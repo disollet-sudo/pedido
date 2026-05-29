@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbxtbyM2qljOrh2amaNlST9mulONY1aOe3dBtfZfZlHuijVFp_QlbMGpneuI86enbPZJlg/exec">
-    <title>Catálogo Di Solle - Carregando...</title>
-    <script>
-        window.location.href = "https://script.google.com/macros/s/AKfycbxtbyM2qljOrh2amaNlST9mulONY1aOe3dBtfZfZlHuijVFp_QlbMGpneuI86enbPZJlg/exec";
+    <title>Redirecionando...</title>
+    <script type="text/javascript">
+        window.location.href = "https://script.google.com/macros/s/AKfycbxtbyM2qljOrh2amaNlST9mulONY1aOe3dBtfZfZlHuijVFp_QlbMGpneuI86enbPZJlg/exec"
     </script>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
-    <p>Carregando o catálogo Di Solle...</p>
-    <p>Se não for redirecionado automaticamente, <a href="https://script.google.com/macros/s/AKfycbxtbyM2qljOrh2amaNlST9mulONY1aOe3dBtfZfZlHuijVFp_QlbMGpneuI86enbPZJlg/exec">clique aqui para acessar</a>.</p>
+<body>
+    <p>Se você não for redirecionado automaticamente, <a href="https://script.google.com/macros/s/AKfycbxtbyM2qljOrh2amaNlST9mulONY1aOe3dBtfZfZlHuijVFp_QlbMGpneuI86enbPZJlg/exec">clique aqui</a>.</p>
 </body>
 </html>
