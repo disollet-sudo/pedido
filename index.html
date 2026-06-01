@@ -205,7 +205,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     </div>
     
     <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>Finalizar e Salvar Pedido</button>
-    <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 PDF (Salve p/ Liberar)</button>
+    <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Libertar)</button>
     <button class="btn" onclick="limSel()">Limpar seleção</button>
   </aside>
 </div>
@@ -251,7 +251,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 
   <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')">Finalizar e Salvar Pedido</button>
-  <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Salve p/ Liberar)</button>
+  <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Libertar)</button>
   <button class="btn" onclick="limSel();fecharSheet()">Limpar seleção</button>
   <button class="btn" onclick="fecharSheet()">Fechar</button>
 </div>
@@ -301,7 +301,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// 🔗 SEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
+// 🔗 O TEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
 const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxu4SOgOLkqXMV6DTo-4M6R9rzy4kPVzIzrYqvuYvewONxmgyKSTRy5KOP3BPzvJsplrQ/exec";
 
 function cleanDescription(str) {
@@ -330,7 +330,8 @@ window.onload = function() {
     }, { rootMargin:'200px' });
   }
   
-  fetch(URL_GOOGLE_SCRIPT)
+  // Adiciona o cache-buster (t=...) também na inicialização
+  fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime())
     .then(res => res.json())
     .then(data => carregar(data))
     .catch(err => { toast("Erro ao conectar ao banco de dados."); console.error(err); });
@@ -338,13 +339,14 @@ window.onload = function() {
 
 function sincronizarPlanilha() {
   var btn = document.getElementById('btn-sync');
-  btn.textContent = '⏳ Baixando...';
+  btn.textContent = '⏳ A descarregar...';
   btn.disabled = true;
   document.getElementById('grid').innerHTML = '';
   mostrarSkeletons(12);
   toast('A sincronizar novas imagens e preços...');
 
-  fetch(URL_GOOGLE_SCRIPT + "?atualizar=true")
+  // Adicionamos o &t=... para o cache-buster funcionar aqui com o parâmetro "atualizar"
+  fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime())
     .then(res => res.json())
     .then(data => {
       carregar(data);
@@ -681,7 +683,8 @@ function baixarPdf() {
 
   toast('A processar cálculos e gerar PDF...');
 
-  fetch(URL_GOOGLE_SCRIPT, {
+  // ADICIONADO O CACHE-BUSTER: "?t=" + new Date().getTime()
+  fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime(), {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ acao: 'pdf', dadosPdf: dadosPdf })
@@ -750,7 +753,8 @@ function confirmarEEnviarPedido() {
   fecharModalCliente();
   toast('A registar dados na nuvem...');
   
-  fetch(URL_GOOGLE_SCRIPT, { 
+  // ADICIONADO O CACHE-BUSTER: "?t=" + new Date().getTime()
+  fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime(), { 
     method: "POST", 
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(dados) 
