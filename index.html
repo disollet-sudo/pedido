@@ -304,6 +304,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 // 🔗 SEU LINK DO GOOGLE APPS SCRIPT
 const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbws2qDHJMUJ26mpNG8sDSqz0TJelLTuTFh79STL6lVbFcBh8dFKpyrClBU_gJEXRmCM-w/exec";
 
+function cleanDescription(str) {
+  if (!str) return '';
+  return str.replace(/<\/?[^>]+(>|$)/g, "").replace(/\n/g, " ");
+}
+
 var todos   = [];
 var sel     = {}; 
 var modalCod = null;
@@ -464,7 +469,7 @@ function cardHtml(p) {
     + '<div class="card-img" onclick="abrirModal(\''+p.codigo+'\')">'+img+'</div>'
     + '<div class="card-body" onclick="abrirModal(\''+p.codigo+'\')">'
     + '<div class="card-cod">'+p.codigo+'</div>'
-    + '<div class="card-desc">'+p.descricao+'</div>'
+    + '<div class="card-desc">'+cleanDescription(p.descricao)+'</div>'
     + '<div class="card-bottom">' + pr + '<span class="card-emb">Cx:'+p.qtdEmbalagem+'</span>' + '</div></div></div>';
 }
 
@@ -676,31 +681,43 @@ function baixarPdf() {
 
   toast('Processando cálculos e gerando PDF...');
 
+  /* CORREÇÃO PARA GITHUB PAGES:
+    Enviamos os dados como texto plano para evitar o preflight OPTIONS (que o Google recusa).
+    Removemos o "no-cors" para podermos ler a resposta com a string base64 do arquivo!
+  */
   fetch(URL_GOOGLE_SCRIPT, {
     method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ acao: 'pdf', dadosPdf: dadosPdf })
   })
-  .then(() => {
-    // Como a resposta do PDF é complexa via no-cors, o ideal é o PDF ser retornado usando a função nativa quando estamos rodando do GitHub, ou melhor ainda, manter a chamada google.script.run para ele.
-    // MAS como você está usando GitHub Pages (Web Externo), você DEVE usar a comunicação POST/GET.
-    toast('Nota: Use o Web App original para o PDF nativo.');
-    btnD.disabled = false; btnD.textContent = '📄 Baixar Pedido (PDF)';
+  .then(res => {
+    if (!res.ok) throw new Error('Falha na resposta do servidor.');
+    return res.json();
+  })
+  .then(resData => {
+    if (resData && resData.base64) {
+      var link = document.createElement("a");
+      link.href = "data:application/pdf;base64," + resData.base64;
+      link.setAttribute("download", "Pedido_Di_Solle_" + new Date().toISOString().split('T')[0] + ".pdf");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast('PDF baixado com sucesso!');
+    } else if (resData && resData.url) {
+      window.open(resData.url, '_blank');
+      toast('PDF aberto em nova aba!');
+    } else {
+      throw new Error('O formato retornado pelo servidor é inválido.');
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message + '\nVerifique se o seu Apps Script está retornando um objeto JSON correto.');
+  })
+  .finally(() => {
+    if(btnD) { btnD.disabled = false; btnD.textContent = '📄 Baixar Pedido (PDF)'; }
+    if(btnM) { btnM.disabled = false; btnM.textContent = '📄 Baixar Pedido (PDF)'; }
+    atualizarPainel();
   });
-  
-  // SOLUÇÃO: Mantendo compatibilidade com google.script.run se abrir pelo Google:
-  if(typeof google !== 'undefined' && google.script) {
-    google.script.run
-      .withSuccessHandler(function(base64) {
-        atualizarPainel();
-        var link = document.createElement("a");
-        link.href = "data:application/pdf;base64," + base64;
-        link.setAttribute("download", "Pedido_Di_Solle.pdf");
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        toast('PDF baixado!');
-      }).gerarPdfPedido(dadosPdf);
-  }
 }
 
 function abrirFluxoFechamento(origem) { fluxoOrigem = origem; document.getElementById('modal-cliente').classList.add('open'); document.body.style.overflow = 'hidden'; }
@@ -738,23 +755,20 @@ function confirmarEEnviarPedido() {
   fecharModalCliente();
   toast('Registrando dados na nuvem...');
   
-  if(typeof google !== 'undefined' && google.script) {
-     google.script.run
-      .withSuccessHandler(function(){
-        pedidoSalvo = true;
-        toast('Pedido salvo! PDF liberado.');
-        if(fluxoOrigem === 'd'){ btn.textContent = '✓ Salvo!'; setTimeout(function(){ btn.textContent = 'Finalizar e Salvar Pedido'; btn.disabled = false; }, 3000); }
-        atualizarPainel();
-      })
-      .registrarPedido(dados);
-  } else {
-    fetch(URL_GOOGLE_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) })
-    .then(() => {
-      pedidoSalvo = true; toast('Pedido salvo com sucesso!');
-      if(fluxoOrigem === 'd'){ btn.textContent = '✓ Salvo!'; setTimeout(function(){ btn.textContent = 'Finalizar e Salvar Pedido'; btn.disabled = false; }, 3000); }
-      atualizarPainel();
-    });
-  }
+  fetch(URL_GOOGLE_SCRIPT, { 
+    method: "POST", 
+    body: JSON.stringify(dados) 
+  })
+  .then(res => {
+    pedidoSalvo = true; 
+    toast('Pedido salvo com sucesso!');
+    if(fluxoOrigem === 'd'){ btn.textContent = '✓ Salvo!'; setTimeout(function(){ btn.textContent = 'Finalizar e Salvar Pedido'; btn.disabled = false; }, 3000); }
+    atualizarPainel();
+  })
+  .catch(err => {
+    console.error(err);
+    toast('Erro ao salvar pedido.');
+  });
 }
 
 function abrirSheet() { document.getElementById('sh-ov').classList.add('open'); document.getElementById('b-sheet').classList.add('open'); document.body.style.overflow='hidden'; }
