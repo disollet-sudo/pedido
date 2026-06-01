@@ -301,8 +301,8 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// 🔗 SEU LINK DO GOOGLE APPS SCRIPT
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbws2qDHJMUJ26mpNG8sDSqz0TJelLTuTFh79STL6lVbFcBh8dFKpyrClBU_gJEXRmCM-w/exec";
+// 🔗 SEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxu4SOgOLkqXMV6DTo-4M6R9rzy4kPVzIzrYqvuYvewONxmgyKSTRy5KOP3BPzvJsplrQ/exec";
 
 function cleanDescription(str) {
   if (!str) return '';
@@ -348,7 +348,7 @@ function sincronizarPlanilha() {
     .then(res => res.json())
     .then(data => {
       carregar(data);
-      toast('Catálogo atualizado e acelerado!');
+      toast('Catálogo atualizado!');
       btn.textContent = '🔄 Sincronizar Catálogo';
       btn.disabled = false;
     })
@@ -645,6 +645,7 @@ function mudaQtySel(cod, d) {
 function remover(cod) { delete sel[cod]; pedidoSalvo = false; atualizarPainel(); }
 function limSel() { sel = {}; pedidoSalvo = false; atualizarPainel(); }
 
+// 🚀 FUNÇÃO CORRIGIDA: EFETUA O FETCH DE FORMA LIMPA E DESCARREGA O BASE64 COMO ARQUIVO PDF
 function baixarPdf() {
   if(!pedidoSalvo) return;
   var ks = Object.keys(sel); if (!ks.length) return;
@@ -681,10 +682,7 @@ function baixarPdf() {
 
   toast('Processando cálculos e gerando PDF...');
 
-  /* CORREÇÃO PARA GITHUB PAGES:
-    Enviamos os dados como texto plano para evitar o preflight OPTIONS (que o Google recusa).
-    Removemos o "no-cors" para podermos ler a resposta com a string base64 do arquivo!
-  */
+  // Sem headers adicionais e sem 'no-cors' para podermos ler a resposta com a String Base64 vinda do Google!
   fetch(URL_GOOGLE_SCRIPT, {
     method: "POST",
     body: JSON.stringify({ acao: 'pdf', dadosPdf: dadosPdf })
@@ -695,6 +693,7 @@ function baixarPdf() {
   })
   .then(resData => {
     if (resData && resData.base64) {
+      // Força a criação de um link de download nativo do browser com os bytes convertidos
       var link = document.createElement("a");
       link.href = "data:application/pdf;base64," + resData.base64;
       link.setAttribute("download", "Pedido_Di_Solle_" + new Date().toISOString().split('T')[0] + ".pdf");
@@ -702,16 +701,13 @@ function baixarPdf() {
       link.click();
       document.body.removeChild(link);
       toast('PDF baixado com sucesso!');
-    } else if (resData && resData.url) {
-      window.open(resData.url, '_blank');
-      toast('PDF aberto em nova aba!');
     } else {
-      throw new Error('O formato retornado pelo servidor é inválido.');
+      throw new Error('Formato retornado inválido.');
     }
   })
   .catch(err => {
     console.error(err);
-    alert('Erro ao gerar PDF: ' + err.message + '\nVerifique se o seu Apps Script está retornando um objeto JSON correto.');
+    alert('Erro ao baixar o PDF: ' + err.message + '\nConfirma se atualizaste a Implantação no Google Script!');
   })
   .finally(() => {
     if(btnD) { btnD.disabled = false; btnD.textContent = '📄 Baixar Pedido (PDF)'; }
@@ -744,6 +740,7 @@ function confirmarEEnviarPedido() {
     qtd: contasAtuais.qtd, 
     subtotalProdutos: contasAtuais.brutoProdutos.toFixed(2), 
     totalIpi: contasAtuais.totalIpi.toFixed(2),
+    totalDescontos: contasAtuais.valPrazo.toFixed(2),
     tabelaAtiva: contasAtuais.tabelaAtiva,
     prazo: prazoTxt, 
     total: contasAtuais.liquido.toFixed(2), 
