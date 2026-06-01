@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Di Solle</title>
-<link rel="icon" type="image/png" href="https://www.disolle.com.br/wp-content/uploads/2023/11/logo_disolle_horizontal.png">
+<title>Pedidos Di Solle</title>
+<link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=1mS6_4Yv74x6tq7B10kZz2m7FndNly7gq&sz=w64">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--verde:#1D9E75;--verde-lt:#E1F5EE;--verde-dk:#0F6E56;--cinza:#f4f4f2;--borda:#e0dfd8;--texto:#1a1a18;--sub:#6b6b65;--branco:#fff;--promo:#E24B4A}
@@ -142,7 +142,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <header>
   <div class="header-inner">
     <div class="logo-area" id="logo-area">
-      <div class="logo-css"><span class="mn">DI SOLLE</span><span class="sb">INOX BRASIL</span></div>
+      <img src="https://drive.google.com/thumbnail?id=1mS6_4Yv74x6tq7B10kZz2m7FndNly7gq&sz=w300" alt="Di Solle">
     </div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
@@ -331,7 +331,6 @@ window.onload = function() {
     }, { rootMargin:'200px' });
   }
   
-  // Adiciona o cache-buster (t=...) também na inicialização
   fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime())
     .then(res => res.json())
     .then(data => carregar(data))
@@ -346,12 +345,11 @@ function sincronizarPlanilha() {
   mostrarSkeletons(12);
   toast('A sincronizar novas imagens e preços...');
 
-  // Adicionamos o &t=... para o cache-buster funcionar aqui com o parâmetro "atualizar"
   fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime())
     .then(res => res.json())
     .then(data => {
       carregar(data);
-      toast('Catálogo atualizado!');
+      toast('Catálogo atualizado e acelerado!');
       btn.textContent = '🔄 Sincronizar Catálogo';
       btn.disabled = false;
     })
@@ -684,7 +682,6 @@ function baixarPdf() {
 
   toast('A processar cálculos e gerar PDF...');
 
-  // ADICIONADO O CACHE-BUSTER: "?t=" + new Date().getTime()
   fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime(), {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -754,7 +751,6 @@ function confirmarEEnviarPedido() {
   fecharModalCliente();
   toast('A registar dados na nuvem...');
   
-  // ADICIONADO O CACHE-BUSTER: "?t=" + new Date().getTime()
   fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime(), { 
     method: "POST", 
     headers: { "Content-Type": "text/plain;charset=utf-8" },
