@@ -302,7 +302,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // 🔗 SEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxu4SOgOLkqXMV6DTo-4M6R9rzy4kPVzIzrYqvuYvewONxmgyKSTRy5KOP3BPzvJsplrQ/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbws2qDHJMUJ26mpNG8sDSqz0TJelLTuTFh79STL6lVbFcBh8dFKpyrClBU_gJEXRmCM-w/exec";
 
 function cleanDescription(str) {
   if (!str) return '';
@@ -342,7 +342,7 @@ function sincronizarPlanilha() {
   btn.disabled = true;
   document.getElementById('grid').innerHTML = '';
   mostrarSkeletons(12);
-  toast('Sincronizando novas imagens e preços...');
+  toast('A sincronizar novas imagens e preços...');
 
   fetch(URL_GOOGLE_SCRIPT + "?atualizar=true")
     .then(res => res.json())
@@ -353,7 +353,7 @@ function sincronizarPlanilha() {
       btn.disabled = false;
     })
     .catch(err => {
-      toast('Falha ao atualizar. Tente novamente.');
+      toast('Falha ao atualizar. Tenta novamente.');
       btn.textContent = '🔄 Sincronizar Catálogo';
       btn.disabled = false;
     });
@@ -527,7 +527,7 @@ function adicionarDoModal() {
   var minPermitido = p.qtdEmbalagem || 1;
   if (qty < minPermitido || qty % minPermitido !== 0) {
     qty = Math.ceil(qty / minPermitido) * minPermitido;
-    alert('⚠️ MÚLTIPLO DE CAIXA FECHADA:\nAjustamos para ' + qty + ' un para respeitar a embalagem padrão de ' + minPermitido + ' un.');
+    alert('⚠️ MÚLTIPLO DE CAIXA FECHADA:\nAjustámos para ' + qty + ' un para respeitar a embalagem padrão de ' + minPermitido + ' un.');
     document.getElementById('modal-qty').value = qty;
     return;
   }
@@ -601,17 +601,17 @@ function atualizarPainel() {
     if(btnD) { btnD.disabled = false; btnD.className = 'btn pdf-btn liberado'; btnD.textContent = '📄 Baixar Pedido (PDF)'; }
     if(btnM) { btnM.disabled = false; btnM.className = 'btn pdf-btn liberado'; btnM.textContent = '📄 Baixar Pedido (PDF)'; }
   } else {
-    if(btnD) { btnD.disabled = true; btnD.className = 'btn pdf-btn'; btnD.textContent = '📄 PDF (Salve p/ Liberar)'; }
-    if(btnM) { btnM.disabled = true; btnM.className = 'btn pdf-btn'; btnM.textContent = '📄 PDF (Salve p/ Liberar)'; }
+    if(btnD) { btnD.disabled = true; btnD.className = 'btn pdf-btn'; btnD.textContent = '📄 PDF (Guardar p/ Libertar)'; }
+    if(btnM) { btnM.disabled = true; btnM.className = 'btn pdf-btn'; btnM.textContent = '📄 PDF (Guardar p/ Libertar)'; }
   }
 
-  var vazio = '<div class="vazio">Clique nos produtos para adicionar</div>';
+  var vazio = '<div class="vazio">Clica nos produtos para adicionar</div>';
   var html  = !tem ? vazio : '<div class="lista-sel">'+ks.map(function(k){
     var it = sel[k];
     var tagPromo = it.prod.emPromocao ? ' <span style="color:var(--promo);font-weight:bold;">[PROMO]</span>' : '';
     return '<div class="sel-row">'
       +'<span class="sel-cod">'+it.prod.codigo+'</span>'
-      +'<span class="sel-desc">'+it.prod.descricao+tagPromo+'</span>'
+      +'<span class="sel-desc">'+cleanDescription(it.prod.descricao)+tagPromo+'</span>'
       +'<div class="sel-qty-wrap">'
       +'<button class="qty-btn" onclick="mudaQtySel(\''+k+'\',-1)">&#8722;</button>'
       +'<span class="qty-num">'+it.qty+'</span>'
@@ -645,7 +645,6 @@ function mudaQtySel(cod, d) {
 function remover(cod) { delete sel[cod]; pedidoSalvo = false; atualizarPainel(); }
 function limSel() { sel = {}; pedidoSalvo = false; atualizarPainel(); }
 
-// 🚀 FUNÇÃO CORRIGIDA: EFETUA O FETCH DE FORMA LIMPA E DESCARREGA O BASE64 COMO ARQUIVO PDF
 function baixarPdf() {
   if(!pedidoSalvo) return;
   var ks = Object.keys(sel); if (!ks.length) return;
@@ -665,7 +664,7 @@ function baixarPdf() {
   var itensArr = ks.map(function(k) {
     return {
       codigo: sel[k].prod.codigo,
-      descricao: sel[k].prod.descricao,
+      descricao: cleanDescription(sel[k].prod.descricao),
       preco: obterPrecoItem(sel[k].prod, tabelaAtiva),
       qty: sel[k].qty,
       fileId: sel[k].prod.fileId,
@@ -677,14 +676,14 @@ function baixarPdf() {
   var dadosPdf = { cliente: clienteObj, itens: itensArr, contas: contasAtuais };
 
   var btnD = document.getElementById('btn-xls-d'); var btnM = document.getElementById('btn-xls-m');
-  if(btnD) { btnD.disabled = true; btnD.textContent = '⏳ Gerando PDF...'; }
-  if(btnM) { btnM.disabled = true; btnM.textContent = '⏳ Gerando PDF...'; }
+  if(btnD) { btnD.disabled = true; btnD.textContent = '⏳ A gerar PDF...'; }
+  if(btnM) { btnM.disabled = true; btnM.textContent = '⏳ A gerar PDF...'; }
 
-  toast('Processando cálculos e gerando PDF...');
+  toast('A processar cálculos e gerar PDF...');
 
-  // Sem headers adicionais e sem 'no-cors' para podermos ler a resposta com a String Base64 vinda do Google!
   fetch(URL_GOOGLE_SCRIPT, {
     method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ acao: 'pdf', dadosPdf: dadosPdf })
   })
   .then(res => {
@@ -693,21 +692,20 @@ function baixarPdf() {
   })
   .then(resData => {
     if (resData && resData.base64) {
-      // Força a criação de um link de download nativo do browser com os bytes convertidos
       var link = document.createElement("a");
       link.href = "data:application/pdf;base64," + resData.base64;
       link.setAttribute("download", "Pedido_Di_Solle_" + new Date().toISOString().split('T')[0] + ".pdf");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast('PDF baixado com sucesso!');
+      toast('PDF descarregado com sucesso!');
     } else {
       throw new Error('Formato retornado inválido.');
     }
   })
   .catch(err => {
     console.error(err);
-    alert('Erro ao baixar o PDF: ' + err.message + '\nConfirma se atualizaste a Implantação no Google Script!');
+    alert('Erro ao descarregar o PDF: ' + err.message + '\nConfirma se atualizaste a Implantação no Google Script!');
   })
   .finally(() => {
     if(btnD) { btnD.disabled = false; btnD.textContent = '📄 Baixar Pedido (PDF)'; }
@@ -748,23 +746,26 @@ function confirmarEEnviarPedido() {
   };
 
   var btn = document.getElementById('btn-orc-d');
-  if (fluxoOrigem === 'd') { btn.disabled = true; btn.textContent = 'Salvando...'; }
+  if (fluxoOrigem === 'd') { btn.disabled = true; btn.textContent = 'A guardar...'; }
   fecharModalCliente();
-  toast('Registrando dados na nuvem...');
+  toast('A registar dados na nuvem...');
   
   fetch(URL_GOOGLE_SCRIPT, { 
     method: "POST", 
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(dados) 
   })
-  .then(res => {
+  .then(res => res.json())
+  .then(resData => {
     pedidoSalvo = true; 
-    toast('Pedido salvo com sucesso!');
-    if(fluxoOrigem === 'd'){ btn.textContent = '✓ Salvo!'; setTimeout(function(){ btn.textContent = 'Finalizar e Salvar Pedido'; btn.disabled = false; }, 3000); }
+    toast('Pedido guardado com sucesso!');
+    if(fluxoOrigem === 'd'){ btn.textContent = '✓ Guardado!'; setTimeout(function(){ btn.textContent = 'Finalizar e Salvar Pedido'; btn.disabled = false; }, 3000); }
     atualizarPainel();
   })
   .catch(err => {
     console.error(err);
-    toast('Erro ao salvar pedido.');
+    toast('Erro ao guardar pedido.');
+    if(fluxoOrigem === 'd'){ btn.disabled = false; btn.textContent = 'Finalizar e Salvar Pedido'; }
   });
 }
 
