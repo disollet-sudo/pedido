@@ -65,7 +65,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 /* PAINEL E MODALS */
 .painel{background:var(--branco);border:1px solid var(--borda);border-radius:12px;padding:16px;position:sticky;top:90px;overflow:visible}
-.painel h3{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.painel h3{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .field{margin-bottom:12px}
 .field label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600}
 .field select, .field input[type=text], .field input[type=email], .field textarea{width:100%;padding:8px 10px;border:1px solid var(--borda);border-radius:7px;font-size:13px;outline:none;background:#fff;color:var(--texto)}
@@ -104,21 +104,21 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 .sh-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300}
 .sh-overlay.open{display:block}
-.b-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--branco);border-radius:16px 16px 0 0;padding:16px 16px 24px;z-index:400;transform:translateY(100%);transition:transform .3s ease;max-height:88vh;overflow-y:auto}
-.b-sheet.open{transform:translateY(0)}
+.b-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:520px;background:var(--branco);border-radius:16px 16px 0 0;padding:16px 20px 28px;z-index:400;transition:transform .3s ease;max-height:88vh;overflow-y:auto;box-shadow:0 -8px 32px rgba(0,0,0,.18)}
+.b-sheet.open{transform:translateX(-50%) translateY(0)}
 .sh-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 14px}
 .sh-title{font-size:15px;font-weight:600;margin-bottom:14px}
 
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;padding:12px}
 .modal.open{display:flex}
-.modal-box{background:var(--branco);border-radius:14px;overflow:hidden;width:100%;max-width:440px;display:flex;flex-direction:column}
-.modal-img-wrap{background:#fff;display:flex;align-items:center;justify-content:center;height:220px;position:relative;padding:8px;flex-shrink:0}
+.modal-box{background:var(--branco);border-radius:14px;overflow:hidden;width:100%;max-width:420px;display:flex;flex-direction:column}
+.modal-img-wrap{background:#fff;display:flex;align-items:center;justify-content:center;height:240px;position:relative;padding:8px;flex-shrink:0}
 .modal-img-wrap img{width:100%;height:100%;object-fit:contain}
 .modal-spin{width:32px;height:32px;border:3px solid #ddd;border-top-color:var(--verde);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .modal-close-btn{position:absolute;top:10px;right:12px;width:30px;height:30px;background:rgba(0,0,0,.35);border:none;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.modal-info{padding:12px 16px;overflow-y:visible}
-@media(min-width:480px){.modal-img-wrap{height:280px}}
+.modal-info{padding:12px 16px}
+@media(min-height:700px){.modal-img-wrap{height:300px}}
 .modal-cod{font-size:12px;font-weight:700;color:var(--verde-dk);margin-bottom:3px}
 .modal-desc{font-size:15px;font-weight:600;line-height:1.4;margin-bottom:4px}
 .modal-preco{font-size:20px;font-weight:800;color:var(--verde-dk);margin-bottom:4px}
@@ -175,11 +175,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   
   <aside class="painel">
     <h3>📊 Fechamento do Pedido</h3>
-    <div id="painel-resumo-itens" style="display:none;background:var(--verde-lt);border:1px solid #9FE1CB;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px;text-align:center;cursor:pointer" onclick="abrirSheet()">
-      <span id="painel-itens-txt" style="color:var(--verde-dk);font-weight:700;">0 itens no pedido</span>
-      <span style="color:var(--sub);font-size:11px;display:block;margin-top:2px;">Clique para ver / editar itens ›</span>
+    <div id="painel-badge" style="display:none;background:var(--verde-lt);border:1px solid #9FE1CB;border-radius:10px;padding:9px 14px;margin-bottom:10px;cursor:pointer;transition:background .15s" onclick="abrirSheet()" onmouseover="this.style.background='#c8eed9'" onmouseout="this.style.background='var(--verde-lt)'">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span id="painel-badge-txt" style="color:var(--verde-dk);font-weight:700;font-size:13px">0 itens</span>
+        <span style="color:var(--verde-dk);font-size:11px;font-weight:600">Ver / editar ›</span>
+      </div>
     </div>
-    
+
     <div class="field">
       <label>Regra de ICMS / Faixa</label>
       <select id="icms-d" onchange="syncRegras('icms-d','icms-m')">
@@ -626,15 +628,14 @@ function atualizarPainel() {
       +'</div>';
   }).join('')+'</div>';
 
-  // painel lateral: mostra badge de resumo em vez de lista
-  var painelResumo = document.getElementById('painel-resumo-itens');
-  if (painelResumo) {
-    painelResumo.style.display = tem ? 'block' : 'none';
-    var totalRefs = ks.length; var totalUn = 0; ks.forEach(function(k){ totalUn += sel[k].qty; });
-    var txtEl = document.getElementById('painel-itens-txt');
-    if (txtEl) txtEl.textContent = totalRefs + ' referência(s) — ' + totalUn + ' un. no pedido';
+  // Badge painel lateral
+  var badge = document.getElementById('painel-badge');
+  if (badge) {
+    badge.style.display = tem ? 'block' : 'none';
+    var totalUn = 0; ks.forEach(function(k){ totalUn += sel[k].qty; });
+    var txtEl = document.getElementById('painel-badge-txt');
+    if (txtEl) txtEl.textContent = ks.length + ' ref. — ' + totalUn + ' un.';
   }
-  // lista no sheet mobile
   document.getElementById('lista-m').innerHTML = html;
 
   ks.forEach(function(k){
