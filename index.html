@@ -302,7 +302,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// 🔗 O TEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
 const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxu4SOgOLkqXMV6DTo-4M6R9rzy4kPVzIzrYqvuYvewONxmgyKSTRy5KOP3BPzvJsplrQ/exec";
 
 function cleanDescription(str) {
@@ -396,20 +395,16 @@ function determinarTabelaAtiva() {
   var limite = (icmsTipo === '7') ? 5000 : 2500;
   
   var simBrutoProdutos = 0;
-  var simTotalIpi = 0;
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
 
   Object.keys(sel).forEach(function(k) {
     var pVal = obterPrecoItem(sel[k].prod, t1Code);
     var qty = sel[k].qty;
-    var subtotalItem = pVal * qty;
-    simBrutoProdutos += subtotalItem;
-    var ipiPct = sel[k].prod.ipi || 0;
-    simTotalIpi += subtotalItem * (ipiPct / 100);
+    simBrutoProdutos += pVal * qty;
   });
   
   var simValPrazo = simBrutoProdutos * (prazoDescPct / 100);
-  var simTotalPedidoComIpi = (simBrutoProdutos - simValPrazo) + simTotalIpi;
+  var simTotalPedidoComIpi = (simBrutoProdutos - simValPrazo);
   
   return (simTotalPedidoComIpi > limite) ? t2Code : t1Code;
 }
@@ -445,12 +440,10 @@ function cardHtml(p) {
   var tabelaAtiva = determinarTabelaAtiva();
   var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
   var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  var precoExibir = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
-  
-  var s = sel[p.codigo]; var cls = s ? ' sel' : '';
+  var cls = sel[p.codigo] ? ' sel' : '';
   if (p.emPromocao) cls += ' promo';
   
-  var qty = s ? s.qty : 0;
+  var qty = sel[p.codigo] ? sel[p.codigo].qty : 0;
   var pr = '';
   
   if (p.emPromocao && precoPromo > 0) {
@@ -661,12 +654,16 @@ function baixarPdf() {
   };
 
   var tabelaAtiva = determinarTabelaAtiva();
+  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
 
   var itensArr = ks.map(function(k) {
+    var precoOriginal = obterPrecoItem(sel[k].prod, tabelaAtiva);
+    var precoComDesconto = precoOriginal * (1 - (prazoDescPct / 100)); // Aplica a porcentagem do prazo diretamente no valor enviado
+
     return {
       codigo: sel[k].prod.codigo,
       descricao: cleanDescription(sel[k].prod.descricao),
-      preco: obterPrecoItem(sel[k].prod, tabelaAtiva),
+      preco: precoComDesconto, // O preço vai recalculado para a tabela do PDF
       qty: sel[k].qty,
       fileId: sel[k].prod.fileId,
       emPromocao: sel[k].prod.emPromocao,
@@ -727,7 +724,6 @@ function confirmarEEnviarPedido() {
   var endereco=document.getElementById('cli-endereco').value.trim();
   var telefone=document.getElementById('cli-telefone').value.trim();
   var email=document.getElementById('cli-email').value.trim();
-  var obs=document.getElementById('cli-obs').value.trim();
 
   var prazoTxt = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
   var itensStr = ks.map(function(k){ return k + ' (x' + sel[k].qty + ')'; }).join(' | ');
