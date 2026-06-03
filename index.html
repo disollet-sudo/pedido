@@ -388,21 +388,11 @@ function carregar(res) {
   filtrar();
 }
 
-function arredondar2(v) {
-  return Math.round(v * 100) / 100;
-}
-
 function obterPrecoItem(p, tabelaAtiva) {
   if (p.emPromocao && p.precosPromo && p.precosPromo[tabelaAtiva] && p.precosPromo[tabelaAtiva] > 0) {
     return p.precosPromo[tabelaAtiva];
   }
   return p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
-}
-
-function obterPrecoComDesconto(p, tabelaAtiva) {
-  var precoBase = obterPrecoItem(p, tabelaAtiva);
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
-  return arredondar2(precoBase * (1 - prazoDescPct / 100));
 }
 
 function determinarTabelaAtiva() {
@@ -416,16 +406,16 @@ function determinarTabelaAtiva() {
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
 
   Object.keys(sel).forEach(function(k) {
-    var pBase = obterPrecoItem(sel[k].prod, t1Code);
-    var pDesc = arredondar2(pBase * (1 - prazoDescPct / 100));
+    var pVal = obterPrecoItem(sel[k].prod, t1Code);
     var qty = sel[k].qty;
-    var subtotalItem = pDesc * qty;
+    var subtotalItem = pVal * qty;
     simBrutoProdutos += subtotalItem;
     var ipiPct = sel[k].prod.ipi || 0;
     simTotalIpi += subtotalItem * (ipiPct / 100);
   });
-
-  var simTotalPedidoComIpi = simBrutoProdutos + simTotalIpi;
+  
+  var simValPrazo = simBrutoProdutos * (prazoDescPct / 100);
+  var simTotalPedidoComIpi = (simBrutoProdutos - simValPrazo) + simTotalIpi;
   
   return (simTotalPedidoComIpi > limite) ? t2Code : t1Code;
 }
@@ -459,25 +449,23 @@ function renderizar(lista) {
 
 function cardHtml(p) {
   var tabelaAtiva = determinarTabelaAtiva();
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
   var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
   var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  var precoNormalDesc = arredondar2(precoNormal * (1 - prazoDescPct / 100));
-  var precoPromoDesc  = arredondar2(precoPromo  * (1 - prazoDescPct / 100));
-
+  var precoExibir = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
+  
   var s = sel[p.codigo]; var cls = s ? ' sel' : '';
   if (p.emPromocao) cls += ' promo';
-
+  
   var qty = s ? s.qty : 0;
   var pr = '';
-
+  
   if (p.emPromocao && precoPromo > 0) {
     pr = '<div style="display:flex; flex-direction:column;">'
-       + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">De: R$ '+precoNormalDesc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
-       + '<span class="card-preco" style="color:var(--promo); font-weight:800; line-height:1.2;">Por: R$ '+precoPromoDesc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
+       + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
+       + '<span class="card-preco" style="color:var(--promo); font-weight:800; line-height:1.2;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
        + '</div>';
   } else {
-    pr = '<span class="card-preco">R$ '+precoNormalDesc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
+    pr = '<span class="card-preco">R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
   }
   
   var promoBadge = p.emPromocao ? '<div class="card-badge-promo">🔥 PROMOÇÃO</div>' : '';
@@ -499,18 +487,15 @@ function abrirModal(cod) {
   document.getElementById('modal-desc').textContent = p.descricao;
   
   var tabelaAtiva = determinarTabelaAtiva();
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
   var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
   var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  var precoNormalDesc = arredondar2(precoNormal * (1 - prazoDescPct / 100));
-  var precoPromoDesc  = arredondar2(precoPromo  * (1 - prazoDescPct / 100));
-
+  
   if (p.emPromocao && precoPromo > 0) {
-    document.getElementById('modal-preco').innerHTML =
-      '<span style="font-size:13px; text-decoration:line-through; color:#aaa; display:block; margin-bottom:2px;">De: R$ '+precoNormalDesc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>' +
-      '<span style="color:var(--promo); font-size:22px; font-weight:800;">Por: R$ '+precoPromoDesc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
+    document.getElementById('modal-preco').innerHTML = 
+      '<span style="font-size:13px; text-decoration:line-through; color:#aaa; display:block; margin-bottom:2px;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>' +
+      '<span style="color:var(--promo); font-size:22px; font-weight:800;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
   } else {
-    document.getElementById('modal-preco').innerHTML = 'R$ '+precoNormalDesc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('modal-preco').innerHTML = 'R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
   }
   
   var minPermitido = p.qtdEmbalagem || 1;
@@ -570,22 +555,22 @@ function calcularDescontosERenderizar() {
   var tabelaAtiva = determinarTabelaAtiva();
   var ks = Object.keys(sel);
   var brutoProdutosTabela = 0; var totalIpiAcumulado = 0; var qtdTotal = 0;
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
+  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0; 
 
-  ks.forEach(function(k){
-    var itemPrecoBase = obterPrecoItem(sel[k].prod, tabelaAtiva);
-    var itemPrecoDesc = arredondar2(itemPrecoBase * (1 - prazoDescPct / 100));
+  ks.forEach(function(k){ 
+    var itemPreco = obterPrecoItem(sel[k].prod, tabelaAtiva);
     var itemQty = sel[k].qty;
-    var subtotalItem = itemPrecoDesc * itemQty;
+    var subtotalItem = itemPreco * itemQty;
     brutoProdutosTabela += subtotalItem;
     qtdTotal += itemQty;
     var itemIpiPct = sel[k].prod.ipi || 0;
     totalIpiAcumulado += subtotalItem * (itemIpiPct / 100);
   });
 
-  var liquidoFinal = arredondar2(brutoProdutosTabela + totalIpiAcumulado);
+  var valPrazo = brutoProdutosTabela * (prazoDescPct / 100);
+  var liquidoFinal = (brutoProdutosTabela - valPrazo) + totalIpiAcumulado;
 
-  contasAtuais = { brutoProdutos: brutoProdutosTabela, totalIpi: totalIpiAcumulado, pctPrazo: prazoDescPct, valPrazo: 0, liquido: liquidoFinal, qtd: qtdTotal, tabelaAtiva: tabelaAtiva };
+  contasAtuais = { brutoProdutos: brutoProdutosTabela, totalIpi: totalIpiAcumulado, pctPrazo: prazoDescPct, valPrazo: valPrazo, liquido: liquidoFinal, qtd: qtdTotal, tabelaAtiva: tabelaAtiva };
 
   var f = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); };
   var sufixoTab = ' <span style="font-size:10px; color:var(--verde-dk); font-weight:normal;">[' + tabelaAtiva + ']</span>';
@@ -593,13 +578,13 @@ function calcularDescontosERenderizar() {
   document.getElementById('rd-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
   document.getElementById('rd-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rd-prazo-pct').textContent = prazoDescPct;
-  document.getElementById('rd-prazo-val').textContent = '(incluso no preço unit.)';
+  document.getElementById('rd-prazo-val').textContent = '- ' + f(valPrazo);
   document.getElementById('rd-total').textContent = f(liquidoFinal);
 
   document.getElementById('rm-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
   document.getElementById('rm-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rm-prazo-pct').textContent = prazoDescPct;
-  document.getElementById('rm-prazo-val').textContent = '(incluso no preço unit.)';
+  document.getElementById('rm-prazo-val').textContent = '- ' + f(valPrazo);
   document.getElementById('rm-total').textContent = f(liquidoFinal);
 
   if (ks.length > 0) {
