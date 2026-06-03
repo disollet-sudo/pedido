@@ -15,9 +15,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px}
 .logo-area{flex-shrink:0;display:flex;align-items:center}
 .logo-area img{max-height:48px;display:block}
-.logo-css{color:#fff;font-family:'Arial Black',sans-serif;line-height:1}
-.logo-css .mn{font-size:22px;font-weight:900;letter-spacing:2px;display:block}
-.logo-css .sb{font-size:8px;letter-spacing:3px;color:#aaa;display:block;margin-top:1px}
 .search-wrap{flex:1;position:relative;max-width:500px}
 .search-wrap input{width:100%;padding:10px 12px 10px 36px;border:1px solid #444;border-radius:8px;font-size:14px;background:#222;color:#fff;outline:none}
 .search-wrap input:focus{border-color:var(--verde)}
@@ -199,7 +196,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     </div>
 
     <div class="resultado">
-      <div class="res-row"><span>Subtotal Itens:</span><b id="rd-bruto-prod">R$ 0,00</b></div>
+      <div class="res-row"><span>Subtotal Tabela:</span><b id="rd-bruto-prod">R$ 0,00</b></div>
       <div class="res-row"><span>Desc. de Volume:</span><b id="rd-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
       <div class="res-row"><span>Desc. Prazo (<span id="rd-prazo-pct">0</span>%):</span><b id="rd-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
       <div class="res-row"><span>Valor Total IPI (+):</span><b id="rd-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
@@ -245,7 +242,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 
   <div class="resultado">
-    <div class="res-row"><span>Subtotal Itens:</span><b id="rm-bruto-prod">R$ 0,00</b></div>
+    <div class="res-row"><span>Subtotal Tabela:</span><b id="rm-bruto-prod">R$ 0,00</b></div>
     <div class="res-row"><span>Desc. de Volume:</span><b id="rm-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
     <div class="res-row"><span>Desc. Prazo (<span id="rm-prazo-pct">0</span>%):</span><b id="rm-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
     <div class="res-row"><span>Valor Total IPI (+):</span><b id="rm-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
@@ -305,7 +302,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // 🔗 O TEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzQ7DEQNHFpx10jjCm0dx2zI5Vgl6rBBYQeO0NdmFiPRvKUgBDCpJhJqI9LWlMyZENJHA/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwgFvth8oh2JkEVCRaAE0TAD704FmUaUidV8fNXrWm8U4O3ADmxMO7OVTGtC3tTL_Hv5w/exec";
 
 function cleanDescription(str) {
   if (!str) return '';
@@ -347,7 +344,6 @@ function sincronizarPlanilha() {
   mostrarSkeletons(12);
   toast('A limpar cache e sincronizar novos dados...');
 
-  // O "cache: 'no-store'" obriga a página a buscar do zero no servidor
   fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime(), { cache: "no-store" })
     .then(res => res.json())
     .then(data => {
@@ -398,7 +394,7 @@ function determinarTabelaAtiva() {
   var t2Code = (icmsTipo === '7') ? 'M26072' : 'M26122';
   var limite = (icmsTipo === '7') ? 5000 : 2500;
   
-  var simBrutoProdutos = 0;
+  var simLiquido = 0;
   var simTotalIpi = 0;
   
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
@@ -406,19 +402,20 @@ function determinarTabelaAtiva() {
 
   Object.keys(sel).forEach(function(k) {
     var pVal = obterPrecoItem(sel[k].prod, t1Code);
-    var qty = sel[k].qty;
-    var subtotalItem = pVal * qty;
-    simBrutoProdutos += subtotalItem;
     
+    // 1. Arredonda preço com desconto
+    var precoDesc = Math.round((pVal * fatorDesconto) * 100) / 100;
+    
+    // 2. Calcula subtotal descontado
+    var subtotalDesc = Math.round((precoDesc * sel[k].qty) * 100) / 100;
+    simLiquido += subtotalDesc;
+    
+    // 3. IPI sobre o subtotal descontado exato
     var ipiPct = sel[k].prod.ipi || 0;
-    // O IPI é simulado já sobre o subtotal com desconto
-    var subtotalComDesconto = subtotalItem * fatorDesconto;
-    simTotalIpi += subtotalComDesconto * (ipiPct / 100);
+    simTotalIpi += Math.round((subtotalDesc * (ipiPct / 100)) * 100) / 100;
   });
   
-  var simValPrazo = simBrutoProdutos * (prazoDescPct / 100);
-  var simTotalPedidoComIpi = (simBrutoProdutos - simValPrazo) + simTotalIpi;
-  
+  var simTotalPedidoComIpi = simLiquido + simTotalIpi;
   return (simTotalPedidoComIpi > limite) ? t2Code : t1Code;
 }
 
@@ -453,7 +450,13 @@ function cardHtml(p) {
   var tabelaAtiva = determinarTabelaAtiva();
   var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
   var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  var precoExibir = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
+  var precoBase = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
+  
+  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
+  var fatorDesconto = 1 - (prazoDescPct / 100);
+  
+  // Calcula o preço final a mostrar no Card (já com desconto de prazo da tela)
+  var precoComDesconto = Math.round((precoBase * fatorDesconto) * 100) / 100;
   
   var s = sel[p.codigo]; var cls = s ? ' sel' : '';
   if (p.emPromocao) cls += ' promo';
@@ -461,13 +464,14 @@ function cardHtml(p) {
   var qty = s ? s.qty : 0;
   var pr = '';
   
-  if (p.emPromocao && precoPromo > 0) {
+  // Se existir desconto do prazo selecionado ou for promo, exibe ambos para transparência
+  if (prazoDescPct > 0 || (p.emPromocao && precoPromo > 0)) {
     pr = '<div style="display:flex; flex-direction:column;">'
-       + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
-       + '<span class="card-preco" style="color:var(--promo); font-weight:800; line-height:1.2;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
+       + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">Tabela: R$ '+precoBase.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
+       + '<span class="card-preco" style="color:var(--verde-dk); font-weight:800; line-height:1.2;">R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
        + '</div>';
   } else {
-    pr = '<span class="card-preco">R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
+    pr = '<span class="card-preco">R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
   }
   
   var promoBadge = p.emPromocao ? '<div class="card-badge-promo">🔥 PROMOÇÃO</div>' : '';
@@ -491,13 +495,20 @@ function abrirModal(cod) {
   var tabelaAtiva = determinarTabelaAtiva();
   var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
   var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
+  var precoBase = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
   
-  if (p.emPromocao && precoPromo > 0) {
+  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
+  var fatorDesconto = 1 - (prazoDescPct / 100);
+  
+  // O modal vai apresentar exatamente o preço com desconto também
+  var precoComDesconto = Math.round((precoBase * fatorDesconto) * 100) / 100;
+  
+  if (prazoDescPct > 0 || (p.emPromocao && precoPromo > 0)) {
     document.getElementById('modal-preco').innerHTML = 
-      '<span style="font-size:13px; text-decoration:line-through; color:#aaa; display:block; margin-bottom:2px;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>' +
-      '<span style="color:var(--promo); font-size:22px; font-weight:800;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
+      '<span style="font-size:13px; text-decoration:line-through; color:#aaa; display:block; margin-bottom:2px;">Tabela: R$ '+precoBase.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>' +
+      '<span style="color:var(--verde-dk); font-size:22px; font-weight:800;">R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
   } else {
-    document.getElementById('modal-preco').innerHTML = 'R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('modal-preco').innerHTML = 'R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
   }
   
   var minPermitido = p.qtdEmbalagem || 1;
@@ -551,12 +562,17 @@ function syncRegras(sourceId, targetId) {
   document.getElementById(targetId).value = document.getElementById(sourceId).value;
   pedidoSalvo = false;
   atualizarPainel();
+  filtrar(); // CHAMA ISTO: Para forçar os cartões da página a atualizar o preço com o novo desconto
 }
 
 function calcularDescontosERenderizar() {
   var tabelaAtiva = determinarTabelaAtiva();
   var ks = Object.keys(sel);
-  var brutoProdutosTabela = 0; var totalIpiAcumulado = 0; var qtdTotal = 0;
+  
+  var brutoProdutosTabela = 0; 
+  var subtotalProdutosDesconto = 0;
+  var totalIpiAcumulado = 0; 
+  var qtdTotal = 0;
   
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0; 
   var fatorDesconto = 1 - (prazoDescPct / 100);
@@ -565,20 +581,27 @@ function calcularDescontosERenderizar() {
     var itemPreco = obterPrecoItem(sel[k].prod, tabelaAtiva);
     var itemQty = sel[k].qty;
     
-    var subtotalItem = Math.round((itemPreco * itemQty) * 100) / 100;
-    brutoProdutosTabela += subtotalItem;
+    // 1. O Preço Unitário já sofre a penalização do desconto E arredonda
+    // Ex: 1.49 - 7% = 1.3857 => 1.39
+    var precoUnitarioDescontado = Math.round((itemPreco * fatorDesconto) * 100) / 100;
+    
+    // 2. Multiplica o preço unitário (arredondado) pela quantidade
+    // Ex: 1.39 * 60 = 83.40
+    var subtotalDescontadoItem = Math.round((precoUnitarioDescontado * itemQty) * 100) / 100;
+    var subtotalCheioDaTabela = Math.round((itemPreco * itemQty) * 100) / 100;
+    
+    brutoProdutosTabela += subtotalCheioDaTabela;
+    subtotalProdutosDesconto += subtotalDescontadoItem;
     qtdTotal += itemQty;
     
-    // Aplica o desconto no subtotal do item ANTES de calcular o IPI
-    var subtotalComDesconto = Math.round((subtotalItem * fatorDesconto) * 100) / 100;
+    // 3. IPI calculado exclusivamente sobre a base descontada do item exata
     var itemIpiPct = sel[k].prod.ipi || 0;
-    
-    // Calcula IPI sobre o valor base já reduzido pelo desconto
-    totalIpiAcumulado += Math.round((subtotalComDesconto * (itemIpiPct / 100)) * 100) / 100;
+    totalIpiAcumulado += Math.round((subtotalDescontadoItem * (itemIpiPct / 100)) * 100) / 100;
   });
 
-  var valPrazo = Math.round((brutoProdutosTabela * (prazoDescPct / 100)) * 100) / 100;
-  var liquidoFinal = Math.round(((brutoProdutosTabela - valPrazo) + totalIpiAcumulado) * 100) / 100;
+  // A diferença matemática exata que vai ser o teu valor de desconto no fecho
+  var valPrazo = Math.round((brutoProdutosTabela - subtotalProdutosDesconto) * 100) / 100;
+  var liquidoFinal = Math.round((subtotalProdutosDesconto + totalIpiAcumulado) * 100) / 100;
 
   contasAtuais = { brutoProdutos: brutoProdutosTabela, totalIpi: totalIpiAcumulado, pctPrazo: prazoDescPct, valPrazo: valPrazo, liquido: liquidoFinal, qtd: qtdTotal, tabelaAtiva: tabelaAtiva };
 
