@@ -201,6 +201,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="res-row"><span>Desc. de Volume:</span><b id="rd-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
       <div class="res-row"><span>Desc. Prazo (<span id="rd-prazo-pct">0</span>%):</span><b id="rd-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
       <div class="res-row"><span>Valor Total IPI (+):</span><b id="rd-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
+      <div class="res-row"><span>Frete:</span><b id="rd-frete-val" style="color:var(--promo);">FOB (Por Conta)</b></div>
       <div class="res-sep"></div>
       <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rd-total">R$ 0,00</b></div>
     </div>
@@ -247,6 +248,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div class="res-row"><span>Desc. de Volume:</span><b id="rm-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
     <div class="res-row"><span>Desc. Prazo (<span id="rm-prazo-pct">0</span>%):</span><b id="rm-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
     <div class="res-row"><span>Valor Total IPI (+):</span><b id="rm-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
+    <div class="res-row"><span>Frete:</span><b id="rm-frete-val" style="color:var(--promo);">FOB (Por Conta)</b></div>
     <div class="res-sep"></div>
     <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rm-total">R$ 0,00</b></div>
   </div>
@@ -303,7 +305,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// 🔗 O TEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
 const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwFCEuYrNKq0O-xNlJd6XSiUO0w6lqe1l4gT_vep5GDMcn-GX07YFSyqODrQgXuJEknIw/exec";
 
 function cleanDescription(str) {
@@ -350,7 +351,7 @@ function sincronizarPlanilha() {
     .then(res => res.json())
     .then(data => {
       carregar(data);
-      toast('Catálogo atualizado e acelerado!');
+      toast('Catálogo updated e acelerado!');
       btn.textContent = '🔄 Sincronizar Catálogo';
       btn.disabled = false;
     })
@@ -374,7 +375,6 @@ function carregar(res) {
   todos = res.produtos || res; 
   if (res.logoUrl) document.getElementById('logo-area').innerHTML = '<img src="' + res.logoUrl + '" alt="Di Solle">';
   
-  // 🧭 [ALTERAÇÃO] População dinâmica dos Estados vindos do Apps Script
   if (res.estados && res.estados.length > 0) {
     var selectEstado = document.getElementById('cli-estado');
     if (selectEstado) {
@@ -405,6 +405,7 @@ function obterPrecoItem(p, tabelaAtiva) {
   return p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
 }
 
+/* 🧭 [AJUSTE FRETE] Modificado para avaliar pelo Subtotal Bruto estavelmente */
 function determinarTabelaAtiva() {
   var icmsTipo = document.getElementById('icms-d').value; 
   var t1Code = (icmsTipo === '7') ? 'M26071' : 'M26121';
@@ -412,22 +413,14 @@ function determinarTabelaAtiva() {
   var limite = (icmsTipo === '7') ? 5000 : 2500;
   
   var simBrutoProdutos = 0;
-  var simTotalIpi = 0;
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
 
   Object.keys(sel).forEach(function(k) {
     var pVal = obterPrecoItem(sel[k].prod, t1Code);
     var qty = sel[k].qty;
-    var subtotalItem = pVal * qty;
-    simBrutoProdutos += subtotalItem;
-    var ipiPct = sel[k].prod.ipi || 0;
-    simTotalIpi += subtotalItem * (ipiPct / 100);
+    simBrutoProdutos += pVal * qty;
   });
   
-  var simValPrazo = simBrutoProdutos * (prazoDescPct / 100);
-  var simTotalPedidoComIpi = (simBrutoProdutos - simValPrazo) + simTotalIpi;
-  
-  return (simTotalPedidoComIpi > limite) ? t2Code : t1Code;
+  return (simBrutoProdutos >= limite) ? t2Code : t1Code;
 }
 
 function filtrar() {
@@ -585,16 +578,24 @@ function calcularDescontosERenderizar() {
   var f = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); };
   var sufixoTab = ' <span style="font-size:10px; color:var(--verde-dk); font-weight:normal;">[' + tabelaAtiva + ']</span>';
 
+  /* 🧭 [AJUSTE FRETE] Atualiza os elementos de texto e as cores dinamicamente */
+  var txtFrete = (tabelaAtiva === 'M26072' || tabelaAtiva === 'M26122') ? 'GRÁTIS (CIF)' : 'FOB (Por Conta)';
+  var corFrete = (tabelaAtiva === 'M26072' || tabelaAtiva === 'M26122') ? 'var(--verde-dk)' : 'var(--promo)';
+
   document.getElementById('rd-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
   document.getElementById('rd-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rd-prazo-pct').textContent = prazoDescPct;
   document.getElementById('rd-prazo-val').textContent = '- ' + f(valPrazo);
+  document.getElementById('rd-frete-val').textContent = txtFrete;
+  document.getElementById('rd-frete-val').style.color = corFrete;
   document.getElementById('rd-total').textContent = f(liquidoFinal);
 
   document.getElementById('rm-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
   document.getElementById('rm-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rm-prazo-pct').textContent = prazoDescPct;
   document.getElementById('rm-prazo-val').textContent = '- ' + f(valPrazo);
+  document.getElementById('rm-frete-val').textContent = txtFrete;
+  document.getElementById('rm-frete-val').style.color = corFrete;
   document.getElementById('rm-total').textContent = f(liquidoFinal);
 
   if (ks.length > 0) {
@@ -671,7 +672,7 @@ function baixarPdf() {
     razao: document.getElementById('cli-razao').value.trim(),
     fantasia: document.getElementById('cli-fantasia').value.trim(),
     endereco: document.getElementById('cli-endereco').value.trim(),
-    estado: document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : '', // 🧭 [ALTERAÇÃO] Estado anexado aos dados do PDF
+    estado: document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : '', 
     telefone: document.getElementById('cli-telefone').value.trim(),
     email: document.getElementById('cli-email').value.trim(),
     obs: document.getElementById('cli-obs').value.trim()
@@ -742,14 +743,14 @@ function confirmarEEnviarPedido() {
   var razao=document.getElementById('cli-razao').value.trim();
   var fantasia=document.getElementById('cli-fantasia').value.trim();
   var endereco=document.getElementById('cli-endereco').value.trim();
-  var estado=document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : ''; // 🧭 [ALTERAÇÃO] Leitura do Estado selecionado
+  var estado=document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : ''; 
   var telefone=document.getElementById('cli-telefone').value.trim();
   var email=document.getElementById('cli-email').value.trim();
   var obs=document.getElementById('cli-obs').value.trim();
 
   var prazoTxt = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
   var itensStr = ks.map(function(k){ return k + ' (x' + sel[k].qty + ')'; }).join(' | ');
-  var detalhesCliente = "CNPJ: "+(cnpj||'-')+" | Razão: "+(razao||'-')+" | UF: "+(estado||'-')+" | Tel: "+(telefone||'-'); // 🧭 [ALTERAÇÃO] UF concatenado nos detalhes salvos na Planilha
+  var detalhesCliente = "CNPJ: "+(cnpj||'-')+" | Razão: "+(razao||'-')+" | UF: "+(estado||'-')+" | Tel: "+(telefone||'-'); 
 
   var dados = { 
     acao: 'registrar',
