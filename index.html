@@ -131,6 +131,8 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .btn-add{width:100%;padding:13px;background:var(--verde);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
 .btn-add.adicionado{background:var(--verde-dk)}
 
+.modal-cliente{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;padding:16px}
+.modal-cliente.open{display:flex}
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;color:var(--sub);gap:12px}
 .toast{position:fixed;bottom:76px;right:16px;background:#1a1a18;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -280,7 +282,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 </div>
 
-<div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
+<div class="modal-cliente" id="modal-cliente" onclick="clicouForaCliente(event)">
   <div class="modal-box" style="max-width:460px; max-height:90vh;">
     <div style="padding:14px 18px; border-bottom:1px solid var(--borda); display:flex; justify-content:between; align-items:center; background:var(--cinza)">
       <b style="font-size:15px; color:var(--texto)">🏢 Dados Cadastrais do Cliente</b>
@@ -343,13 +345,14 @@ function sincronizarPlanilha() {
   btn.disabled = true;
   document.getElementById('grid').innerHTML = '';
   mostrarSkeletons(12);
-  toast('A sincronizar novas imagens e preços...');
+  toast('A limpar cache e sincronizar novos dados...');
 
-  fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime())
+  // O "cache: 'no-store'" obriga a página a buscar do zero no servidor
+  fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime(), { cache: "no-store" })
     .then(res => res.json())
     .then(data => {
       carregar(data);
-      toast('Catálogo atualizado e acelerado!');
+      toast('Catálogo e cache atualizados!');
       btn.textContent = '🔄 Sincronizar Catálogo';
       btn.disabled = false;
     })
@@ -545,6 +548,9 @@ function syncRegras(sourceId, targetId) {
   atualizarPainel();
 }
 
+// ----------------------------------------------------
+// NOVA FUNÇÃO COM ARREDONDAMENTOS COMERCIAIS
+// ----------------------------------------------------
 function calcularDescontosERenderizar() {
   var tabelaAtiva = determinarTabelaAtiva();
   var ks = Object.keys(sel);
@@ -554,15 +560,19 @@ function calcularDescontosERenderizar() {
   ks.forEach(function(k){ 
     var itemPreco = obterPrecoItem(sel[k].prod, tabelaAtiva);
     var itemQty = sel[k].qty;
-    var subtotalItem = itemPreco * itemQty;
+    
+    // Arredondamento comercial para 2 casas no subtotal de cada item
+    var subtotalItem = Math.round((itemPreco * itemQty) * 100) / 100;
     brutoProdutosTabela += subtotalItem;
     qtdTotal += itemQty;
+    
     var itemIpiPct = sel[k].prod.ipi || 0;
-    totalIpiAcumulado += subtotalItem * (itemIpiPct / 100);
+    totalIpiAcumulado += Math.round((subtotalItem * (itemIpiPct / 100)) * 100) / 100;
   });
 
-  var valPrazo = brutoProdutosTabela * (prazoDescPct / 100);
-  var liquidoFinal = (brutoProdutosTabela - valPrazo) + totalIpiAcumulado;
+  // Arredondamento no desconto e no total líquido (Ex: força o 1.3857 a virar 1.39)
+  var valPrazo = Math.round((brutoProdutosTabela * (prazoDescPct / 100)) * 100) / 100;
+  var liquidoFinal = Math.round(((brutoProdutosTabela - valPrazo) + totalIpiAcumulado) * 100) / 100;
 
   contasAtuais = { brutoProdutos: brutoProdutosTabela, totalIpi: totalIpiAcumulado, pctPrazo: prazoDescPct, valPrazo: valPrazo, liquido: liquidoFinal, qtd: qtdTotal, tabelaAtiva: tabelaAtiva };
 
