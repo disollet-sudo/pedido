@@ -15,6 +15,9 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px}
 .logo-area{flex-shrink:0;display:flex;align-items:center}
 .logo-area img{max-height:48px;display:block}
+.logo-css{color:#fff;font-family:'Arial Black',sans-serif;line-height:1}
+.logo-css .mn{font-size:22px;font-weight:900;letter-spacing:2px;display:block}
+.logo-css .sb{font-size:8px;letter-spacing:3px;color:#aaa;display:block;margin-top:1px}
 .search-wrap{flex:1;position:relative;max-width:500px}
 .search-wrap input{width:100%;padding:10px 12px 10px 36px;border:1px solid #444;border-radius:8px;font-size:14px;background:#222;color:#fff;outline:none}
 .search-wrap input:focus{border-color:var(--verde)}
@@ -128,8 +131,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .btn-add{width:100%;padding:13px;background:var(--verde);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
 .btn-add.adicionado{background:var(--verde-dk)}
 
-.modal-cliente{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;padding:16px}
-.modal-cliente.open{display:flex}
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;color:var(--sub);gap:12px}
 .toast{position:fixed;bottom:76px;right:16px;background:#1a1a18;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -176,13 +177,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div id="lista-d"></div>
     
     <div class="field">
-      <label>Estado p/ Frete</label>
-      <select id="estado-d" onchange="syncRegras('estado-d','estado-m')">
-        <option value="">Aguarde...</option>
-      </select>
-    </div>
-
-    <div class="field">
       <label>Regra de ICMS / Faixa</label>
       <select id="icms-d" onchange="syncRegras('icms-d','icms-m')">
         <option value="7">ICMS 7</option>
@@ -203,10 +197,10 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     </div>
 
     <div class="resultado">
-      <div class="res-row"><span>Subtotal Tabela:</span><b id="rd-bruto-prod">R$ 0,00</b></div>
+      <div class="res-row"><span>Subtotal Itens:</span><b id="rd-bruto-prod">R$ 0,00</b></div>
+      <div class="res-row"><span>Desc. de Volume:</span><b id="rd-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
       <div class="res-row"><span>Desc. Prazo (<span id="rd-prazo-pct">0</span>%):</span><b id="rd-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
       <div class="res-row"><span>Valor Total IPI (+):</span><b id="rd-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
-      <div class="res-row"><span>Frete:</span><span id="rd-frete-val">R$ 0,00</span></div>
       <div class="res-sep"></div>
       <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rd-total">R$ 0,00</b></div>
     </div>
@@ -229,13 +223,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   <div id="lista-m" style="margin-bottom:12px"></div>
   
   <div class="field">
-    <label>Estado p/ Frete</label>
-    <select id="estado-m" onchange="syncRegras('estado-m','estado-d')">
-      <option value="">Aguarde...</option>
-    </select>
-  </div>
-
-  <div class="field">
     <label>Regra de ICMS / Faixa</label>
     <select id="icms-m" onchange="syncRegras('icms-m','icms-d')">
       <option value="7">ICMS 7</option>
@@ -256,10 +243,10 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 
   <div class="resultado">
-    <div class="res-row"><span>Subtotal Tabela:</span><b id="rm-bruto-prod">R$ 0,00</b></div>
+    <div class="res-row"><span>Subtotal Itens:</span><b id="rm-bruto-prod">R$ 0,00</b></div>
+    <div class="res-row"><span>Desc. de Volume:</span><b id="rm-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
     <div class="res-row"><span>Desc. Prazo (<span id="rm-prazo-pct">0</span>%):</span><b id="rm-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
     <div class="res-row"><span>Valor Total IPI (+):</span><b id="rm-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
-    <div class="res-row"><span>Frete:</span><span id="rm-frete-val">R$ 0,00</span></div>
     <div class="res-sep"></div>
     <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rm-total">R$ 0,00</b></div>
   </div>
@@ -293,7 +280,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 </div>
 
-<div class="modal-cliente" id="modal-cliente" onclick="clicouForaCliente(event)">
+<div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
   <div class="modal-box" style="max-width:460px; max-height:90vh;">
     <div style="padding:14px 18px; border-bottom:1px solid var(--borda); display:flex; justify-content:between; align-items:center; background:var(--cinza)">
       <b style="font-size:15px; color:var(--texto)">🏢 Dados Cadastrais do Cliente</b>
@@ -304,6 +291,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="field"><label>RAZÃO SOCIAL</label><input type="text" id="cli-razao" placeholder="Razão Social"></div>
       <div class="field"><label>FANTASIA</label><input type="text" id="cli-fantasia" placeholder="Nome Fantasia"></div>
       <div class="field"><label>ENDEREÇO</label><input type="text" id="cli-endereco" placeholder="Endereço Completo"></div>
+      <div class="field"><label>ESTADO P/ FRETE</label><select id="cli-estado"><option value="">A carregar estados...</option></select></div>
       <div class="field"><label>TELEFONE</label><input type="text" id="cli-telefone" placeholder="(00) 00000-0000"></div>
       <div class="field"><label>E-MAIL</label><input type="email" id="cli-email" placeholder="cliente@email.com"></div>
       <div class="field"><label>OBSERVAÇÃO</label><textarea id="cli-obs" placeholder="Observações..." style="height:60px; resize:none; font-family:inherit;"></textarea></div>
@@ -316,7 +304,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // 🔗 O TEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwsu6IZSHLzrmMKsjoAqHPRRNx5Y5UHyUF4ZdokTo8ZDuFrX-Q-QXWXjRNaBb2QKJ5i0w/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwFCEuYrNKq0O-xNlJd6XSiUO0w6lqe1l4gT_vep5GDMcn-GX07YFSyqODrQgXuJEknIw/exec";
 
 function cleanDescription(str) {
   if (!str) return '';
@@ -324,11 +312,10 @@ function cleanDescription(str) {
 }
 
 var todos   = [];
-var fretes  = [];
 var sel     = {}; 
 var modalCod = null;
 var lazyObs;
-var contasAtuais = { brutoProdutos: 0, totalIpi: 0, pctPrazo: 0, valPrazo: 0, liquido: 0, qtd: 0, tabelaAtiva: 'M26071', frete: 0, estado: '', liquidoComFrete: 0, prazoTxt: '' };
+var contasAtuais = { brutoProdutos: 0, totalIpi: 0, pctPrazo: 0, valPrazo: 0, liquido: 0, qtd: 0, tabelaAtiva: 'M26071' };
 var fluxoOrigem = 'd';
 var pedidoSalvo = false;
 var ultimaTabelaAtiva = '';
@@ -357,13 +344,13 @@ function sincronizarPlanilha() {
   btn.disabled = true;
   document.getElementById('grid').innerHTML = '';
   mostrarSkeletons(12);
-  toast('A limpar cache e sincronizar novos dados...');
+  toast('A sincronizar novas imagens e preços...');
 
-  fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime(), { cache: "no-store" })
+  fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime())
     .then(res => res.json())
     .then(data => {
       carregar(data);
-      toast('Catálogo e cache atualizados!');
+      toast('Catálogo atualizado e acelerado!');
       btn.textContent = '🔄 Sincronizar Catálogo';
       btn.disabled = false;
     })
@@ -387,14 +374,18 @@ function carregar(res) {
   todos = res.produtos || res; 
   if (res.logoUrl) document.getElementById('logo-area').innerHTML = '<img src="' + res.logoUrl + '" alt="Di Solle">';
   
-  if (res.fretes) {
-    fretes = res.fretes;
-    var optHtml = '<option value="">Selecione...</option>';
-    fretes.forEach(function(f) {
-      optHtml += '<option value="' + f.estado + '">' + f.estado + '</option>';
-    });
-    document.getElementById('estado-d').innerHTML = optHtml;
-    document.getElementById('estado-m').innerHTML = optHtml;
+  // 🧭 [ALTERAÇÃO] População dinâmica dos Estados vindos do Apps Script
+  if (res.estados && res.estados.length > 0) {
+    var selectEstado = document.getElementById('cli-estado');
+    if (selectEstado) {
+      selectEstado.innerHTML = '<option value="">Selecione o Estado</option>';
+      res.estados.forEach(function(uf) {
+        var opt = document.createElement('option');
+        opt.value = uf;
+        opt.textContent = uf;
+        selectEstado.appendChild(opt);
+      });
+    }
   }
 
   var marcas = {};
@@ -420,23 +411,22 @@ function determinarTabelaAtiva() {
   var t2Code = (icmsTipo === '7') ? 'M26072' : 'M26122';
   var limite = (icmsTipo === '7') ? 5000 : 2500;
   
-  var simLiquido = 0;
+  var simBrutoProdutos = 0;
   var simTotalIpi = 0;
-  
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
-  var fatorDesconto = 1 - (prazoDescPct / 100); 
 
   Object.keys(sel).forEach(function(k) {
     var pVal = obterPrecoItem(sel[k].prod, t1Code);
-    var precoDesc = Math.round((pVal * fatorDesconto) * 100) / 100;
-    var subtotalDesc = Math.round((precoDesc * sel[k].qty) * 100) / 100;
-    simLiquido += subtotalDesc;
-    
+    var qty = sel[k].qty;
+    var subtotalItem = pVal * qty;
+    simBrutoProdutos += subtotalItem;
     var ipiPct = sel[k].prod.ipi || 0;
-    simTotalIpi += Math.round((subtotalDesc * (ipiPct / 100)) * 100) / 100;
+    simTotalIpi += subtotalItem * (ipiPct / 100);
   });
   
-  var simTotalPedidoComIpi = simLiquido + simTotalIpi;
+  var simValPrazo = simBrutoProdutos * (prazoDescPct / 100);
+  var simTotalPedidoComIpi = (simBrutoProdutos - simValPrazo) + simTotalIpi;
+  
   return (simTotalPedidoComIpi > limite) ? t2Code : t1Code;
 }
 
@@ -471,12 +461,7 @@ function cardHtml(p) {
   var tabelaAtiva = determinarTabelaAtiva();
   var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
   var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  var precoBase = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
-  
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
-  var fatorDesconto = 1 - (prazoDescPct / 100);
-  
-  var precoComDesconto = Math.round((precoBase * fatorDesconto) * 100) / 100;
+  var precoExibir = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
   
   var s = sel[p.codigo]; var cls = s ? ' sel' : '';
   if (p.emPromocao) cls += ' promo';
@@ -484,13 +469,13 @@ function cardHtml(p) {
   var qty = s ? s.qty : 0;
   var pr = '';
   
-  if (prazoDescPct > 0 || (p.emPromocao && precoPromo > 0)) {
+  if (p.emPromocao && precoPromo > 0) {
     pr = '<div style="display:flex; flex-direction:column;">'
-       + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">Tabela: R$ '+precoBase.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
-       + '<span class="card-preco" style="color:var(--verde-dk); font-weight:800; line-height:1.2;">R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
+       + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
+       + '<span class="card-preco" style="color:var(--promo); font-weight:800; line-height:1.2;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
        + '</div>';
   } else {
-    pr = '<span class="card-preco">R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
+    pr = '<span class="card-preco">R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
   }
   
   var promoBadge = p.emPromocao ? '<div class="card-badge-promo">🔥 PROMOÇÃO</div>' : '';
@@ -514,18 +499,13 @@ function abrirModal(cod) {
   var tabelaAtiva = determinarTabelaAtiva();
   var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
   var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  var precoBase = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
   
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
-  var fatorDesconto = 1 - (prazoDescPct / 100);
-  var precoComDesconto = Math.round((precoBase * fatorDesconto) * 100) / 100;
-  
-  if (prazoDescPct > 0 || (p.emPromocao && precoPromo > 0)) {
+  if (p.emPromocao && precoPromo > 0) {
     document.getElementById('modal-preco').innerHTML = 
-      '<span style="font-size:13px; text-decoration:line-through; color:#aaa; display:block; margin-bottom:2px;">Tabela: R$ '+precoBase.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>' +
-      '<span style="color:var(--verde-dk); font-size:22px; font-weight:800;">R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
+      '<span style="font-size:13px; text-decoration:line-through; color:#aaa; display:block; margin-bottom:2px;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>' +
+      '<span style="color:var(--promo); font-size:22px; font-weight:800;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
   } else {
-    document.getElementById('modal-preco').innerHTML = 'R$ '+precoComDesconto.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('modal-preco').innerHTML = 'R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
   }
   
   var minPermitido = p.qtdEmbalagem || 1;
@@ -579,77 +559,28 @@ function syncRegras(sourceId, targetId) {
   document.getElementById(targetId).value = document.getElementById(sourceId).value;
   pedidoSalvo = false;
   atualizarPainel();
-  filtrar(); 
 }
 
 function calcularDescontosERenderizar() {
   var tabelaAtiva = determinarTabelaAtiva();
   var ks = Object.keys(sel);
-  
-  var brutoProdutosTabela = 0; 
-  var subtotalProdutosDesconto = 0;
-  var totalIpiAcumulado = 0; 
-  var qtdTotal = 0;
-  
-  var selectPrazo = document.getElementById('prazo-d');
-  var prazoDescPct = parseInt(selectPrazo.value) || 0; 
-  var fatorDesconto = 1 - (prazoDescPct / 100);
-  var prazoTxt = selectPrazo.options[selectPrazo.selectedIndex].text;
+  var brutoProdutosTabela = 0; var totalIpiAcumulado = 0; var qtdTotal = 0;
+  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0; 
 
   ks.forEach(function(k){ 
     var itemPreco = obterPrecoItem(sel[k].prod, tabelaAtiva);
     var itemQty = sel[k].qty;
-    
-    var precoUnitarioDescontado = Math.round((itemPreco * fatorDesconto) * 100) / 100;
-    var subtotalDescontadoItem = Math.round((precoUnitarioDescontado * itemQty) * 100) / 100;
-    var subtotalCheioDaTabela = Math.round((itemPreco * itemQty) * 100) / 100;
-    
-    brutoProdutosTabela += subtotalCheioDaTabela;
-    subtotalProdutosDesconto += subtotalDescontadoItem;
+    var subtotalItem = itemPreco * itemQty;
+    brutoProdutosTabela += subtotalItem;
     qtdTotal += itemQty;
-    
     var itemIpiPct = sel[k].prod.ipi || 0;
-    totalIpiAcumulado += Math.round((subtotalDescontadoItem * (itemIpiPct / 100)) * 100) / 100;
+    totalIpiAcumulado += subtotalItem * (itemIpiPct / 100);
   });
 
-  var valPrazo = Math.round((brutoProdutosTabela - subtotalProdutosDesconto) * 100) / 100;
-  var liquidoFinal = Math.round((subtotalProdutosDesconto + totalIpiAcumulado) * 100) / 100;
+  var valPrazo = brutoProdutosTabela * (prazoDescPct / 100);
+  var liquidoFinal = (brutoProdutosTabela - valPrazo) + totalIpiAcumulado;
 
-  // Lógica de Frete
-  var uf = document.getElementById('estado-d').value;
-  var valFrete = 0;
-  var txtFreteHTML = '<span style="color:#888;font-size:11px">Selecione o Estado</span>';
-  
-  if (uf) {
-      var regra = fretes.find(f => f.estado === uf);
-      if (regra) {
-          if (liquidoFinal > 0 && liquidoFinal < regra.minPedido) {
-              txtFreteHTML = '<b style="color:#E24B4A;font-size:11px">Abaixo do Mín. (R$ '+regra.minPedido.toLocaleString('pt-BR',{minimumFractionDigits:2})+')</b>';
-          } else if (liquidoFinal >= regra.minPedido && liquidoFinal < regra.freteGratis) {
-              valFrete = regra.valorFrete;
-              txtFreteHTML = '<b style="color:#c0392b">+ R$ '+valFrete.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</b>';
-          } else if (liquidoFinal > 0) {
-              valFrete = 0;
-              txtFreteHTML = '<b style="color:var(--verde-dk)">GRÁTIS</b>';
-          }
-      }
-  }
-
-  var liquidoComFrete = liquidoFinal + valFrete;
-
-  contasAtuais = { 
-    brutoProdutos: brutoProdutosTabela, 
-    totalIpi: totalIpiAcumulado, 
-    pctPrazo: prazoDescPct, 
-    valPrazo: valPrazo, 
-    liquido: liquidoFinal, 
-    qtd: qtdTotal, 
-    tabelaAtiva: tabelaAtiva,
-    estado: uf,
-    frete: valFrete,
-    liquidoComFrete: liquidoComFrete,
-    prazoTxt: prazoTxt
-  };
+  contasAtuais = { brutoProdutos: brutoProdutosTabela, totalIpi: totalIpiAcumulado, pctPrazo: prazoDescPct, valPrazo: valPrazo, liquido: liquidoFinal, qtd: qtdTotal, tabelaAtiva: tabelaAtiva };
 
   var f = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); };
   var sufixoTab = ' <span style="font-size:10px; color:var(--verde-dk); font-weight:normal;">[' + tabelaAtiva + ']</span>';
@@ -658,18 +589,16 @@ function calcularDescontosERenderizar() {
   document.getElementById('rd-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rd-prazo-pct').textContent = prazoDescPct;
   document.getElementById('rd-prazo-val').textContent = '- ' + f(valPrazo);
-  document.getElementById('rd-frete-val').innerHTML = txtFreteHTML;
-  document.getElementById('rd-total').textContent = f(liquidoComFrete);
+  document.getElementById('rd-total').textContent = f(liquidoFinal);
 
   document.getElementById('rm-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
   document.getElementById('rm-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rm-prazo-pct').textContent = prazoDescPct;
   document.getElementById('rm-prazo-val').textContent = '- ' + f(valPrazo);
-  document.getElementById('rm-frete-val').innerHTML = txtFreteHTML;
-  document.getElementById('rm-total').textContent = f(liquidoComFrete);
+  document.getElementById('rm-total').textContent = f(liquidoFinal);
 
   if (ks.length > 0) {
-    document.getElementById('mb-info').innerHTML = '<b>'+ks.length+' ref.</b> ('+qtdTotal+' un.) ['+tabelaAtiva+']<br><span style="color:var(--verde-dk);font-weight:bold;">Liq: '+f(liquidoComFrete)+'</span>';
+    document.getElementById('mb-info').innerHTML = '<b>'+ks.length+' ref.</b> ('+qtdTotal+' un.) ['+tabelaAtiva+']<br><span style="color:var(--verde-dk);font-weight:bold;">Liq: '+f(liquidoFinal)+'</span>';
   }
 }
 
@@ -737,20 +666,12 @@ function baixarPdf() {
   if(!pedidoSalvo) return;
   var ks = Object.keys(sel); if (!ks.length) return;
 
-  // POPUP AVISO (Para impedir geração de PDF se o pedido ainda não atende ao Frete Mínimo)
-  var uf = document.getElementById('estado-d').value;
-  if (!uf) { alert('Selecione o estado para calcular o frete.'); return; }
-  var regra = fretes.find(f => f.estado === uf);
-  if (regra && contasAtuais.liquido < regra.minPedido) {
-      alert('Atenção: O valor mínimo do pedido para o estado ' + uf + ' é R$ ' + regra.minPedido.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '.\n\nPor favor, adicione mais itens antes de baixar.');
-      return;
-  }
-
   var clienteObj = {
     cnpj: document.getElementById('cli-cnpj').value.trim(),
     razao: document.getElementById('cli-razao').value.trim(),
     fantasia: document.getElementById('cli-fantasia').value.trim(),
     endereco: document.getElementById('cli-endereco').value.trim(),
+    estado: document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : '', // 🧭 [ALTERAÇÃO] Estado anexado aos dados do PDF
     telefone: document.getElementById('cli-telefone').value.trim(),
     email: document.getElementById('cli-email').value.trim(),
     obs: document.getElementById('cli-obs').value.trim()
@@ -811,24 +732,7 @@ function baixarPdf() {
   });
 }
 
-function abrirFluxoFechamento(origem) { 
-  // POPUP AVISO FRETE
-  var uf = document.getElementById('estado-d').value;
-  if (!uf) {
-      alert('⚠️ Por favor, selecione o Estado para calcular o frete antes de finalizar o pedido.');
-      return;
-  }
-  var regra = fretes.find(f => f.estado === uf);
-  if (regra && contasAtuais.liquido < regra.minPedido) {
-      alert('Atenção: O valor mínimo em produtos (com IPI) para o estado ' + uf + ' é R$ ' + regra.minPedido.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '.\n\nFaltam R$ ' + (regra.minPedido - contasAtuais.liquido).toLocaleString('pt-BR',{minimumFractionDigits:2}) + ' para libertar o envio. Por favor, adicione mais itens.');
-      return;
-  }
-
-  fluxoOrigem = origem; 
-  document.getElementById('modal-cliente').classList.add('open'); 
-  document.body.style.overflow = 'hidden'; 
-}
-
+function abrirFluxoFechamento(origem) { fluxoOrigem = origem; document.getElementById('modal-cliente').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function fecharModalCliente() { document.getElementById('modal-cliente').classList.remove('open'); if (!document.getElementById('modal').classList.contains('open')) document.body.style.overflow = ''; }
 function clicouForaCliente(e) { if (e.target === document.getElementById('modal-cliente')) fecharModalCliente(); }
 
@@ -838,12 +742,14 @@ function confirmarEEnviarPedido() {
   var razao=document.getElementById('cli-razao').value.trim();
   var fantasia=document.getElementById('cli-fantasia').value.trim();
   var endereco=document.getElementById('cli-endereco').value.trim();
+  var estado=document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : ''; // 🧭 [ALTERAÇÃO] Leitura do Estado selecionado
   var telefone=document.getElementById('cli-telefone').value.trim();
   var email=document.getElementById('cli-email').value.trim();
   var obs=document.getElementById('cli-obs').value.trim();
 
+  var prazoTxt = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
   var itensStr = ks.map(function(k){ return k + ' (x' + sel[k].qty + ')'; }).join(' | ');
-  var detalhesCliente = "CNPJ: "+(cnpj||'-')+" | Razão: "+(razao||'-')+" | Tel: "+(telefone||'-');
+  var detalhesCliente = "CNPJ: "+(cnpj||'-')+" | Razão: "+(razao||'-')+" | UF: "+(estado||'-')+" | Tel: "+(telefone||'-'); // 🧭 [ALTERAÇÃO] UF concatenado nos detalhes salvos na Planilha
 
   var dados = { 
     acao: 'registrar',
@@ -853,10 +759,8 @@ function confirmarEEnviarPedido() {
     totalIpi: contasAtuais.totalIpi.toFixed(2),
     totalDescontos: contasAtuais.valPrazo.toFixed(2),
     tabelaAtiva: contasAtuais.tabelaAtiva,
-    prazo: contasAtuais.prazoTxt, 
-    estado: contasAtuais.estado,
-    frete: contasAtuais.frete,
-    total: contasAtuais.liquidoComFrete.toFixed(2), 
+    prazo: prazoTxt, 
+    total: contasAtuais.liquido.toFixed(2), 
     clienteInfo: detalhesCliente
   };
 
