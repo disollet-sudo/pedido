@@ -176,6 +176,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div id="lista-d"></div>
     
     <div class="field">
+      <label>Estado p/ Frete</label>
+      <select id="estado-d" onchange="syncRegras('estado-d','estado-m')">
+        <option value="">Aguarde...</option>
+      </select>
+    </div>
+
+    <div class="field">
       <label>Regra de ICMS / Faixa</label>
       <select id="icms-d" onchange="syncRegras('icms-d','icms-m')">
         <option value="7">ICMS 7</option>
@@ -197,9 +204,9 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
     <div class="resultado">
       <div class="res-row"><span>Subtotal Tabela:</span><b id="rd-bruto-prod">R$ 0,00</b></div>
-      <div class="res-row"><span>Desc. de Volume:</span><b id="rd-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
       <div class="res-row"><span>Desc. Prazo (<span id="rd-prazo-pct">0</span>%):</span><b id="rd-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
       <div class="res-row"><span>Valor Total IPI (+):</span><b id="rd-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
+      <div class="res-row"><span>Frete:</span><span id="rd-frete-val">R$ 0,00</span></div>
       <div class="res-sep"></div>
       <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rd-total">R$ 0,00</b></div>
     </div>
@@ -222,6 +229,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   <div id="lista-m" style="margin-bottom:12px"></div>
   
   <div class="field">
+    <label>Estado p/ Frete</label>
+    <select id="estado-m" onchange="syncRegras('estado-m','estado-d')">
+      <option value="">Aguarde...</option>
+    </select>
+  </div>
+
+  <div class="field">
     <label>Regra de ICMS / Faixa</label>
     <select id="icms-m" onchange="syncRegras('icms-m','icms-d')">
       <option value="7">ICMS 7</option>
@@ -243,9 +257,9 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
   <div class="resultado">
     <div class="res-row"><span>Subtotal Tabela:</span><b id="rm-bruto-prod">R$ 0,00</b></div>
-    <div class="res-row"><span>Desc. de Volume:</span><b id="rm-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
     <div class="res-row"><span>Desc. Prazo (<span id="rm-prazo-pct">0</span>%):</span><b id="rm-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
     <div class="res-row"><span>Valor Total IPI (+):</span><b id="rm-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
+    <div class="res-row"><span>Frete:</span><span id="rm-frete-val">R$ 0,00</span></div>
     <div class="res-sep"></div>
     <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rm-total">R$ 0,00</b></div>
   </div>
@@ -302,7 +316,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // 🔗 O TEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzAUA_xfjm2WWi_gRYYVuZFEgQ3Qkn2tWduoVhhWQi9NHJVrG6SWpcvk10nq2Ne0XdUAA/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwsu6IZSHLzrmMKsjoAqHPRRNx5Y5UHyUF4ZdokTo8ZDuFrX-Q-QXWXjRNaBb2QKJ5i0w/exec";
 
 function cleanDescription(str) {
   if (!str) return '';
@@ -310,10 +324,11 @@ function cleanDescription(str) {
 }
 
 var todos   = [];
+var fretes  = [];
 var sel     = {}; 
 var modalCod = null;
 var lazyObs;
-var contasAtuais = { brutoProdutos: 0, totalIpi: 0, pctPrazo: 0, valPrazo: 0, liquido: 0, qtd: 0, tabelaAtiva: 'M26071' };
+var contasAtuais = { brutoProdutos: 0, totalIpi: 0, pctPrazo: 0, valPrazo: 0, liquido: 0, qtd: 0, tabelaAtiva: 'M26071', frete: 0, estado: '', liquidoComFrete: 0, prazoTxt: '' };
 var fluxoOrigem = 'd';
 var pedidoSalvo = false;
 var ultimaTabelaAtiva = '';
@@ -371,6 +386,17 @@ function mostrarSkeletons(n) {
 function carregar(res) {
   todos = res.produtos || res; 
   if (res.logoUrl) document.getElementById('logo-area').innerHTML = '<img src="' + res.logoUrl + '" alt="Di Solle">';
+  
+  if (res.fretes) {
+    fretes = res.fretes;
+    var optHtml = '<option value="">Selecione...</option>';
+    fretes.forEach(function(f) {
+      optHtml += '<option value="' + f.estado + '">' + f.estado + '</option>';
+    });
+    document.getElementById('estado-d').innerHTML = optHtml;
+    document.getElementById('estado-m').innerHTML = optHtml;
+  }
+
   var marcas = {};
   todos.forEach(function(p){ if(p.descricao) marcas[p.descricao.split(' ')[0]]=1; });
   var s = document.getElementById('fil-marca');
@@ -402,15 +428,10 @@ function determinarTabelaAtiva() {
 
   Object.keys(sel).forEach(function(k) {
     var pVal = obterPrecoItem(sel[k].prod, t1Code);
-    
-    // 1. Arredonda preço com desconto
     var precoDesc = Math.round((pVal * fatorDesconto) * 100) / 100;
-    
-    // 2. Calcula subtotal descontado
     var subtotalDesc = Math.round((precoDesc * sel[k].qty) * 100) / 100;
     simLiquido += subtotalDesc;
     
-    // 3. IPI sobre o subtotal descontado exato
     var ipiPct = sel[k].prod.ipi || 0;
     simTotalIpi += Math.round((subtotalDesc * (ipiPct / 100)) * 100) / 100;
   });
@@ -455,7 +476,6 @@ function cardHtml(p) {
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
   var fatorDesconto = 1 - (prazoDescPct / 100);
   
-  // Calcula o preço final a mostrar no Card (já com desconto de prazo da tela)
   var precoComDesconto = Math.round((precoBase * fatorDesconto) * 100) / 100;
   
   var s = sel[p.codigo]; var cls = s ? ' sel' : '';
@@ -464,7 +484,6 @@ function cardHtml(p) {
   var qty = s ? s.qty : 0;
   var pr = '';
   
-  // Se existir desconto do prazo selecionado ou for promo, exibe ambos para transparência
   if (prazoDescPct > 0 || (p.emPromocao && precoPromo > 0)) {
     pr = '<div style="display:flex; flex-direction:column;">'
        + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">Tabela: R$ '+precoBase.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
@@ -499,8 +518,6 @@ function abrirModal(cod) {
   
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
   var fatorDesconto = 1 - (prazoDescPct / 100);
-  
-  // O modal vai apresentar exatamente o preço com desconto também
   var precoComDesconto = Math.round((precoBase * fatorDesconto) * 100) / 100;
   
   if (prazoDescPct > 0 || (p.emPromocao && precoPromo > 0)) {
@@ -562,7 +579,7 @@ function syncRegras(sourceId, targetId) {
   document.getElementById(targetId).value = document.getElementById(sourceId).value;
   pedidoSalvo = false;
   atualizarPainel();
-  filtrar(); // CHAMA ISTO: Para forçar os cartões da página a atualizar o preço com o novo desconto
+  filtrar(); 
 }
 
 function calcularDescontosERenderizar() {
@@ -574,19 +591,16 @@ function calcularDescontosERenderizar() {
   var totalIpiAcumulado = 0; 
   var qtdTotal = 0;
   
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0; 
+  var selectPrazo = document.getElementById('prazo-d');
+  var prazoDescPct = parseInt(selectPrazo.value) || 0; 
   var fatorDesconto = 1 - (prazoDescPct / 100);
+  var prazoTxt = selectPrazo.options[selectPrazo.selectedIndex].text;
 
   ks.forEach(function(k){ 
     var itemPreco = obterPrecoItem(sel[k].prod, tabelaAtiva);
     var itemQty = sel[k].qty;
     
-    // 1. O Preço Unitário já sofre a penalização do desconto E arredonda
-    // Ex: 1.49 - 7% = 1.3857 => 1.39
     var precoUnitarioDescontado = Math.round((itemPreco * fatorDesconto) * 100) / 100;
-    
-    // 2. Multiplica o preço unitário (arredondado) pela quantidade
-    // Ex: 1.39 * 60 = 83.40
     var subtotalDescontadoItem = Math.round((precoUnitarioDescontado * itemQty) * 100) / 100;
     var subtotalCheioDaTabela = Math.round((itemPreco * itemQty) * 100) / 100;
     
@@ -594,16 +608,48 @@ function calcularDescontosERenderizar() {
     subtotalProdutosDesconto += subtotalDescontadoItem;
     qtdTotal += itemQty;
     
-    // 3. IPI calculado exclusivamente sobre a base descontada do item exata
     var itemIpiPct = sel[k].prod.ipi || 0;
     totalIpiAcumulado += Math.round((subtotalDescontadoItem * (itemIpiPct / 100)) * 100) / 100;
   });
 
-  // A diferença matemática exata que vai ser o teu valor de desconto no fecho
   var valPrazo = Math.round((brutoProdutosTabela - subtotalProdutosDesconto) * 100) / 100;
   var liquidoFinal = Math.round((subtotalProdutosDesconto + totalIpiAcumulado) * 100) / 100;
 
-  contasAtuais = { brutoProdutos: brutoProdutosTabela, totalIpi: totalIpiAcumulado, pctPrazo: prazoDescPct, valPrazo: valPrazo, liquido: liquidoFinal, qtd: qtdTotal, tabelaAtiva: tabelaAtiva };
+  // Lógica de Frete
+  var uf = document.getElementById('estado-d').value;
+  var valFrete = 0;
+  var txtFreteHTML = '<span style="color:#888;font-size:11px">Selecione o Estado</span>';
+  
+  if (uf) {
+      var regra = fretes.find(f => f.estado === uf);
+      if (regra) {
+          if (liquidoFinal > 0 && liquidoFinal < regra.minPedido) {
+              txtFreteHTML = '<b style="color:#E24B4A;font-size:11px">Abaixo do Mín. (R$ '+regra.minPedido.toLocaleString('pt-BR',{minimumFractionDigits:2})+')</b>';
+          } else if (liquidoFinal >= regra.minPedido && liquidoFinal < regra.freteGratis) {
+              valFrete = regra.valorFrete;
+              txtFreteHTML = '<b style="color:#c0392b">+ R$ '+valFrete.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</b>';
+          } else if (liquidoFinal > 0) {
+              valFrete = 0;
+              txtFreteHTML = '<b style="color:var(--verde-dk)">GRÁTIS</b>';
+          }
+      }
+  }
+
+  var liquidoComFrete = liquidoFinal + valFrete;
+
+  contasAtuais = { 
+    brutoProdutos: brutoProdutosTabela, 
+    totalIpi: totalIpiAcumulado, 
+    pctPrazo: prazoDescPct, 
+    valPrazo: valPrazo, 
+    liquido: liquidoFinal, 
+    qtd: qtdTotal, 
+    tabelaAtiva: tabelaAtiva,
+    estado: uf,
+    frete: valFrete,
+    liquidoComFrete: liquidoComFrete,
+    prazoTxt: prazoTxt
+  };
 
   var f = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); };
   var sufixoTab = ' <span style="font-size:10px; color:var(--verde-dk); font-weight:normal;">[' + tabelaAtiva + ']</span>';
@@ -612,16 +658,18 @@ function calcularDescontosERenderizar() {
   document.getElementById('rd-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rd-prazo-pct').textContent = prazoDescPct;
   document.getElementById('rd-prazo-val').textContent = '- ' + f(valPrazo);
-  document.getElementById('rd-total').textContent = f(liquidoFinal);
+  document.getElementById('rd-frete-val').innerHTML = txtFreteHTML;
+  document.getElementById('rd-total').textContent = f(liquidoComFrete);
 
   document.getElementById('rm-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
   document.getElementById('rm-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
   document.getElementById('rm-prazo-pct').textContent = prazoDescPct;
   document.getElementById('rm-prazo-val').textContent = '- ' + f(valPrazo);
-  document.getElementById('rm-total').textContent = f(liquidoFinal);
+  document.getElementById('rm-frete-val').innerHTML = txtFreteHTML;
+  document.getElementById('rm-total').textContent = f(liquidoComFrete);
 
   if (ks.length > 0) {
-    document.getElementById('mb-info').innerHTML = '<b>'+ks.length+' ref.</b> ('+qtdTotal+' un.) ['+tabelaAtiva+']<br><span style="color:var(--verde-dk);font-weight:bold;">Liq: '+f(liquidoFinal)+'</span>';
+    document.getElementById('mb-info').innerHTML = '<b>'+ks.length+' ref.</b> ('+qtdTotal+' un.) ['+tabelaAtiva+']<br><span style="color:var(--verde-dk);font-weight:bold;">Liq: '+f(liquidoComFrete)+'</span>';
   }
 }
 
@@ -689,6 +737,15 @@ function baixarPdf() {
   if(!pedidoSalvo) return;
   var ks = Object.keys(sel); if (!ks.length) return;
 
+  // POPUP AVISO (Para impedir geração de PDF se o pedido ainda não atende ao Frete Mínimo)
+  var uf = document.getElementById('estado-d').value;
+  if (!uf) { alert('Selecione o estado para calcular o frete.'); return; }
+  var regra = fretes.find(f => f.estado === uf);
+  if (regra && contasAtuais.liquido < regra.minPedido) {
+      alert('Atenção: O valor mínimo do pedido para o estado ' + uf + ' é R$ ' + regra.minPedido.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '.\n\nPor favor, adicione mais itens antes de baixar.');
+      return;
+  }
+
   var clienteObj = {
     cnpj: document.getElementById('cli-cnpj').value.trim(),
     razao: document.getElementById('cli-razao').value.trim(),
@@ -754,7 +811,24 @@ function baixarPdf() {
   });
 }
 
-function abrirFluxoFechamento(origem) { fluxoOrigem = origem; document.getElementById('modal-cliente').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function abrirFluxoFechamento(origem) { 
+  // POPUP AVISO FRETE
+  var uf = document.getElementById('estado-d').value;
+  if (!uf) {
+      alert('⚠️ Por favor, selecione o Estado para calcular o frete antes de finalizar o pedido.');
+      return;
+  }
+  var regra = fretes.find(f => f.estado === uf);
+  if (regra && contasAtuais.liquido < regra.minPedido) {
+      alert('Atenção: O valor mínimo em produtos (com IPI) para o estado ' + uf + ' é R$ ' + regra.minPedido.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '.\n\nFaltam R$ ' + (regra.minPedido - contasAtuais.liquido).toLocaleString('pt-BR',{minimumFractionDigits:2}) + ' para libertar o envio. Por favor, adicione mais itens.');
+      return;
+  }
+
+  fluxoOrigem = origem; 
+  document.getElementById('modal-cliente').classList.add('open'); 
+  document.body.style.overflow = 'hidden'; 
+}
+
 function fecharModalCliente() { document.getElementById('modal-cliente').classList.remove('open'); if (!document.getElementById('modal').classList.contains('open')) document.body.style.overflow = ''; }
 function clicouForaCliente(e) { if (e.target === document.getElementById('modal-cliente')) fecharModalCliente(); }
 
@@ -768,7 +842,6 @@ function confirmarEEnviarPedido() {
   var email=document.getElementById('cli-email').value.trim();
   var obs=document.getElementById('cli-obs').value.trim();
 
-  var prazoTxt = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
   var itensStr = ks.map(function(k){ return k + ' (x' + sel[k].qty + ')'; }).join(' | ');
   var detalhesCliente = "CNPJ: "+(cnpj||'-')+" | Razão: "+(razao||'-')+" | Tel: "+(telefone||'-');
 
@@ -780,8 +853,10 @@ function confirmarEEnviarPedido() {
     totalIpi: contasAtuais.totalIpi.toFixed(2),
     totalDescontos: contasAtuais.valPrazo.toFixed(2),
     tabelaAtiva: contasAtuais.tabelaAtiva,
-    prazo: prazoTxt, 
-    total: contasAtuais.liquido.toFixed(2), 
+    prazo: contasAtuais.prazoTxt, 
+    estado: contasAtuais.estado,
+    frete: contasAtuais.frete,
+    total: contasAtuais.liquidoComFrete.toFixed(2), 
     clienteInfo: detalhesCliente
   };
 
