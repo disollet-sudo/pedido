@@ -15,21 +15,17 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px}
 .logo-area{flex-shrink:0;display:flex;align-items:center}
 .logo-area img{max-height:48px;display:block}
-.logo-css{color:#fff;font-family:'Arial Black',sans-serif;line-height:1}
-.logo-css .mn{font-size:22px;font-weight:900;letter-spacing:2px;display:block}
-.logo-css .sb{font-size:8px;letter-spacing:3px;color:#aaa;display:block;margin-top:1px}
 .search-wrap{flex:1;position:relative;max-width:500px}
 .search-wrap input{width:100%;padding:10px 12px 10px 36px;border:1px solid #444;border-radius:8px;font-size:14px;background:#222;color:#fff;outline:none}
 .search-wrap input:focus{border-color:var(--verde)}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#888;font-size:15px;pointer-events:none}
 .badge{background:var(--verde);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;white-space:nowrap;display:none}
 
-/* FILTROS E BOTÃO DE SYNC */
+/* FILTROS E SYNC */
 .filtros{background:var(--branco);border-bottom:1px solid var(--borda);padding:8px 20px}
 .filtros-inner{max-width:1200px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .filtros-inner label{font-size:12px;color:var(--sub);font-weight:600}
 .filtros-inner select,.filtros-inner input[type=number]{padding:5px 8px;border:1px solid var(--borda);border-radius:6px;font-size:12px;background:var(--cinza);outline:none}
-.filtros-inner select:focus,.filtros-inner input:focus{border-color:var(--verde)}
 .btn-lim{padding:5px 10px;border:1px solid var(--borda);border-radius:6px;background:var(--branco);font-size:12px;cursor:pointer;color:var(--sub)}
 .btn-lim:hover{border-color:var(--verde);color:var(--verde)}
 .btn-sync{background:#E1F5EE;color:var(--verde-dk);border:1px solid var(--verde);font-weight:700;}
@@ -43,19 +39,22 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 /* GRID E CARDS */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
 @media(max-width:500px){.grid{grid-template-columns:repeat(2,1fr);gap:8px}}
-.card{background:var(--branco);border:1.5px solid var(--borda);border-radius:10px;overflow:hidden;position:relative;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s}
+.card{background:var(--branco);border:1.5px solid var(--borda);border-radius:10px;overflow:hidden;position:relative;display:flex;flex-direction:column;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 .card.sel{border-color:var(--verde);border-width:2px;box-shadow:0 0 0 3px rgba(29,158,117,.13)}
-.card.promo{border: 2px solid var(--promo) !important; background: #FFF4F4 !important; box-shadow: 0 4px 10px rgba(226,75,74,0.18)}
-.card-badge-promo{position:absolute;top:7px;right:7px;background:var(--promo);color:#fff;border-radius:4px;padding:3px 7px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 4px rgba(0,0,0,0.15)}
-.card-badge-qty{position:absolute;top:7px;left:7px;background:var(--verde);color:#fff;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;display:none;z-index:2}
+.card.promo{border: 2px solid var(--promo) !important; background: #FFF4F4 !important;}
+.card-badge-promo{position:absolute;top:7px;right:7px;background:var(--promo);color:#fff;border-radius:4px;padding:3px 7px;font-size:10px;font-weight:800;}
+.card-badge-qty{position:absolute;top:7px;left:7px;background:var(--verde);color:#fff;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;display:none;}
 .card.sel .card-badge-qty{display:block}
-.card-img{width:100%;height:145px;background:var(--cinza);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in;position:relative}
+.card-img{width:100%;height:145px;background:var(--cinza);display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .card-img img{width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .3s}
 .card-img img.loaded{opacity:1}
 .no-img-icon{font-size:30px;color:#ddd}
+
+/* SKELETON */
 .sk-card{background:var(--branco);border:1.5px solid var(--borda);border-radius:10px;overflow:hidden}
 .skeleton{background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:4px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
 .card-body{padding:10px 12px 12px}
 .card-cod{font-size:11px;font-weight:700;color:var(--verde-dk);margin-bottom:3px}
 .card-desc{font-size:12px;color:var(--texto);font-weight:500;line-height:1.35;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -69,14 +68,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .field{margin-bottom:12px}
 .field label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600}
 .field select, .field input[type=text], .field input[type=email], .field textarea{width:100%;padding:8px 10px;border:1px solid var(--borda);border-radius:7px;font-size:13px;outline:none;background:#fff;color:var(--texto)}
-.field select:focus, .field input:focus, .field textarea:focus{border-color:var(--verde)}
 .lista-sel{max-height:180px;overflow-y:auto;border:1px solid var(--borda);border-radius:8px;margin-bottom:12px}
 .sel-row{display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid var(--borda);gap:6px}
 .sel-row:last-child{border-bottom:none}
 .sel-cod{font-size:11px;font-weight:700;color:var(--verde-dk);flex-shrink:0;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sel-desc{flex:1;font-size:11px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sel-qty-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.qty-btn{width:22px;height:22px;border:1px solid var(--borda);border-radius:5px;background:var(--cinza);cursor:pointer;font-size:14px;font-weight:700;color:var(--texto);display:flex;align-items:center;justify-content:center;padding:0}
+.qty-btn{width:22px;height:22px;border:1px solid var(--borda);border-radius:5px;background:var(--cinza);cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .qty-num{width:32px;text-align:center;font-size:12px;font-weight:700}
 .sel-rm{cursor:pointer;color:#ccc;font-size:18px;flex-shrink:0}
 .sel-rm:hover{color:#e24b4a}
@@ -89,7 +87,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .btn.pdf-btn{background:#f0f0ed;color:#aaa;border-color:#ddd;cursor:not-allowed}
 .btn.pdf-btn.liberado{background:#fff;color:var(--verde-dk);border-color:var(--verde);cursor:pointer}
 .btn.pdf-btn.liberado:hover{background:var(--verde-lt)}
-.btn:disabled{opacity:.4;cursor:not-allowed;background-color:#eee !important;color:#aaa !important}
+.btn:disabled{opacity:.5;cursor:not-allowed;background-color:#eee !important;color:#999 !important}
 
 .resultado{background:var(--verde-lt);border:1px solid #9FE1CB;border-radius:8px;padding:12px;margin-bottom:12px}
 .res-row{display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px}
@@ -109,10 +107,10 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .sh-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 14px}
 .sh-title{font-size:15px;font-weight:600;margin-bottom:14px}
 
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;padding:16px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;justify-content:center;align-items:center;padding:16px}
 .modal.open{display:flex}
 .modal-box{background:var(--branco);border-radius:14px;overflow:hidden;width:100%;max-width:480px;max-height:94vh;display:flex;flex-direction:column}
-.modal-img-wrap{background:#fff;display:flex;align-items:center;justify-content:center;height:360px;position:relative;padding:8px}
+.modal-img-wrap{background:#fff;display:flex;align-items:center;justify-content:center;height:320px;position:relative;padding:8px}
 .modal-img-wrap img{width:100%;height:100%;object-fit:contain}
 .modal-spin{width:32px;height:32px;border:3px solid #ddd;border-top-color:var(--verde);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -131,7 +129,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .btn-add{width:100%;padding:13px;background:var(--verde);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
 .btn-add.adicionado{background:var(--verde-dk)}
 
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;color:var(--sub);gap:12px}
 .toast{position:fixed;bottom:76px;right:16px;background:#1a1a18;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(min-width:881px){.toast{bottom:20px}}
@@ -174,8 +171,15 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   
   <aside class="painel">
     <h3>📊 Fechamento do Pedido</h3>
-    <div id="lista-d"></div>
+    <div class="lista-sel" id="lista-d"></div>
     
+    <div class="field">
+      <label>Estado (UF) para Regra de Frete</label>
+      <select id="uf-d" onchange="syncRegras('uf-d','uf-m')">
+        <option value="">Selecione o Estado...</option>
+      </select>
+    </div>
+
     <div class="field">
       <label>Regra de ICMS / Faixa</label>
       <select id="icms-d" onchange="syncRegras('icms-d','icms-m')">
@@ -201,13 +205,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="res-row"><span>Desc. de Volume:</span><b id="rd-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
       <div class="res-row"><span>Desc. Prazo (<span id="rd-prazo-pct">0</span>%):</span><b id="rd-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
       <div class="res-row"><span>Valor Total IPI (+):</span><b id="rd-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
-      <div class="res-row"><span>Frete:</span><b id="rd-frete-val" style="color:var(--promo);">FOB (Por Conta)</b></div>
+      <div class="res-row"><span>Valor Frete:</span><b id="rd-frete-val">Selecione o Estado</b></div>
       <div class="res-sep"></div>
       <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rd-total">R$ 0,00</b></div>
     </div>
     
     <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>Finalizar e Salvar Pedido</button>
-    <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Libertar)</button>
+    <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
     <button class="btn" onclick="limSel()">Limpar seleção</button>
   </aside>
 </div>
@@ -218,11 +222,19 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 </div>
 
 <div class="sh-overlay" id="sh-ov" onclick="fecharSheet()"></div>
+
 <div class="b-sheet" id="b-sheet">
   <div class="sh-handle"></div>
   <div class="sh-title">📊 Fechamento do Pedido</div>
-  <div id="lista-m" style="margin-bottom:12px"></div>
+  <div class="lista-sel" id="lista-m" style="margin-bottom:12px"></div>
   
+  <div class="field">
+    <label>Estado (UF) para Regra de Frete</label>
+    <select id="uf-m" onchange="syncRegras('uf-m','uf-d')">
+      <option value="">Selecione o Estado...</option>
+    </select>
+  </div>
+
   <div class="field">
     <label>Regra de ICMS / Faixa</label>
     <select id="icms-m" onchange="syncRegras('icms-m','icms-d')">
@@ -248,13 +260,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div class="res-row"><span>Desc. de Volume:</span><b id="rm-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
     <div class="res-row"><span>Desc. Prazo (<span id="rm-prazo-pct">0</span>%):</span><b id="rm-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
     <div class="res-row"><span>Valor Total IPI (+):</span><b id="rm-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
-    <div class="res-row"><span>Frete:</span><b id="rm-frete-val" style="color:var(--promo);">FOB (Por Conta)</b></div>
+    <div class="res-row"><span>Valor Frete:</span><b id="rm-frete-val">Selecione o Estado</b></div>
     <div class="res-sep"></div>
     <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rm-total">R$ 0,00</b></div>
   </div>
 
-  <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')">Finalizar e Salvar Pedido</button>
-  <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Libertar)</button>
+  <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>Finalizar e Salvar Pedido</button>
+  <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
   <button class="btn" onclick="limSel();fecharSheet()">Limpar seleção</button>
   <button class="btn" onclick="fecharSheet()">Fechar</button>
 </div>
@@ -284,20 +296,19 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
   <div class="modal-box" style="max-width:460px; max-height:90vh;">
-    <div style="padding:14px 18px; border-bottom:1px solid var(--borda); display:flex; justify-content:between; align-items:center; background:var(--cinza)">
+    <div style="padding:14px 18px; border-bottom:1px solid var(--borda); display:flex; justify-content:space-between; align-items:center; background:var(--cinza)">
       <b style="font-size:15px; color:var(--texto)">🏢 Dados Cadastrais do Cliente</b>
-      <button onclick="fecharModalCliente()" style="margin-left:auto; background:none; border:none; font-size:22px; cursor:pointer; color:var(--sub)">&times;</button>
+      <button onclick="fecharModalCliente()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--sub)">&times;</button>
     </div>
     <div class="modal-info" style="padding:16px 18px; display:flex; flex-direction:column; gap:2px;">
       <div class="field"><label>CNPJ</label><input type="text" id="cli-cnpj" placeholder="00.000.000/0001-00"></div>
       <div class="field"><label>RAZÃO SOCIAL</label><input type="text" id="cli-razao" placeholder="Razão Social"></div>
       <div class="field"><label>FANTASIA</label><input type="text" id="cli-fantasia" placeholder="Nome Fantasia"></div>
       <div class="field"><label>ENDEREÇO</label><input type="text" id="cli-endereco" placeholder="Endereço Completo"></div>
-      <div class="field"><label>ESTADO P/ FRETE</label><select id="cli-estado"><option value="">A carregar estados...</option></select></div>
       <div class="field"><label>TELEFONE</label><input type="text" id="cli-telefone" placeholder="(00) 00000-0000"></div>
       <div class="field"><label>E-MAIL</label><input type="email" id="cli-email" placeholder="cliente@email.com"></div>
       <div class="field"><label>OBSERVAÇÃO</label><textarea id="cli-obs" placeholder="Observações..." style="height:60px; resize:none; font-family:inherit;"></textarea></div>
-      <button class="btn prim" onclick="confirmarEEnviarPedido()" style="margin-top:8px; padding:12px;">Confirmar e Salvar Pedido</button>
+      <button class="btn prim" onclick="salvarPedidoNuvem()" style="margin-top:10px; padding:13px;">Confirmar e Enviar Pedido</button>
     </div>
   </div>
 </div>
@@ -305,494 +316,602 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwFCEuYrNKq0O-xNlJd6XSiUO0w6lqe1l4gT_vep5GDMcn-GX07YFSyqODrQgXuJEknIw/exec";
-
-function cleanDescription(str) {
-  if (!str) return '';
-  return str.replace(/<\/?[^>]+(>|$)/g, "").replace(/\n/g, " ");
+// Ajusta automaticamente a URL correta da Web App do Script
+var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbynnCn12hj-HtR9yaaAY8JliAGvXjWFFZ3xji-vabIHVJjvC7aYdLqxICKDOKCFgkJn8Q/exec"; 
+if(window.location.href.includes("script.google.com")) {
+  URL_GOOGLE_SCRIPT = window.location.href.split('/exec')[0] + '/exec';
 }
 
-var todos   = [];
-var sel     = {}; 
-var modalCod = null;
-var lazyObs;
-var contasAtuais = { brutoProdutos: 0, totalIpi: 0, pctPrazo: 0, valPrazo: 0, liquido: 0, qtd: 0, tabelaAtiva: 'M26071' };
+var catalogo = { produtos: [], logoUrl: "", fretes: {} };
+var cesta = {};
+var refModalAtivo = null;
 var fluxoOrigem = 'd';
 var pedidoSalvo = false;
-var ultimaTabelaAtiva = '';
+var clienteCompletoAtivo = null;
+var dadosAtuaisDoPedido = null;
 
-window.onload = function() {
-  mostrarSkeletons(12);
-  if ('IntersectionObserver' in window) {
-    lazyObs = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if (!e.isIntersecting) return;
-        var img = e.target; var src = img.getAttribute('data-src');
-        if (src) { img.src = src; img.removeAttribute('data-src'); img.onload=function(){ img.classList.add('loaded'); }; lazyObs.unobserve(img); }
-      });
-    }, { rootMargin:'200px' });
-  }
+function normalizarReferencia(val) {
+  if (!val) return '';
+  var s = String(val).trim();
+  if (s.endsWith('.0')) s = s.slice(0, -2);
+  return s.toLowerCase();
+}
+
+function fmt(v) {
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  carregarCatalogo(false);
+});
+
+function carregarCatalogo(forceUpdate) {
+  var url = URL_GOOGLE_SCRIPT + (forceUpdate ? "?atualizar=true" : "");
   
-  fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime())
-    .then(res => res.json())
-    .then(data => carregar(data))
-    .catch(err => { toast("Erro ao conectar ao banco de dados."); console.error(err); });
-};
+  document.getElementById('grid').innerHTML = Array(8).fill().map(() => `
+    <div class="sk-card" style="height:240px; padding:10px;">
+      <div class="skeleton" style="height:130px; margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:15px; width:40%; margin-bottom:6px;"></div>
+      <div class="skeleton" style="height:30px; margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:20px; width:60%;"></div>
+    </div>
+  `).join('');
 
-function sincronizarPlanilha() {
-  var btn = document.getElementById('btn-sync');
-  btn.textContent = '⏳ A descarregar...';
-  btn.disabled = true;
-  document.getElementById('grid').innerHTML = '';
-  mostrarSkeletons(12);
-  toast('A sincronizar novas imagens e preços...');
-
-  fetch(URL_GOOGLE_SCRIPT + "?atualizar=true&t=" + new Date().getTime())
+  fetch(url)
     .then(res => res.json())
     .then(data => {
-      carregar(data);
-      toast('Catálogo updated e acelerado!');
-      btn.textContent = '🔄 Sincronizar Catálogo';
-      btn.disabled = false;
+      catalogo = data;
+      pedidoSalvo = false;
+
+      // Alimenta seletor de Marcas dinamicamente com base nas primeiras palavras
+      var marcasSet = new Set();
+      catalogo.produtos.forEach(p => {
+        if(p.descricao) {
+          var prime = p.descricao.trim().split(' ')[0].toUpperCase();
+          if(prime.length > 2) marcasSet.add(prime);
+        }
+      });
+      var htmlMarca = '<option value="">TODAS</option>';
+      marcasSet.forEach(m => { htmlMarca += `<option value="${m}">${m}</option>`; });
+      document.getElementById('fil-marca').innerHTML = htmlMarca;
+
+      // Alimenta os seletores de Estado (UF) dinamicamente vindo da aba FRETE
+      var ufs = Object.keys(catalogo.fretes || {}).sort();
+      var htmlUf = '<option value="">Selecione o Estado...</option>';
+      ufs.forEach(uf => { htmlUf += `<option value="${uf}">${uf}</option>`; });
+      document.getElementById('uf-d').innerHTML = htmlUf;
+      document.getElementById('uf-m').innerHTML = htmlUf;
+
+      if(catalogo.logoUrl) {
+        document.getElementById('logo-area').innerHTML = `<img src="${catalogo.logoUrl}" alt="Logo">`;
+      }
+
+      renderizarProdutos(catalogo.produtos);
+      atualizarPainel();
     })
     .catch(err => {
-      toast('Falha ao atualizar. Tenta novamente.');
-      btn.textContent = '🔄 Sincronizar Catálogo';
-      btn.disabled = false;
+      console.error(err);
+      document.getElementById('grid').innerHTML = '<div class="vazio" style="grid-column:1/-1">Erro ao carregar catálogo. Certifique-se de que o Script está publicado como Web App para Acesso Anónimo.</div>';
     });
 }
 
-function mostrarSkeletons(n) {
-  var h = '';
-  for (var i=0; i<n; i++)
-    h += '<div class="sk-card"><div class="skeleton" style="height:145px;border-radius:0"></div>'
-       + '<div style="padding:10px 12px"><div class="skeleton" style="height:11px;width:40%;margin-bottom:7px"></div>'
-       + '<div class="skeleton" style="height:11px;width:80%"></div></div></div>';
-  document.getElementById('grid').innerHTML = h;
-}
-
-function carregar(res) {
-  todos = res.produtos || res; 
-  if (res.logoUrl) document.getElementById('logo-area').innerHTML = '<img src="' + res.logoUrl + '" alt="Di Solle">';
+function renderizarProdutos(lista) {
+  var tabelaAtiva = document.getElementById('icms-d').value;
+  var html = '';
   
-  if (res.estados && res.estados.length > 0) {
-    var selectEstado = document.getElementById('cli-estado');
-    if (selectEstado) {
-      selectEstado.innerHTML = '<option value="">Selecione o Estado</option>';
-      res.estados.forEach(function(uf) {
-        var opt = document.createElement('option');
-        opt.value = uf;
-        opt.textContent = uf;
-        selectEstado.appendChild(opt);
-      });
+  if(lista.length === 0) {
+    document.getElementById('grid').innerHTML = '<div class="vazio" style="grid-column:1/-1">Nenhum produto encontrado.</div>';
+    document.getElementById('cont').textContent = '0 produtos';
+    return;
+  }
+
+  lista.forEach(p => {
+    var ref = normalizarReferencia(p.codigo);
+    var qty = cesta[ref] || 0;
+    
+    var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+    var badgePromo = '';
+    var classePromo = '';
+    
+    if (p.emPromocao) {
+      var prPromo = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || Object.values(p.precosPromo)[0];
+      if (prPromo) {
+        precoUn = prPromo;
+        badgePromo = '<div class="card-badge-promo">PROMO</div>';
+        classePromo = ' promo';
+      }
     }
-  }
 
-  var marcas = {};
-  todos.forEach(function(p){ if(p.descricao) marcas[p.descricao.split(' ')[0]]=1; });
-  var s = document.getElementById('fil-marca');
-  s.innerHTML = '<option value="">TODAS</option>';
-  Object.keys(marcas).sort().forEach(function(m){
-    var o=document.createElement('option'); o.value=m; o.textContent=m; s.appendChild(o);
+    var imgHtml = p.fileId ? `<img src="https://drive.google.com/thumbnail?id=${p.fileId}&sz=w300" onload="this.classList.add('loaded')">` : '<span class="no-img-icon">📦</span>';
+
+    html += `
+      <div class="card${qty > 0 ? ' sel' : ''}${classePromo}" id="card-${ref}" onclick="abrirModal('${ref}')">
+        ${badgePromo}
+        <div class="card-badge-qty" id="badge-qty-${ref}" style="${qty > 0 ? 'display:block' : 'display:none'}">${qty}</div>
+        <div class="card-img">${imgHtml}</div>
+        <div class="card-body">
+          <div class="card-cod">${p.codigo}</div>
+          <div class="card-desc" title="${p.descricao}">${p.descricao}</div>
+          <div class="card-bottom">
+            <div class="card-preco">R$ ${fmt(precoUn)}</div>
+            <div class="card-emb">Emb: ${p.qtdEmbalagem}</div>
+          </div>
+        </div>
+      </div>
+    `;
   });
-  filtrar();
-}
 
-function obterPrecoItem(p, tabelaAtiva) {
-  if (p.emPromocao && p.precosPromo && p.precosPromo[tabelaAtiva] && p.precosPromo[tabelaAtiva] > 0) {
-    return p.precosPromo[tabelaAtiva];
-  }
-  return p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
-}
-
-/* 🧭 [AJUSTE FRETE] Modificado para avaliar pelo Subtotal Bruto estavelmente */
-function determinarTabelaAtiva() {
-  var icmsTipo = document.getElementById('icms-d').value; 
-  var t1Code = (icmsTipo === '7') ? 'M26071' : 'M26121';
-  var t2Code = (icmsTipo === '7') ? 'M26072' : 'M26122';
-  var limite = (icmsTipo === '7') ? 5000 : 2500;
-  
-  var simBrutoProdutos = 0;
-
-  Object.keys(sel).forEach(function(k) {
-    var pVal = obterPrecoItem(sel[k].prod, t1Code);
-    var qty = sel[k].qty;
-    simBrutoProdutos += pVal * qty;
-  });
-  
-  return (simBrutoProdutos >= limite) ? t2Code : t1Code;
+  document.getElementById('grid').innerHTML = html;
+  document.getElementById('cont').textContent = `${lista.length} ${lista.length === 1 ? 'produto' : 'produtos'}`;
 }
 
 function filtrar() {
-  var q = document.getElementById('busca').value.toLowerCase();
-  var m = document.getElementById('fil-marca').value;
-  var p = parseFloat(document.getElementById('fil-preco').value) || Infinity;
-  var tabelaAtiva = determinarTabelaAtiva();
-  
-  var f = todos.filter(function(x){
-    var t = (x.codigo+' '+x.descricao+' '+x.codigoEan).toLowerCase();
-    var precoItem = obterPrecoItem(x, tabelaAtiva);
-    return t.includes(q) && (!m||x.descricao.startsWith(m)) && precoItem<=p && precoItem > 0;
+  if(!catalogo.produtos) return;
+  var busca = document.getElementById('busca').value.toLowerCase().trim();
+  var marca = document.getElementById('fil-marca').value;
+  var precoMax = parseFloat(document.getElementById('fil-preco').value) || Infinity;
+  var tabelaAtiva = document.getElementById('icms-d').value;
+
+  var filtrados = catalogo.produtos.filter(p => {
+    var ref = normalizarReferencia(p.codigo);
+    var desc = p.descricao.toLowerCase();
+    var ean = (p.codigoEan || '').toLowerCase();
+    
+    var mBusca = !busca || ref.includes(busca) || desc.includes(busca) || ean.includes(busca);
+    var mMarca = !marca || desc.startsWith(marca.toLowerCase()) || desc.includes(' ' + marca.toLowerCase());
+    
+    var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+    if(p.emPromocao) {
+      precoUn = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || precoUn;
+    }
+    var mPreco = precoUn <= precoMax;
+
+    return mBusca && mMarca && mPreco;
   });
-  document.getElementById('cont').textContent = f.length+' produtos';
-  renderizar(f);
+
+  renderizarProdutos(filtrados);
 }
 
 function limFiltros() {
-  document.getElementById('busca').value=''; document.getElementById('fil-marca').value=''; document.getElementById('fil-preco').value='';
+  document.getElementById('busca').value = '';
+  document.getElementById('fil-marca').value = '';
+  document.getElementById('fil-preco').value = '';
   filtrar();
 }
 
-function renderizar(lista) {
-  var g = document.getElementById('grid');
-  if (!lista.length) { g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#999">Nenhum produto encontrado.</div>'; return; }
-  g.innerHTML = lista.map(cardHtml).join('');
-  if (lazyObs) g.querySelectorAll('img[data-src]').forEach(function(img){ lazyObs.observe(img); });
+function sincronizarPlanilha() {
+  var btn = document.getElementById('btn-sync');
+  btn.disabled = true;
+  btn.textContent = "🔄 A atualizar...";
+  carregarCatalogo(true);
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = "🔄 Sincronizar Catálogo";
+  }, 2500);
 }
 
-function cardHtml(p) {
-  var tabelaAtiva = determinarTabelaAtiva();
-  var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
-  var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  var precoExibir = (p.emPromocao && precoPromo > 0) ? precoPromo : precoNormal;
-  
-  var s = sel[p.codigo]; var cls = s ? ' sel' : '';
-  if (p.emPromocao) cls += ' promo';
-  
-  var qty = s ? s.qty : 0;
-  var pr = '';
-  
-  if (p.emPromocao && precoPromo > 0) {
-    pr = '<div style="display:flex; flex-direction:column;">'
-       + '<span style="font-size:10px; text-decoration:line-through; color:#a2a29c; line-height:1.1;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
-       + '<span class="card-preco" style="color:var(--promo); font-weight:800; line-height:1.2;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>'
-       + '</div>';
-  } else {
-    pr = '<span class="card-preco">R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
+function syncRegras(idOrigem, idDestino) {
+  var val = document.getElementById(idOrigem).value;
+  document.getElementById(idDestino).value = val;
+  atualizarPainel();
+}
+
+// ─────────────────────────────────────────────
+// CÁLCULO CORE: REGRAS DE PRODUTOS E FRETE POR ESTADO
+// ─────────────────────────────────────────────
+function atualizarPainel() {
+  var tabelaAtiva = document.getElementById('icms-d').value;
+  var pctPrazo = parseInt(document.getElementById('prazo-d').value) || 0;
+  var ufAtiva = document.getElementById('uf-d').value;
+
+  var subtotal = 0;
+  var totalIpi = 0;
+  var totalItensQtd = 0;
+  var htmlLista = '';
+  var itensArray = [];
+
+  for (var ref in cesta) {
+    var qty = cesta[ref];
+    if(qty <= 0) continue;
+
+    var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === ref);
+    if(!p) continue;
+
+    var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+    if (p.emPromocao) {
+      precoUn = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || Object.values(p.precosPromo)[0] || precoUn;
+    }
+
+    var totalItem = precoUn * qty;
+    var ipiItem = totalItem * ((p.ipi || 0) / 100);
+
+    subtotal += totalItem;
+    totalIpi += ipiItem;
+    totalItensQtd += qty;
+
+    itensArray.push({
+      codigo: p.codigo,
+      descricao: p.descricao,
+      emb: p.qtdEmbalagem,
+      qty: qty,
+      preco: precoUn,
+      ipi: p.ipi,
+      totalItem: totalItem
+    });
+
+    htmlLista += `
+      <div class="sel-row">
+        <div class="sel-cod" title="${p.codigo}">${p.codigo}</div>
+        <div class="sel-desc" title="${p.descricao}">${p.descricao}</div>
+        <div class="sel-qty-wrap">
+          <button class="qty-btn" onclick="mudaQtyCesta('${ref}', -1)">−</button>
+          <span class="qty-num">${qty}</span>
+          <button class="qty-btn" onclick="mudaQtyCesta('${ref}', 1)">+</button>
+        </div>
+        <div class="sel-rm" onclick="removeCesta('${ref}')">&times;</div>
+      </div>
+    `;
   }
-  
-  var promoBadge = p.emPromocao ? '<div class="card-badge-promo">🔥 PROMOÇÃO</div>' : '';
-  var img = p.fileId ? '<img data-src="https://drive.google.com/thumbnail?id='+p.fileId+'&sz=w300" alt="'+p.descricao+'">' : '<span class="no-img-icon">&#128248;</span>';
+
+  if (totalItensQtd === 0) {
+    var vHtml = '<div class="vazio">Nenhum produto selecionado</div>';
+    document.getElementById('lista-d').innerHTML = vHtml;
+    document.getElementById('lista-m').innerHTML = vHtml;
     
-  return '<div class="card'+cls+'" data-cod="'+p.codigo+'">'
-    + promoBadge + '<div class="card-badge-qty" id="bq-'+p.codigo+'">'+(qty>0?qty:'')+'</div>'
-    + '<div class="card-img" onclick="abrirModal(\''+p.codigo+'\')">'+img+'</div>'
-    + '<div class="card-body" onclick="abrirModal(\''+p.codigo+'\')">'
-    + '<div class="card-cod">'+p.codigo+'</div>'
-    + '<div class="card-desc">'+cleanDescription(p.descricao)+'</div>'
-    + '<div class="card-bottom">' + pr + '<span class="card-emb">Cx:'+p.qtdEmbalagem+'</span>' + '</div></div></div>';
-}
-
-function abrirModal(cod) {
-  var p = todos.find(function(x){ return x.codigo===cod; }); if (!p) return;
-  modalCod = cod;
-  document.getElementById('modal-cod').textContent  = p.codigo;
-  document.getElementById('modal-desc').textContent = p.descricao;
-  
-  var tabelaAtiva = determinarTabelaAtiva();
-  var precoNormal = p.precos && p.precos[tabelaAtiva] ? p.precos[tabelaAtiva] : 0;
-  var precoPromo = (p.precosPromo && p.precosPromo[tabelaAtiva]) ? p.precosPromo[tabelaAtiva] : 0;
-  
-  if (p.emPromocao && precoPromo > 0) {
-    document.getElementById('modal-preco').innerHTML = 
-      '<span style="font-size:13px; text-decoration:line-through; color:#aaa; display:block; margin-bottom:2px;">De: R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>' +
-      '<span style="color:var(--promo); font-size:22px; font-weight:800;">Por: R$ '+precoPromo.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</span>';
-  } else {
-    document.getElementById('modal-preco').innerHTML = 'R$ '+precoNormal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+    ['rd','rm'].forEach(pfx => {
+      document.getElementById(`${pfx}-bruto-prod`).textContent = 'R$ 0,00';
+      document.getElementById(`${pfx}-prazo-val`).textContent = '- R$ 0,00';
+      document.getElementById(`${pfx}-ipi-val`).textContent = '+ R$ 0,00';
+      document.getElementById(`${pfx}-frete-val`).textContent = 'Selecione o Estado';
+      document.getElementById(`${pfx}-frete-val`).style.color = 'var(--texto)';
+      document.getElementById(`${pfx}-total`).textContent = 'R$ 0,00';
+      document.getElementById(`btn-orc-${pfx.slice(-1)}`).disabled = true;
+      document.getElementById(`btn-orc-${pfx.slice(-1)}`).textContent = 'Finalizar e Salvar Pedido';
+      document.getElementById(`btn-xls-${pfx.slice(-1)}`).disabled = true;
+      document.getElementById(`btn-xls-${pfx.slice(-1)}`).className = 'btn pdf-btn';
+    });
+    
+    document.getElementById('badge').style.display = 'none';
+    document.getElementById('mob-bar').style.display = 'none';
+    return;
   }
+
+  document.getElementById('lista-d').innerHTML = htmlLista;
+  document.getElementById('lista-m').innerHTML = htmlLista;
+
+  var valPrazo = subtotal * (pctPrazo / 100);
   
-  var minPermitido = p.qtdEmbalagem || 1;
-  document.getElementById('modal-emb').innerHTML  = 'Venda mínima exigida (Cx): ' + minPermitido + ' un<br><span style="color:#2980b9; font-weight:600;">Incidência de IPI: ' + (p.ipi || 0) + '%</span>';
-  document.getElementById('modal-qty').value = sel[cod] ? sel[cod].qty : minPermitido;
+  // 🚚 Lógica de Precificação de Frete e Validação Restritiva
+  var valorFrete = 0;
+  var freteTxt = 'Grátis';
+  var freteBloqueado = false;
 
-  var btnAdd = document.getElementById('btn-add');
-  btnAdd.textContent = sel[cod] ? 'Atualizar quantidade' : 'Adicionar ao pedido';
-  btnAdd.classList.remove('adicionado');
+  if (!ufAtiva) {
+    freteTxt = 'Selecione o Estado';
+    freteBloqueado = true;
+  } else if (catalogo.fretes && catalogo.fretes[ufAtiva]) {
+    var regra = catalogo.fretes[ufAtiva];
+    
+    if (subtotal < regra.minimoPedido) {
+      freteTxt = `Abaixo do Limite (Min: R$ ${fmt(regra.minimoPedido)})`;
+      freteBloqueado = true;
+    } else if (subtotal >= regra.freteGratis) {
+      valorFrete = 0;
+      freteTxt = 'Grátis';
+    } else {
+      valorFrete = regra.valorFrete;
+      freteTxt = `R$ ${fmt(valorFrete)}`;
+    }
+  } else {
+    freteTxt = 'Grátis (Sem regra)';
+    valorFrete = 0;
+  }
 
-  var img = document.getElementById('modal-img'); var spin = document.getElementById('modal-spin');
-  img.style.display = 'none'; spin.style.display = 'block';
+  var liquido = subtotal - valPrazo + totalIpi + valorFrete;
 
-  if (p.fileId) {
-    img.src = 'https://drive.google.com/thumbnail?id='+p.fileId+'&sz=w1000';
-    img.onload = function(){ spin.style.display='none'; img.style.display='block'; };
-  } else { spin.style.display='none'; }
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow='hidden';
+  // Atualização síncrona UI Desktop e Mobile
+  ['rd','rm'].forEach(pfx => {
+    document.getElementById(`${pfx}-bruto-prod`).textContent = 'R$ ' + fmt(subtotal);
+    document.getElementById(`${pfx}-prazo-pct`).textContent = pctPrazo;
+    document.getElementById(`${pfx}-prazo-val`).textContent = '- R$ ' + fmt(valPrazo);
+    document.getElementById(`${pfx}-ipi-val`).textContent = '+ R$ ' + fmt(totalIpi);
+    document.getElementById(`${pfx}-frete-val`).textContent = freteTxt;
+    document.getElementById(`${pfx}-total`).textContent = 'R$ ' + fmt(liquido);
+
+    var btnFecho = document.getElementById(`btn-orc-${pfx.slice(-1)}`);
+    if(freteBloqueado) {
+      document.getElementById(`${pfx}-frete-val`).style.color = '#e24b4a';
+      document.getElementById(`${pfx}-frete-val`).style.fontWeight = 'bold';
+      btnFecho.disabled = true;
+      btnFecho.textContent = ufAtiva ? 'Abaixo do Limite Mínimo' : 'Selecione o Estado';
+    } else {
+      document.getElementById(`${pfx}-frete-val`).style.color = valorFrete > 0 ? 'var(--texto)' : 'var(--verde-dk)';
+      btnFecho.disabled = false;
+      btnFecho.textContent = 'Finalizar e Salvar Pedido';
+    }
+
+    var btnPdf = document.getElementById(`btn-xls-${pfx.slice(-1)}`);
+    if(pedidoSalvo) {
+      btnPdf.disabled = false;
+      btnPdf.className = 'btn pdf-btn liberado';
+    } else {
+      btnPdf.disabled = true;
+      btnPdf.className = 'btn pdf-btn';
+    }
+  });
+
+  document.getElementById('badge').textContent = `${totalItensQtd} itens`;
+  document.getElementById('badge').style.display = 'block';
+  
+  document.getElementById('mob-bar').style.display = 'flex';
+  document.getElementById('mb-info').innerHTML = `<b>Total: R$ ${fmt(liquido)}</b><br>${totalItensQtd} itens`;
+
+  dadosAtuaisDoPedido = {
+    itens: itensArray,
+    subtotalProdutos: subtotal,
+    totalIpi: totalIpi,
+    totalDescontos: valPrazo,
+    pctPrazo: pctPrazo,
+    valorFrete: valorFrete,
+    uf: ufAtiva,
+    prazo: document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text,
+    tabelaAtiva: tabelaAtiva,
+    total: liquido,
+    qtd: totalItensQtd
+  };
 }
 
-function fecharModal() { document.getElementById('modal').classList.remove('open'); document.body.style.overflow=''; modalCod = null; }
-function clicouFora(e) { if (e.target === document.getElementById('modal')) fecharModal(); }
+function mudaQtyCesta(ref, delta) {
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === ref);
+  if(!p) return;
+  var step = p.qtdEmbalagem || 1;
+  
+  if(!cesta[ref]) cesta[ref] = 0;
+  cesta[ref] += (delta * step);
+  
+  if(cesta[ref] <= 0) delete cesta[ref];
+  
+  var bQty = document.getElementById(`badge-qty-${ref}`);
+  var card = document.getElementById(`card-${ref}`);
+  if(card) {
+    if(cesta[ref] > 0) {
+      card.classList.add('sel');
+      if(bQty) { bQty.textContent = cesta[ref]; bQty.style.display = 'block'; }
+    } else {
+      card.classList.remove('sel');
+      if(bQty) bQty.style.display = 'none';
+    }
+  }
+  atualizarPainel();
+}
 
-function mudaQtyModal(d) {
-  var inp = document.getElementById('modal-qty'); var p = todos.find(function(x){ return x.codigo===modalCod; });
-  var min = (p && p.qtdEmbalagem) ? p.qtdEmbalagem : 1; var v = parseInt(inp.value) || min;
-  v = d > 0 ? (Math.floor(v / min) * min + min) : (Math.ceil(v / min) * min - min);
-  if (v < min) v = min; inp.value = v;
+function removeCesta(ref) {
+  delete cesta[ref];
+  var card = document.getElementById(`card-${ref}`);
+  var bQty = document.getElementById(`badge-qty-${ref}`);
+  if(card) card.classList.remove('sel');
+  if(bQty) bQty.style.display = 'none';
+  atualizarPainel();
+}
+
+function limSel() {
+  if(confirm("Deseja realmente limpar toda a sua cesta?")) {
+    cesta = {};
+    pedidoSalvo = false;
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('sel'));
+    document.querySelectorAll('.card-badge-qty').forEach(b => b.style.display = 'none');
+    atualizarPainel();
+  }
+}
+
+function abrirSheet() { 
+  document.getElementById('sh-ov').classList.add('open'); 
+  document.getElementById('b-sheet').classList.add('open'); 
+  document.body.style.overflow='hidden'; 
+}
+function fecharSheet() { 
+  document.getElementById('sh-ov').classList.remove('open'); 
+  document.getElementById('b-sheet').classList.remove('open'); 
+  document.body.style.overflow=''; 
+}
+
+// MODAL PRODUTO
+function abrirModal(ref) {
+  refModalAtivo = ref;
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === ref);
+  if(!p) return;
+
+  var tabelaAtiva = document.getElementById('icms-d').value;
+  var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+  if(p.emPromocao) {
+    precoUn = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || precoUn;
+  }
+
+  document.getElementById('modal-cod').textContent = p.codigo;
+  document.getElementById('modal-desc').textContent = p.descricao;
+  document.getElementById('modal-preco').textContent = 'R$ ' + fmt(precoUn);
+  document.getElementById('modal-emb').textContent = 'Multiplicador Master: Múltiplos de ' + p.qtdEmbalagem + ' un';
+  
+  var qtyAt = cesta[ref] || 0;
+  document.getElementById('modal-qty').value = qtyAt > 0 ? qtyAt : p.qtdEmbalagem;
+
+  var img = document.getElementById('modal-img');
+  var spin = document.getElementById('modal-spin');
+  spin.style.display = 'block'; img.style.display = 'none';
+
+  if(p.fileId) {
+    img.src = `https://drive.google.com/thumbnail?id=${p.fileId}&sz=w600`;
+    img.onload = () => { spin.style.display = 'none'; img.style.display = 'block'; };
+  } else {
+    spin.style.display = 'none';
+  }
+
+  var btn = document.getElementById('btn-add');
+  if(qtyAt > 0) { btn.textContent = "✓ Atualizar Quantidade"; btn.className = "btn-add adicionado"; }
+  else { btn.textContent = "Adicionar ao pedido"; btn.className = "btn-add"; }
+
+  document.getElementById('modal').classList.add('open');
+}
+
+function fecharModal() { document.getElementById('modal').classList.remove('open'); refModalAtivo = null; }
+function clicouFora(e) { if(e.target.id === 'modal') fecharModal(); }
+
+function mudaQtyModal(delta) {
+  var inp = document.getElementById('modal-qty');
+  var val = parseInt(inp.value) || 0;
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === refModalAtivo);
+  var step = p ? p.qtdEmbalagem : 1;
+  val += (delta * step);
+  if(val < step) val = step;
+  inp.value = val;
 }
 
 function adicionarDoModal() {
-  if (!modalCod) return;
-  var qty = Math.max(1, parseInt(document.getElementById('modal-qty').value)||1);
-  var p = todos.find(function(x){ return x.codigo===modalCod; }); if (!p) return;
-  var minPermitido = p.qtdEmbalagem || 1;
-  if (qty < minPermitido || qty % minPermitido !== 0) {
-    qty = Math.ceil(qty / minPermitido) * minPermitido;
-    alert('⚠️ MÚLTIPLO DE CAIXA FECHADA:\nAjustámos para ' + qty + ' un para respeitar a embalagem padrão de ' + minPermitido + ' un.');
-    document.getElementById('modal-qty').value = qty;
-    return;
+  if(!refModalAtivo) return;
+  var val = parseInt(document.getElementById('modal-qty').value) || 0;
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === refModalAtivo);
+  
+  if(val > 0 && p && val % p.qtdEmbalagem !== 0) {
+    val = Math.ceil(val / p.qtdEmbalagem) * p.qtdEmbalagem;
   }
-  sel[modalCod] = { prod: p, qty: qty };
-  pedidoSalvo = false;
-  var btn = document.getElementById('btn-add'); btn.textContent = '✓ Adicionado!'; btn.classList.add('adicionado');
-  setTimeout(function(){ fecharModal(); }, 600);
+
+  if(val <= 0) delete cesta[refModalAtivo];
+  else cesta[refModalAtivo] = val;
+
+  var card = document.getElementById(`card-${refModalAtivo}`);
+  var bQty = document.getElementById(`badge-qty-${refModalAtivo}`);
+  if(card) {
+    if(val > 0) {
+      card.classList.add('sel');
+      if(bQty) { bQty.textContent = val; bQty.style.display = 'block'; }
+    } else {
+      card.classList.remove('sel');
+      if(bQty) bQty.style.display = 'none';
+    }
+  }
+  fecharModal();
   atualizarPainel();
+  toast('Cesta atualizada!');
 }
 
-function syncRegras(sourceId, targetId) {
-  document.getElementById(targetId).value = document.getElementById(sourceId).value;
-  pedidoSalvo = false;
-  atualizarPainel();
+// ENVIO DE PEDIDO
+function abrirFluxoFechamento(origem) {
+  fluxoOrigem = origem;
+  document.getElementById('modal-cliente').classList.add('open');
 }
+function fecharModalCliente() { document.getElementById('modal-cliente').classList.remove('open'); }
+function clicouForaCliente(e) { if(e.target.id === 'modal-cliente') fecharModalCliente(); }
 
-function calcularDescontosERenderizar() {
-  var tabelaAtiva = determinarTabelaAtiva();
-  var ks = Object.keys(sel);
-  var brutoProdutosTabela = 0; var totalIpiAcumulado = 0; var qtdTotal = 0;
-  var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0; 
+function salvarPedidoNuvem() {
+  var razao = document.getElementById('cli-razao').value.trim();
+  if(!razao) { alert('A Razão Social do cliente é obrigatória!'); return; }
 
-  ks.forEach(function(k){ 
-    var itemPreco = obterPrecoItem(sel[k].prod, tabelaAtiva);
-    var itemQty = sel[k].qty;
-    var subtotalItem = itemPreco * itemQty;
-    brutoProdutosTabela += subtotalItem;
-    qtdTotal += itemQty;
-    var itemIpiPct = sel[k].prod.ipi || 0;
-    totalIpiAcumulado += subtotalItem * (itemIpiPct / 100);
-  });
-
-  var valPrazo = brutoProdutosTabela * (prazoDescPct / 100);
-  var liquidoFinal = (brutoProdutosTabela - valPrazo) + totalIpiAcumulado;
-
-  contasAtuais = { brutoProdutos: brutoProdutosTabela, totalIpi: totalIpiAcumulado, pctPrazo: prazoDescPct, valPrazo: valPrazo, liquido: liquidoFinal, qtd: qtdTotal, tabelaAtiva: tabelaAtiva };
-
-  var f = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); };
-  var sufixoTab = ' <span style="font-size:10px; color:var(--verde-dk); font-weight:normal;">[' + tabelaAtiva + ']</span>';
-
-  /* 🧭 [AJUSTE FRETE] Atualiza os elementos de texto e as cores dinamicamente */
-  var txtFrete = (tabelaAtiva === 'M26072' || tabelaAtiva === 'M26122') ? 'GRÁTIS (CIF)' : 'FOB (Por Conta)';
-  var corFrete = (tabelaAtiva === 'M26072' || tabelaAtiva === 'M26122') ? 'var(--verde-dk)' : 'var(--promo)';
-
-  document.getElementById('rd-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
-  document.getElementById('rd-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
-  document.getElementById('rd-prazo-pct').textContent = prazoDescPct;
-  document.getElementById('rd-prazo-val').textContent = '- ' + f(valPrazo);
-  document.getElementById('rd-frete-val').textContent = txtFrete;
-  document.getElementById('rd-frete-val').style.color = corFrete;
-  document.getElementById('rd-total').textContent = f(liquidoFinal);
-
-  document.getElementById('rm-bruto-prod').innerHTML = f(brutoProdutosTabela) + sufixoTab;
-  document.getElementById('rm-ipi-val').textContent = '+ ' + f(totalIpiAcumulado);
-  document.getElementById('rm-prazo-pct').textContent = prazoDescPct;
-  document.getElementById('rm-prazo-val').textContent = '- ' + f(valPrazo);
-  document.getElementById('rm-frete-val').textContent = txtFrete;
-  document.getElementById('rm-frete-val').style.color = corFrete;
-  document.getElementById('rm-total').textContent = f(liquidoFinal);
-
-  if (ks.length > 0) {
-    document.getElementById('mb-info').innerHTML = '<b>'+ks.length+' ref.</b> ('+qtdTotal+' un.) ['+tabelaAtiva+']<br><span style="color:var(--verde-dk);font-weight:bold;">Liq: '+f(liquidoFinal)+'</span>';
-  }
-}
-
-function atualizarPainel() {
-  var ks   = Object.keys(sel);
-  var tem  = ks.length > 0;
-  var b = document.getElementById('badge');
-  b.style.display = tem ? 'block' : 'none';
-  var totalItensReg = 0; ks.forEach(function(k){ totalItensReg += sel[k].qty; });
-  b.textContent = totalItensReg + ' un';
-  document.getElementById('mob-bar').style.display = tem ? 'flex' : 'none';
-  document.getElementById('btn-orc-d').disabled = !tem;
-  if(document.getElementById('btn-orc-m')) document.getElementById('btn-orc-m').disabled = !tem;
-
-  var btnD = document.getElementById('btn-xls-d'); var btnM = document.getElementById('btn-xls-m');
-  if (tem && pedidoSalvo) {
-    if(btnD) { btnD.disabled = false; btnD.className = 'btn pdf-btn liberado'; btnD.textContent = '📄 Baixar Pedido (PDF)'; }
-    if(btnM) { btnM.disabled = false; btnM.className = 'btn pdf-btn liberado'; btnM.textContent = '📄 Baixar Pedido (PDF)'; }
-  } else {
-    if(btnD) { btnD.disabled = true; btnD.className = 'btn pdf-btn'; btnD.textContent = '📄 PDF (Guardar p/ Libertar)'; }
-    if(btnM) { btnM.disabled = true; btnM.className = 'btn pdf-btn'; btnM.textContent = '📄 PDF (Guardar p/ Libertar)'; }
-  }
-
-  var vazio = '<div class="vazio">Clica nos produtos para adicionar</div>';
-  var html  = !tem ? vazio : '<div class="lista-sel">'+ks.map(function(k){
-    var it = sel[k];
-    var tagPromo = it.prod.emPromocao ? ' <span style="color:var(--promo);font-weight:bold;">[PROMO]</span>' : '';
-    return '<div class="sel-row">'
-      +'<span class="sel-cod">'+it.prod.codigo+'</span>'
-      +'<span class="sel-desc">'+cleanDescription(it.prod.descricao)+tagPromo+'</span>'
-      +'<div class="sel-qty-wrap">'
-      +'<button class="qty-btn" onclick="mudaQtySel(\''+k+'\',-1)">&#8722;</button>'
-      +'<span class="qty-num">'+it.qty+'</span>'
-      +'<button class="qty-btn" onclick="mudaQtySel(\''+k+'\',1)">&#43;</button>'
-      +'</div>'
-      +'<span class="sel-rm" onclick="remover(\''+k+'\')">&times;</span>'
-      +'</div>';
-  }).join('')+'</div>';
-
-  document.getElementById('lista-d').innerHTML = html;
-  document.getElementById('lista-m').innerHTML = html;
-
-  ks.forEach(function(k){
-    var bq = document.getElementById('bq-'+k); if (bq) bq.textContent = sel[k].qty;
-    var c = document.querySelector('.card[data-cod="'+k+'"]'); if (c) c.classList.add('sel');
-  });
-  document.querySelectorAll('.card.sel').forEach(function(c){
-    var cod = c.getAttribute('data-cod'); if (!sel[cod]) { c.classList.remove('sel'); var bq=document.getElementById('bq-'+cod); if(bq) bq.textContent=''; }
-  });
-
-  calcularDescontosERenderizar();
-  var tabelaAtual = determinarTabelaAtiva();
-  if (tabelaAtual !== ultimaTabelaAtiva) { ultimaTabelaAtiva = tabelaAtual; filtrar(); }
-}
-
-function mudaQtySel(cod, d) {
-  if (!sel[cod]) return; var p = sel[cod].prod; var min = p.qtdEmbalagem || 1; var v = sel[cod].qty;
-  v = d > 0 ? (Math.floor(v / min) * min + min) : (Math.ceil(v / min) * min - min);
-  if (v < min) return; sel[cod].qty = v; pedidoSalvo = false; atualizarPainel();
-}
-function remover(cod) { delete sel[cod]; pedidoSalvo = false; atualizarPainel(); }
-function limSel() { sel = {}; pedidoSalvo = false; atualizarPainel(); }
-
-function baixarPdf() {
-  if(!pedidoSalvo) return;
-  var ks = Object.keys(sel); if (!ks.length) return;
-
-  var clienteObj = {
+  var client = {
     cnpj: document.getElementById('cli-cnpj').value.trim(),
-    razao: document.getElementById('cli-razao').value.trim(),
+    razao: razao,
     fantasia: document.getElementById('cli-fantasia').value.trim(),
     endereco: document.getElementById('cli-endereco').value.trim(),
-    estado: document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : '', 
     telefone: document.getElementById('cli-telefone').value.trim(),
     email: document.getElementById('cli-email').value.trim(),
     obs: document.getElementById('cli-obs').value.trim()
   };
 
-  var tabelaAtiva = determinarTabelaAtiva();
+  var stringItens = dadosAtuaisDoPedido.itens.map(i => `${i.codigo} (${i.qty}un)`).join(', ');
 
-  var itensArr = ks.map(function(k) {
-    return {
-      codigo: sel[k].prod.codigo,
-      descricao: cleanDescription(sel[k].prod.descricao),
-      preco: obterPrecoItem(sel[k].prod, tabelaAtiva),
-      qty: sel[k].qty,
-      fileId: sel[k].prod.fileId,
-      emPromocao: sel[k].prod.emPromocao,
-      ipi: sel[k].prod.ipi
-    };
-  });
+  var payload = {
+    clienteInfo: `${client.razao} | CNPJ: ${client.cnpj || 'Isento'} | UF: ${dadosAtuaisDoPedido.uf} | Tel: ${client.telefone || '-'}`,
+    itens: stringItens,
+    qtd: dadosAtuaisDoPedido.qtd,
+    subtotalProdutos: dadosAtuaisDoPedido.subtotalProdutos,
+    totalIpi: dadosAtuaisDoPedido.totalIpi,
+    totalDescontos: dadosAtuaisDoPedido.totalDescontos,
+    valorFrete: dadosAtuaisDoPedido.valorFrete,
+    prazo: dadosAtuaisDoPedido.prazo,
+    total: dadosAtuaisDoPedido.total
+  };
 
-  var dadosPdf = { cliente: clienteObj, itens: itensArr, contas: contasAtuais };
+  var btn = document.getElementById(fluxoOrigem === 'd' ? 'btn-orc-d' : 'btn-orc-m');
+  btn.disabled = true; btn.textContent = 'A guardar...';
 
-  var btnD = document.getElementById('btn-xls-d'); var btnM = document.getElementById('btn-xls-m');
-  if(btnD) { btnD.disabled = true; btnD.textContent = '⏳ A gerar PDF...'; }
-  if(btnM) { btnM.disabled = true; btnM.textContent = '⏳ A gerar PDF...'; }
-
-  toast('A processar cálculos e gerar PDF...');
+  fecharModalCliente();
+  toast('A registar pedido na folha...');
 
   fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime(), {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ acao: 'pdf', dadosPdf: dadosPdf })
+    body: JSON.stringify(payload)
   })
-  .then(res => {
-    if (!res.ok) throw new Error('Falha na resposta do servidor.');
-    return res.json();
-  })
+  .then(res => res.json())
   .then(resData => {
-    if (resData && resData.base64) {
-      var link = document.createElement("a");
-      link.href = "data:application/pdf;base64," + resData.base64;
-      link.setAttribute("download", "Pedido_Di_Solle_" + new Date().toISOString().split('T')[0] + ".pdf");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast('PDF descarregado com sucesso!');
+    if(resData.status === 'success') {
+      pedidoSalvo = true;
+      clienteCompletoAtivo = client;
+      toast('Pedido guardado com sucesso!');
+      atualizarPainel();
     } else {
-      throw new Error('Formato retornado inválido.');
+      alert('Erro: ' + resData.message);
+      atualizarPainel();
     }
   })
   .catch(err => {
     console.error(err);
-    alert('Erro ao descarregar o PDF: ' + err.message + '\nConfirma se atualizaste a Implantação no Google Script!');
-  })
-  .finally(() => {
-    if(btnD) { btnD.disabled = false; btnD.textContent = '📄 Baixar Pedido (PDF)'; }
-    if(btnM) { btnM.disabled = false; btnM.textContent = '📄 Baixar Pedido (PDF)'; }
+    toast('Erro de rede ao guardar.');
     atualizarPainel();
   });
 }
 
-function abrirFluxoFechamento(origem) { fluxoOrigem = origem; document.getElementById('modal-cliente').classList.add('open'); document.body.style.overflow = 'hidden'; }
-function fecharModalCliente() { document.getElementById('modal-cliente').classList.remove('open'); if (!document.getElementById('modal').classList.contains('open')) document.body.style.overflow = ''; }
-function clicouForaCliente(e) { if (e.target === document.getElementById('modal-cliente')) fecharModalCliente(); }
+function baixarPdf() {
+  if(!pedidoSalvo || !dadosAtuaisDoPedido) { toast('Guarde o pedido primeiro!'); return; }
+  toast('A compilar PDF...');
 
-function confirmarEEnviarPedido() {
-  var ks = Object.keys(sel); if (!ks.length) return;
-  var cnpj=document.getElementById('cli-cnpj').value.trim();
-  var razao=document.getElementById('cli-razao').value.trim();
-  var fantasia=document.getElementById('cli-fantasia').value.trim();
-  var endereco=document.getElementById('cli-endereco').value.trim();
-  var estado=document.getElementById('cli-estado') ? document.getElementById('cli-estado').value : ''; 
-  var telefone=document.getElementById('cli-telefone').value.trim();
-  var email=document.getElementById('cli-email').value.trim();
-  var obs=document.getElementById('cli-obs').value.trim();
-
-  var prazoTxt = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
-  var itensStr = ks.map(function(k){ return k + ' (x' + sel[k].qty + ')'; }).join(' | ');
-  var detalhesCliente = "CNPJ: "+(cnpj||'-')+" | Razão: "+(razao||'-')+" | UF: "+(estado||'-')+" | Tel: "+(telefone||'-'); 
-
-  var dados = { 
-    acao: 'registrar',
-    itens: itensStr, 
-    qtd: contasAtuais.qtd, 
-    subtotalProdutos: contasAtuais.brutoProdutos.toFixed(2), 
-    totalIpi: contasAtuais.totalIpi.toFixed(2),
-    totalDescontos: contasAtuais.valPrazo.toFixed(2),
-    tabelaAtiva: contasAtuais.tabelaAtiva,
-    prazo: prazoTxt, 
-    total: contasAtuais.liquido.toFixed(2), 
-    clienteInfo: detalhesCliente
+  var payloadPdf = {
+    acao: 'pdf',
+    dadosPdf: {
+      cliente: clienteCompletoAtivo,
+      itens: dadosAtuaisDoPedido.itens,
+      contas: {
+        subtotal: dadosAtuaisDoPedido.subtotalProdutos,
+        valPrazo: dadosAtuaisDoPedido.totalDescontos,
+        prazo: dadosAtuaisDoPedido.pctPrazo,
+        totalIpi: dadosAtuaisDoPedido.totalIpi,
+        valorFrete: dadosAtuaisDoPedido.valorFrete,
+        uf: dadosAtuaisDoPedido.uf,
+        liquido: dadosAtuaisDoPedido.total,
+        tabelaAtiva: 'ICMS ' + dadosAtuaisDoPedido.tabelaAtiva
+      }
+    }
   };
 
-  var btn = document.getElementById('btn-orc-d');
-  if (fluxoOrigem === 'd') { btn.disabled = true; btn.textContent = 'A guardar...'; }
-  fecharModalCliente();
-  toast('A registar dados na nuvem...');
-  
-  fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime(), { 
-    method: "POST", 
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(dados) 
+  fetch(URL_GOOGLE_SCRIPT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payloadPdf)
   })
   .then(res => res.json())
   .then(resData => {
-    pedidoSalvo = true; 
-    toast('Pedido guardado com sucesso!');
-    if(fluxoOrigem === 'd'){ btn.textContent = '✓ Guardado!'; setTimeout(function(){ btn.textContent = 'Finalizar e Salvar Pedido'; btn.disabled = false; }, 3000); }
-    atualizarPainel();
+    if(resData.status === 'success' && resData.base64) {
+      var byteChars = atob(resData.base64);
+      var byteNumbers = new Array(byteChars.length);
+      for (var i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
+      var blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
+      
+      var link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `Pedido_${clienteCompletoAtivo.razao.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      link.click();
+      toast('PDF descarregado!');
+    } else {
+      alert('Erro na geração: ' + resData.message);
+    }
   })
-  .catch(err => {
-    console.error(err);
-    toast('Erro ao guardar pedido.');
-    if(fluxoOrigem === 'd'){ btn.disabled = false; btn.textContent = 'Finalizar e Salvar Pedido'; }
-  });
+  .catch(err => { console.error(err); toast('Erro ao chamar motor PDF.'); });
 }
 
-function abrirSheet() { document.getElementById('sh-ov').classList.add('open'); document.getElementById('b-sheet').classList.add('open'); document.body.style.overflow='hidden'; }
-function fecharSheet() { document.getElementById('sh-ov').classList.remove('open'); document.getElementById('b-sheet').classList.remove('open'); document.body.style.overflow=''; }
-function toast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 3500); }
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') { fecharModal(); fecharModalCliente(); } });
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>
