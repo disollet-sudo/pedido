@@ -305,7 +305,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // 🔗 O TEU LINK ATUALIZADO DO GOOGLE APPS SCRIPT
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxSYyXSDVWzP6IVsA-uBFzTfNzm1X520HRqot_F0xJCLl53IOqYNNqULYWN7WR3DfQ5eQ/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzQ7DEQNHFpx10jjCm0dx2zI5Vgl6rBBYQeO0NdmFiPRvKUgBDCpJhJqI9LWlMyZENJHA/exec";
 
 function cleanDescription(str) {
   if (!str) return '';
@@ -400,15 +400,20 @@ function determinarTabelaAtiva() {
   
   var simBrutoProdutos = 0;
   var simTotalIpi = 0;
+  
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0;
+  var fatorDesconto = 1 - (prazoDescPct / 100); 
 
   Object.keys(sel).forEach(function(k) {
     var pVal = obterPrecoItem(sel[k].prod, t1Code);
     var qty = sel[k].qty;
     var subtotalItem = pVal * qty;
     simBrutoProdutos += subtotalItem;
+    
     var ipiPct = sel[k].prod.ipi || 0;
-    simTotalIpi += subtotalItem * (ipiPct / 100);
+    // O IPI é simulado já sobre o subtotal com desconto
+    var subtotalComDesconto = subtotalItem * fatorDesconto;
+    simTotalIpi += subtotalComDesconto * (ipiPct / 100);
   });
   
   var simValPrazo = simBrutoProdutos * (prazoDescPct / 100);
@@ -548,29 +553,30 @@ function syncRegras(sourceId, targetId) {
   atualizarPainel();
 }
 
-// ----------------------------------------------------
-// NOVA FUNÇÃO COM ARREDONDAMENTOS COMERCIAIS
-// ----------------------------------------------------
 function calcularDescontosERenderizar() {
   var tabelaAtiva = determinarTabelaAtiva();
   var ks = Object.keys(sel);
   var brutoProdutosTabela = 0; var totalIpiAcumulado = 0; var qtdTotal = 0;
+  
   var prazoDescPct = parseInt(document.getElementById('prazo-d').value) || 0; 
+  var fatorDesconto = 1 - (prazoDescPct / 100);
 
   ks.forEach(function(k){ 
     var itemPreco = obterPrecoItem(sel[k].prod, tabelaAtiva);
     var itemQty = sel[k].qty;
     
-    // Arredondamento comercial para 2 casas no subtotal de cada item
     var subtotalItem = Math.round((itemPreco * itemQty) * 100) / 100;
     brutoProdutosTabela += subtotalItem;
     qtdTotal += itemQty;
     
+    // Aplica o desconto no subtotal do item ANTES de calcular o IPI
+    var subtotalComDesconto = Math.round((subtotalItem * fatorDesconto) * 100) / 100;
     var itemIpiPct = sel[k].prod.ipi || 0;
-    totalIpiAcumulado += Math.round((subtotalItem * (itemIpiPct / 100)) * 100) / 100;
+    
+    // Calcula IPI sobre o valor base já reduzido pelo desconto
+    totalIpiAcumulado += Math.round((subtotalComDesconto * (itemIpiPct / 100)) * 100) / 100;
   });
 
-  // Arredondamento no desconto e no total líquido (Ex: força o 1.3857 a virar 1.39)
   var valPrazo = Math.round((brutoProdutosTabela * (prazoDescPct / 100)) * 100) / 100;
   var liquidoFinal = Math.round(((brutoProdutosTabela - valPrazo) + totalIpiAcumulado) * 100) / 100;
 
