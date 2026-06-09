@@ -68,10 +68,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .field{margin-bottom:12px}
 .field label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600}
 .field select, .field input[type=text], .field input[type=email], .field textarea{width:100%;padding:8px 10px;border:1px solid var(--borda);border-radius:7px;font-size:13px;outline:none;background:#fff;color:var(--texto)}
-.field-uf-obrig label{color:var(--promo) !important;font-weight:700 !important;}
-.field-uf-obrig label::after{content:" *";color:var(--promo);}
-.field-uf-obrig select{border-color:var(--promo) !important;border-width:2px !important;background:#fff8f8 !important;animation:pulse-borda .6s ease 3;}
-@keyframes pulse-borda{0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,.3)}50%{box-shadow:0 0 0 4px rgba(226,75,74,.25)}}
 .lista-sel{max-height:180px;overflow-y:auto;border:1px solid var(--borda);border-radius:8px;margin-bottom:12px}
 .sel-row{display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid var(--borda);gap:6px}
 .sel-row:last-child{border-bottom:none}
@@ -321,7 +317,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // Ajusta automaticamente a URL correta da Web App do Script
-var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzPvUxsr5DHGKKbu8AowtD1ZJR5uZk_7zlc9aEiqQZdDuJaWE8PmkR_hBYa7dqHSDVilA/exec"; 
+var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzMCt2Ydh7KG0V_AqowG5vdp0rD9_hPm7yKwpolJ4wSlIm4XaUD88AIC6Cu0VgG5YI1dw/exec"; 
 if(window.location.href.includes("script.google.com")) {
   URL_GOOGLE_SCRIPT = window.location.href.split('/exec')[0] + '/exec';
 }
@@ -380,11 +376,11 @@ function carregarCatalogo(forceUpdate) {
       document.getElementById('fil-marca').innerHTML = htmlMarca;
 
       // Alimenta os seletores de Estado (UF) dinamicamente vindo da aba FRETE
-      // O backend retorna 'estados' (array) e 'fretes' pode vir como objeto ou não existir
+      // O backend envia 'estados' como array de siglas
       var ufs = [];
-      if (catalogo.estados && catalogo.estados.length > 0) {
-        ufs = catalogo.estados.map(e => e.toUpperCase()).sort();
-      } else if (catalogo.fretes && Object.keys(catalogo.fretes).length > 0) {
+      if (Array.isArray(catalogo.estados) && catalogo.estados.length > 0) {
+        ufs = catalogo.estados.map(e => String(e).toUpperCase().trim()).filter(Boolean).sort();
+      } else if (catalogo.fretes) {
         ufs = Object.keys(catalogo.fretes).sort();
       }
       var htmlUf = '<option value="">Selecione o Estado...</option>';
@@ -588,23 +584,6 @@ function atualizarPainel() {
 
   document.getElementById('lista-d').innerHTML = htmlLista;
   document.getElementById('lista-m').innerHTML = htmlLista;
-
-  // Destaque obrigatório no campo UF quando não selecionado
-  ['uf-d', 'uf-m'].forEach(id => {
-    var el = document.getElementById(id);
-    var fieldEl = el ? el.closest('.field') : null;
-    if (fieldEl) {
-      if (!ufAtiva) {
-        fieldEl.classList.add('field-uf-obrig');
-        // Reinicia animação removendo e re-adicionando a classe
-        el.style.animation = 'none';
-        el.offsetHeight; // reflow
-        el.style.animation = '';
-      } else {
-        fieldEl.classList.remove('field-uf-obrig');
-      }
-    }
-  });
 
   var valPrazo = subtotal * (pctPrazo / 100);
   
