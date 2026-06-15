@@ -133,6 +133,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .toast{position:fixed;bottom:76px;right:16px;background:#1a1a18;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(min-width:881px){.toast{bottom:20px}}
+
+/* NOVO: Ajustes para rolagem do Modal do Cliente */
+.scroll-form { overflow-y: auto; max-height: 60vh; padding-right: 5px; margin-bottom: 10px; }
+.scroll-form::-webkit-scrollbar { width: 6px; }
+.scroll-form::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -297,23 +302,43 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 </div>
 
 <div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
-  <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; max-height: 90vh;">
-    <h3 style="margin-bottom:16px; color:var(--verde-dk); font-size: 16px; text-align: center;">📋 PREENCHER DADOS DO CLIENTE</h3>
-    <div class="field">
-      <label>Razão Social / Nome</label>
-      <input type="text" id="cli-nome" placeholder="Digite a Razão Social ou Nome">
+  <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; max-height: 94vh;">
+    <h3 style="margin-bottom:12px; color:var(--verde-dk); font-size: 16px; text-align: center;">📋 DADOS DO CLIENTE</h3>
+    
+    <div class="scroll-form">
+      <div class="field">
+        <label>CNPJ / CPF</label>
+        <input type="text" id="cli-cnpj" placeholder="Digite o CNPJ ou CPF">
+      </div>
+      <div class="field">
+        <label>Razão Social</label>
+        <input type="text" id="cli-razao" placeholder="Razão Social ou Nome Completo">
+      </div>
+      <div class="field">
+        <label>Fantasia (Opcional)</label>
+        <input type="text" id="cli-fantasia" placeholder="Nome Fantasia">
+      </div>
+      <div class="field">
+        <label>Endereço Completo</label>
+        <input type="text" id="cli-endereco" placeholder="Rua, Número, Bairro, Cidade">
+      </div>
+      <div class="field">
+        <label>Telefone</label>
+        <input type="text" id="cli-telefone" placeholder="(XX) XXXXX-XXXX">
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="cli-email" placeholder="email@cliente.com">
+      </div>
+      <div class="field">
+        <label>UF do Cliente</label>
+        <select id="cli-uf">
+          <option value="">Selecione o Estado...</option>
+        </select>
+      </div>
     </div>
-    <div class="field">
-      <label>CNPJ / CPF (Opcional)</label>
-      <input type="text" id="cli-doc" placeholder="Digite o CNPJ ou CPF">
-    </div>
-    <div class="field">
-      <label>UF do Cliente</label>
-      <select id="cli-uf">
-        <option value="">Selecione o Estado...</option>
-      </select>
-    </div>
-    <div style="margin-top: 20px;">
+    
+    <div style="margin-top: 10px;">
       <button class="btn prim" id="btn-salvar-cli" onclick="confirmarSalvamentoPedido()" style="margin-bottom: 8px;">Salvar Pedido na Planilha</button>
       <button class="btn" onclick="fecharModalCliente()">Cancelar</button>
     </div>
@@ -324,13 +349,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // CONFIGURAÇÃO WEB APP GOOGLE APPLICATION URL
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxbRsGjBETwMAh4bM4VthlalqmheoRfNkwF_5a5RF7CiM6z8bvMPMiHiejETc74ulfH9g/exec"; 
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbw0hAxqPjpUrGC_BRScFi-f4MZRNeU3kFI-3YE5l8_xSJ78CPwJrHNY6510Kt-bjceAiA/exec"; 
 
 let PRODUTOS = [];
 let SELECIONADOS = {};
 let DADOS_PDF_PRONTO = null;
 
-// Tabelas de Prazos Condicionais fornecidas
+// Tabelas de Prazos Condicionais
 const SUB_PRAZOS = {
   "9": ["28 DIAS", "14/42 DIAS", "21/35 DIAS", "14/28/42 DIAS"],
   "7": ["35 DIAS", "14/56 DIAS", "21/49 DIAS", "28/42 DIAS", "14/35/56 DIAS", "21/35/49 DIAS", "14/28/42/56 DIAS"],
@@ -375,7 +400,7 @@ function carregarDados(force = false) {
     })
     .catch(err => {
       console.error(err);
-      showToast("Erro ao carregar dados da planilha.");
+      showToast("Erro ao carregar dados da folha de cálculo.");
     });
 }
 
@@ -582,7 +607,6 @@ function confirmarAddModal() {
   showToast("Item adicionado/atualizado com sucesso!");
 }
 
-// ESTA FUNÇÃO FOI ATUALIZADA: Agora chama filtrar() atualizando a tela na hora!
 function syncRegras(idOrigem, idDestino) {
   const val = document.getElementById(idOrigem).value;
   document.getElementById(idDestino).value = val;
@@ -822,11 +846,17 @@ function clicouForaCliente(e) {
 }
 
 function confirmarSalvamentoPedido() {
-  let r = document.getElementById('cli-nome').value.trim();
-  let c = document.getElementById('cli-doc').value.trim() || "Não Informado";
+  // RECOLHA DOS NOVOS CAMPOS DO CLIENTE (Com Trim defensivo)
+  let cnpj = (document.getElementById('cli-cnpj').value || '').trim();
+  let razao = (document.getElementById('cli-razao').value || '').trim();
+  let fantasia = (document.getElementById('cli-fantasia').value || '').trim();
+  let endereco = (document.getElementById('cli-endereco').value || '').trim();
+  let telefone = (document.getElementById('cli-telefone').value || '').trim();
+  let email = (document.getElementById('cli-email').value || '').trim();
   let uf = document.getElementById('cli-uf').value;
 
-  if(!r) { alert("Por favor, preencha a Razão Social / Nome."); return; }
+  if(!cnpj) { alert("Por favor, preencha o CNPJ ou CPF."); return; }
+  if(!razao) { alert("Por favor, preencha a Razão Social ou Nome."); return; }
   if(!uf) { alert("Por favor, selecione a UF do Cliente."); return; }
 
   let totalItensStr = document.getElementById('badge').innerText;
@@ -834,8 +864,11 @@ function confirmarSalvamentoPedido() {
 
   let txtItens = Object.values(SELECIONADOS).map(x => `${x.produto.codigo} (${x.qtd} un)`).join(' | ');
   
+  // BLOCO DE TEXTO ESTRUTURADO PARA PLANILHA E PDF
+  let stringDadosCliente = `RAZÃO SOCIAL: ${razao}\nFANTASIA: ${fantasia}\nCNPJ/CPF: ${cnpj}\nENDEREÇO: ${endereco}\nTELEFONE: ${telefone}\nE-MAIL: ${email}\nESTADO DESTINO: ${uf}\nTABELA APLICADA: ${tabelaAtivaStr}`;
+  
   let payloadPlanilha = {
-    clienteInfo: `Razão Social: ${r}\nDocumento: ${c}\nUF: ${uf}\nTabela Aplicada: ${tabelaAtivaStr}`,
+    clienteInfo: stringDadosCliente,
     itens: txtItens,
     qtd: parseInt(totalItensStr) || 1,
     subtotalProdutos: DADOS_PDF_PRONTO.contas.subtotal,
@@ -863,9 +896,10 @@ function confirmarSalvamentoPedido() {
       fecharModalCliente();
       showToast("Pedido salvo na planilha com sucesso! PDF Liberado.");
       
-      DADOS_PDF_PRONTO.clienteInfo = `Razão Social: ${r}\nCNPJ/CPF: ${c}\nEstado Destino: ${uf}`;
+      // Injeta os dados estruturados no Payload do PDF e guarda um Nome Seguro
+      DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente;
+      DADOS_PDF_PRONTO.razaoSegura = razao;
       
-      // LIBERA O BOTÃO DO PDF DEPOIS DO SUCESSO!
       document.getElementById('btn-xls-d').classList.add('liberado');
       document.getElementById('btn-xls-m').classList.add('liberado');
       document.getElementById('btn-xls-d').disabled = false;
@@ -874,7 +908,7 @@ function confirmarSalvamentoPedido() {
       document.getElementById('btn-orc-d').innerText = "Pedido Salvo! ✓";
       document.getElementById('btn-orc-m').innerText = "Pedido Salvo! ✓";
     } else {
-      alert("Erro ao registrar: " + resData.message);
+      alert("Erro ao registar: " + resData.message);
     }
   })
   .catch(err => {
@@ -888,7 +922,7 @@ function confirmarSalvamentoPedido() {
 function baixarPdf() {
   if(!DADOS_PDF_PRONTO) return;
   
-  showToast("Gerando arquivo PDF, aguarde...");
+  showToast("A gerar ficheiro PDF, aguarde...");
   
   fetch(URL_GOOGLE_SCRIPT, {
     method: 'POST',
@@ -903,9 +937,12 @@ function baixarPdf() {
       for (let i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
       let blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
       
+      // Tratamento Defensivo na hora de dar o nome ao Ficheiro para o utilizador final baixar
+      let razaoLimpa = (DADOS_PDF_PRONTO.razaoSegura || 'Cliente').replace(/[^a-z0-9]/gi, '_');
+      
       let link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = `Pedido_Compra_DiSolle.pdf`;
+      link.download = `Pedido_${razaoLimpa}.pdf`;
       link.click();
       showToast("Download do PDF iniciado!");
     } else {
