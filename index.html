@@ -1,435 +1,592 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Pedidos Dinâmicos - DI SOLLE</title>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .brand-bg { background-color: #0F6E56; }
-    .brand-text { color: #0F6E56; }
-    .brand-border { border-color: #0F6E56; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Di Solle - Catálogo e Pedidos</title>
+<link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=1mS6_4Yv74x6tq7B10kZz2m7FndNly7gq&sz=w64">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --verde: #1D9E75;
+  --verde-lt: #E1F5EE;
+  --verde-dk: #0F6E56;
+  --cinza: #f4f4f2;
+  --borda: #e0dfd8;
+  --texto: #1a1a18;
+  --sub: #6b6b65;
+  --branco: #fff;
+  --promo: #E24B4A;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--cinza);
+  color: var(--texto);
+  font-size: 14px;
+  line-height: 1.5;
+  padding-bottom: 40px;
+}
+
+/* HEADER */
+header {
+  background: #000;
+  border-bottom: 1px solid #222;
+  padding: 12px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header img { height: 40px; display: block; }
+.btn-atualizar {
+  background: transparent;
+  border: 1px solid var(--verde);
+  color: var(--verde);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.btn-atualizar:hover {
+  background: var(--verde);
+  color: #fff;
+}
+
+/* LAYOUT PRINCIPAL */
+.container {
+  display: flex;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: calc(100vh - 65px);
+}
+
+/* LISTA EM GRADE/QUADRADOS (LADO ESQUERDO) */
+.catalogo-container {
+  flex: 1;
+  padding: 20px;
+}
+.busca-box {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  outline: none;
+}
+.busca-box:focus { border-color: var(--verde); }
+
+/* GRADE DE PRODUTOS ORIGINAL (QUADRADOS) */
+.grid-produtos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.card-produto {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card-produto:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* DESTAQUE DE PROMOÇÃO NA GRADE */
+.card-produto.em-promocao {
+  border: 2px solid var(--promo);
+}
+.badge-promo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--promo);
+  color: #fff;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 4px;
+  text-transform: uppercase;
+  z-index: 10;
+}
+
+.prod-img-box {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+.prod-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.prod-detalhes { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
+.prod-cod { font-size: 11px; font-weight: bold; color: var(--sub); margin-bottom: 2px; }
+.prod-nome { font-size: 13px; font-weight: 600; color: var(--texto); margin-bottom: 8px; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.prod-info-linha { font-size: 11px; color: var(--sub); margin-bottom: 10px; }
+
+.prod-preco-box { margin-bottom: 12px; }
+.preco-de { font-size: 11px; text-decoration: line-through; color: #a0a098; margin-right: 5px; }
+.preco-por { font-size: 16px; font-weight: bold; color: var(--verde-dk); }
+
+/* SELETOR DE QUANTIDADE */
+.qtd-controle { display: flex; align-items: center; border: 1px solid var(--borda); border-radius: 4px; overflow: hidden; height: 32px; }
+.qtd-btn { background: var(--cinza); border: none; width: 32px; height: 100%; font-size: 16px; cursor: pointer; font-weight: bold; }
+.qtd-btn:hover { background: #e8e8e2; }
+.qtd-input { flex: 1; width: 100%; text-align: center; border: none; outline: none; font-size: 14px; font-weight: bold; }
+
+/* PAINEL LATERAL DE FECHAMENTO (DIREITO) */
+.sidebar {
+  width: 380px;
+  background: var(--branco);
+  border-left: 1px solid var(--borda);
+  padding: 20px;
+  position: sticky;
+  top: 65px;
+  height: calc(100vh - 65px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-titulo { font-size: 16px; font-weight: bold; color: var(--verde-dk); margin-bottom: 15px; border-bottom: 2px solid var(--verde-lt); padding-bottom: 6px; }
+.form-grupo { margin-bottom: 12px; }
+.form-grupo label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 4px; }
+.form-control { width: 100%; padding: 8px 10px; border: 1px solid var(--borda); border-radius: 4px; font-size: 13px; outline: none; }
+.form-control:focus { border-color: var(--verde); }
+
+/* RESUMO VALORES */
+.resumo-valores { background: var(--cinza); border-radius: 6px; padding: 12px; margin-top: auto; margin-bottom: 15px; }
+.resumo-linha { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+.resumo-linha.total { border-top: 1px solid var(--borda); margin-top: 8px; padding-top: 8px; font-size: 16px; font-weight: bold; color: var(--verde-dk); }
+
+.btn-pdf {
+  width: 100%;
+  background: var(--verde-dk);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-pdf:hover { background: #0b5341; }
+.btn-pdf:disabled { background: #ccc; cursor: not-allowed; }
+
+/* FEEDBACK CARREGANDO */
+.loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--verde-dk); font-size: 16px; z-index: 999; }
+
+@media (max-width: 900px) {
+  .container { flex-direction: column; }
+  .sidebar { width: 100%; position: static; height: auto; border-left: none; border-top: 1px solid var(--borda); }
+}
+</style>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen" x-data="pedidoSistema()">
+<body>
 
-  <header class="brand-bg text-white p-4 shadow-md flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <h1 class="text-xl font-bold tracking-wider">DI SOLLE - PORTAL DE VENDAS</h1>
+<div id="loading" class="loading-overlay">Carregando catálogo de produtos...</div>
+
+<header>
+  <img src="https://drive.google.com/thumbnail?id=1mS6_4Yv74x6tq7B10kZz2m7FndNly7gq&sz=w200" alt="Di Solle">
+  <button class="btn-atualizar" onclick="recarregarCatalogo()">Forçar Atualização</button>
+</header>
+
+<div class="container">
+  <div class="catalogo-container">
+    <input type="text" id="busca" class="busca-box" placeholder="Digite o código, nome ou descrição para buscar..." oninput="filtrarProdutos()">
+    <div id="grid-produtos" class="grid-produtos"></div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-titulo">DADOS DO CLIENTE</div>
+    <div class="form-grupo">
+      <label>Razão Social</label>
+      <input type="text" id="cli-razao" class="form-control" placeholder="Obrigatório">
     </div>
-    <button @click="carregarDados(true)" class="bg-white text-emerald-800 font-semibold px-4 py-2 rounded text-xs hover:bg-gray-100 transition shadow">
-      🔄 Atualizar Planilha & Fretes (Forçar)
-    </button>
-  </header>
-
-  <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="form-grupo">
+      <label>Nome Fantasia</label>
+      <input type="text" id="cli-fantasia" class="form-control">
+    </div>
+    <div class="form-grupo">
+      <label>CNPJ</label>
+      <input type="text" id="cli-cnpj" class="form-control" placeholder="00.000.000/0000-00">
+    </div>
+    <div class="form-grupo">
+      <label>Telefone</label>
+      <input type="text" id="cli-telefone" class="form-control">
+    </div>
+    <div class="form-grupo">
+      <label>E-mail</label>
+      <input type="text" id="cli-email" class="form-control">
+    </div>
+    <div class="form-grupo">
+      <label>Endereço Completo</label>
+      <input type="text" id="cli-endereco" class="form-control">
+    </div>
     
-    <div class="lg:col-span-1 bg-white p-5 rounded-lg shadow-sm border border-gray-200 space-y-4">
-      <h2 class="text-sm font-bold brand-bg text-white px-3 py-1.5 rounded">DADOS CADASTRAIS DO CLIENTE</h2>
-      
-      <div class="grid grid-cols-1 gap-3 text-xs">
-        <div>
-          <label class="block font-medium mb-1">Razão Social</label>
-          <input type="text" x-model="cliente.razao" class="w-full p-2 border rounded bg-gray-50 focus:bg-white" placeholder="Razão Social">
-        </div>
-        <div>
-          <label class="block font-medium mb-1">Nome Fantasia</label>
-          <input type="text" x-model="cliente.fantasia" class="w-full p-2 border rounded bg-gray-50" placeholder="Nome Fantasia">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-medium mb-1">CNPJ</label>
-            <input type="text" x-model="cliente.cnpj" class="w-full p-2 border rounded bg-gray-50" placeholder="00.000.000/0001-00">
-          </div>
-          <div>
-            <label class="block font-medium mb-1">Telefone</label>
-            <input type="text" x-model="cliente.telefone" class="w-full p-2 border rounded bg-gray-50" placeholder="(00) 00000-0000">
-          </div>
-        </div>
-        <div>
-          <label class="block font-medium mb-1">Endereço Completo</label>
-          <input type="text" x-model="cliente.endereco" class="w-full p-2 border rounded bg-gray-50" placeholder="Rua, Número, Bairro">
-        </div>
-        <div>
-          <label class="block font-medium mb-1">Estado p/ Frete (Buscado da Aba Frete)</label>
-          <select x-model="cliente.estado" class="w-full p-2 border rounded bg-gray-50 font-bold text-emerald-800">
-            <option value="">Selecione...</option>
-            <template x-for="est in listaEstados" :key="est">
-              <option :value="est" x-text="est"></option>
-            </template>
-          </select>
-        </div>
-        <div>
-          <label class="block font-medium mb-1">E-mail Corporativo</label>
-          <input type="email" x-model="cliente.email" class="w-full p-2 border rounded bg-gray-50" placeholder="email@empresa.com">
-        </div>
-        <div>
-          <label class="block font-medium mb-1">Observações do Pedido</label>
-          <textarea x-model="cliente.obs" class="w-full p-2 border rounded bg-gray-50 h-16" placeholder="Informações adicionais de entrega..."></textarea>
-        </div>
+    <div class="sidebar-titulo" style="margin-top:15px;">REGRAS COMERCIAIS</div>
+    <div class="form-grupo">
+      <label>Estado destino (UF)</label>
+      <select id="regra-uf" class="form-control" onchange="atualizarTotais()"></select>
+    </div>
+    <div class="form-grupo">
+      <label>Regra Tributária (ICMS)</label>
+      <select id="regra-icms" class="form-control" onchange="recalcularPrecosGrade()">
+        <option value="7" selected>ICMS 7%</option>
+        <option value="12">ICMS 12%</option>
+      </select>
+    </div>
+    <div class="form-grupo">
+      <label>Condição / Prazo</label>
+      <select id="regra-prazo" class="form-control" onchange="atualizarTotais()">
+        <option value="14" data-pct="14">Antecipado (-14%)</option>
+        <option value="28" data-pct="9">28 dias (-9%)</option>
+        <option value="35" data-pct="7">35 dias (-7%)</option>
+        <option value="42" data-pct="5" selected>42 dias (-5%)</option>
+        <option value="56" data-pct="2">56 dias (-2%)</option>
+        <option value="63" data-pct="0">63 dias (0%)</option>
+      </select>
+    </div>
+    <div class="form-grupo">
+      <label>Observações Internas (Sai no PDF)</label>
+      <textarea id="cli-obs" class="form-control" style="resize:vertical;height:50px;"></textarea>
+    </div>
+
+    <div class="resumo-valores">
+      <div class="resumo-linha">
+        <span>Itens selecionados:</span>
+        <span id="tot-itens">0</span>
       </div>
-
-      <h2 class="text-sm font-bold brand-bg text-white px-3 py-1.5 rounded mt-4">PARAMETRIZAÇÃO COMERCIAL</h2>
-      
-      <div class="text-xs space-y-2">
-        <label class="block font-bold">Alíquota ICMS de Destino:</label>
-        <div class="flex gap-4">
-          <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
-            <input type="radio" value="7" x-model="config.icms" @change="recalcular()" class="text-emerald-700"> ICMS 7% (Base M26071)
-          </label>
-          <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
-            <input type="radio" value="12" x-model="config.icms" @change="recalcular()" class="text-emerald-700"> ICMS 12% (Base M26121)
-          </label>
-        </div>
+      <div class="resumo-linha">
+        <span>Subtotal Produtos:</span>
+        <span id="tot-subtotal">R$ 0,00</span>
       </div>
-
-      <div class="text-xs space-y-2">
-        <label class="block font-bold">Prazo Base de Pagamento:</label>
-        <div class="grid grid-cols-5 gap-1.5">
-          <template x-for="p in [28, 35, 42, 56, 63]">
-            <button type="button" 
-                    @click="selecionarPrazoBase(p)" 
-                    :class="config.prazoBase === p ? 'brand-bg text-white font-bold' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'"
-                    class="p-2 border rounded text-center transition" x-text="p + 'D'"></button>
-          </template>
-        </div>
-
-        <div x-show="opcoesSubPrazos.length > 0" class="mt-2 bg-emerald-50 p-3 rounded border border-emerald-200">
-          <label class="block font-semibold mb-1 text-emerald-900 text-[11px]">Selecione a Composição do Parcelamento (Impressa no PDF):</label>
-          <select x-model="config.prazoSelecionado" class="w-full p-2 border border-emerald-300 rounded font-bold text-gray-800 bg-white">
-            <template x-for="op in opcoesSubPrazos" :key="op">
-              <option :value="op" x-text="op"></option>
-            </template>
-          </select>
-          <p class="text-[10px] text-emerald-700 mt-1">💡 Alterar o parcelamento composto não altera a porcentagem de desconto do prazo base.</p>
-        </div>
-
-        <div class="mt-2">
-          <label class="block font-medium mb-1">Porcentagem de Desconto do Prazo (%)</label>
-          <input type="number" step="0.1" x-model.number="config.pctPrazo" @input="recalcular()" class="w-full p-2 border rounded bg-gray-50 text-right font-bold text-red-600">
-        </div>
-
-        <div class="mt-2">
-          <label class="block font-medium mb-1">Valor do Frete Manual (R$)</label>
-          <input type="number" step="0.01" x-model.number="config.valorFrete" @input="recalcular()" class="w-full p-2 border rounded bg-gray-50 text-right font-bold">
-        </div>
+      <div class="resumo-linha">
+        <span>Desconto Prazo:</span>
+        <span id="tot-desconto" style="color:var(--promo);">- R$ 0,00</span>
+      </div>
+      <div class="resumo-linha">
+        <span>IPI Total:</span>
+        <span id="tot-ipi" style="color:#2980b9;">+ R$ 0,00</span>
+      </div>
+      <div class="resumo-linha total">
+        <span>Total Líquido:</span>
+        <span id="tot-liquido">R$ 0,00</span>
       </div>
     </div>
 
-    <div class="lg:col-span-2 bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
-        <div>
-          <h2 class="text-base font-bold text-gray-800">Catálogo de Produtos Industriais</h2>
-          <div class="text-xs font-semibold inline-block px-2.5 py-1 rounded bg-orange-100 text-orange-800 mt-1">
-            Tabela Ativa Calculada na Tela: <span class="font-extrabold" x-text="contas.tabelaAtiva"></span>
-          </div>
-        </div>
-        <input type="text" x-model="busca" class="p-2 border rounded text-xs w-full sm:w-64" placeholder="Buscar por código ou descrição...">
-      </div>
+    <button id="btn-gerar" class="btn-pdf" onclick="baixarPdfPedido()" disabled>BAIXAR PDF DO PEDIDO</button>
+  </div>
+</div>
 
-      <div class="overflow-x-auto flex-1 text-xs">
-        <table class="w-full border-collapse">
-          <thead>
-            <tr class="bg-gray-100 text-left border-b border-gray-300">
-              <th class="p-2 text-center">Foto</th>
-              <th class="p-2">Código</th>
-              <th class="p-2 w-1/3">Descrição</th>
-              <th class="p-2 text-right">Preço Unit.</th>
-              <th class="p-2 text-center">IPI</th>
-              <th class="p-2 text-center w-16">Qtd</th>
-              <th class="p-2 text-right">Preço+IPI</th>
-              <th class="p-2 text-right">Total c/ IPI</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template x-for="p in produtosFiltrados" :key="p.codigo">
-              <tr class="border-b hover:bg-gray-50 transition" :class="p.emPromocao ? 'bg-amber-50/40' : ''">
-                <td class="p-2 text-center">
-                  <template x-if="p.fileId">
-                    <img :src="'https://drive.google.com/thumbnail?id=' + p.fileId + '&sz=w60'" class="w-8 h-8 rounded border object-contain mx-auto">
-                  </template>
-                  <template x-if="!p.fileId">
-                    <span class="text-[9px] text-gray-400">Sem foto</span>
-                  </template>
-                </td>
-                <td class="p-2 font-bold" x-text="p.codigo"></td>
-                <td class="p-2">
-                  <span x-text="p.descricao"></span>
-                  <template x-if="p.emPromocao">
-                    <span class="bg-red-500 text-white font-extrabold text-[8px] px-1 rounded ml-1">PROMO</span>
-                  </template>
-                </td>
-                <td class="p-2 text-right font-semibold" x-text="'R$ ' + formatarDinheiro(obterPrecoBaseUnitario(p))"></td>
-                <td class="p-2 text-center text-gray-600" x-text="(p.ipi || 0) + '%'"></td>
-                <td class="p-2 text-center">
-                  <input type="number" min="0" x-model.number="carrinho[p.codigo.toLowerCase().trim()]" @input="recalcular()" class="w-14 p-1 border rounded text-center font-bold text-emerald-800 bg-white">
-                </td>
-                <td class="p-2 text-right text-gray-500" x-text="'R$ ' + formatarDinheiro(calcularPrecoUnitarioComIpi(p))"></td>
-                <td class="p-2 text-right font-bold text-emerald-900" x-text="'R$ ' + formatarDinheiro(calcularTotalItemComIpi(p))"></td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
+<script>
+// Insira aqui a URL do seu Web App publicado no Google Apps Script
+const URL_GOOGLE_SCRIPT = 'CONECTAR_SUA_URL_DO_GAS_AQUI';
 
-      <div class="bg-gray-50 p-4 rounded-lg border border-gray-300 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
-        <div class="space-y-1.5">
-          <p class="text-gray-600">Alíquota Selecionada: <span class="text-gray-900 font-bold" x-text="config.icms + '%'"></span></p>
-          <p class="text-gray-600">Parcelamento Impresso: <span class="text-emerald-800 font-extrabold" x-text="config.prazoSelecionado"></span></p>
-          <p class="text-gray-600">Quantidade Total de Itens: <span class="text-gray-900 font-bold" x-text="contas.totalItensQty"></span></p>
-        </div>
-        <div class="text-right space-y-1.5 border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4">
-          <p class="text-gray-700">Subtotal Líquido dos Itens (c/ Desconto Prazo): <span class="text-gray-900 font-bold" x-text="'R$ ' + formatarDinheiro(contas.subtotalComDesc)"></span></p>
-          <p class="text-blue-700">Total IPI da Indústria (+): <span class="font-bold" x-text="'R$ ' + formatarDinheiro(contas.totalIpi)"></span></p>
-          <p class="text-gray-600">Valor Adicional de Frete (+): <span class="font-bold" x-text="'R$ ' + formatarDinheiro(config.valorFrete)"></span></p>
-          <div class="text-sm font-extrabold text-emerald-800 bg-emerald-100 p-2 rounded mt-2 flex justify-between">
-            <span>TOTAL GERAL DO PEDIDO:</span>
-            <span x-text="'R$ ' + formatarDinheiro(contas.totalFinalLiquido)"></span>
-          </div>
-        </div>
-      </div>
+let listaProdutosGlobais = [];
+let carrinho = {}; 
+let dadosAtuaisDoPedido = {};
 
-      <div class="flex gap-3 justify-end pt-2">
-        <button @click="enviarPedido()" class="bg-gray-700 hover:bg-gray-800 text-white font-bold px-5 py-2.5 rounded text-xs transition shadow">
-          💾 Registrar Pedido na Planilha
-        </button>
-        <button @click="emitirPdf()" class="brand-bg hover:bg-emerald-800 text-white font-bold px-6 py-2.5 rounded text-xs transition shadow flex items-center gap-1.5">
-          📄 Gerar Espelho de Pedido (PDF)
-        </button>
-      </div>
+window.addEventListener('DOMContentLoaded', () => {
+  carregarDadosDoSistema(false);
+});
 
-    </div>
-  </main>
+function carregarDadosDoSistema(forcar) {
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('loading').innerText = forcar ? 'Reconstruindo cache do catálogo...' : 'Carregando catálogo de produtos...';
+  
+  let url = https://script.google.com/macros/s/AKfycbwA45PMnDXYPYEkejH2hRgTdmUi9mxUy1SorFtk9rRuxZqUjLL72QRTH3zx_d9iA4pDLQ/exec;
+  if(forcar) url += '?atualizar=true';
 
-  <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwA45PMnDXYPYEkejH2hRgTdmUi9mxUy1SorFtk9rRuxZqUjLL72QRTH3zx_d9iA4pDLQ/exec'; // URL fictícia de exemplo da WebApp do Apps Script
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      listaProdutosGlobais = data.produtos || [];
+      popularEstados(data.estados || []);
+      recalcularPrecosGrade();
+      document.getElementById('loading').style.display = 'none';
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Erro ao carregar os dados. Verifique a configuração da URL do Script.');
+      document.getElementById('loading').style.display = 'none';
+    });
+}
 
-    function pedidoSistema() {
-      return {
-        catalogoCompleto: [],
-        listaEstados: [],
-        busca: '',
-        carrinho: {},
-        cliente: {
-          razao: '', fantasia: '', cnpj: '', telefone: '', endereco: '', estado: '', email: '', obs: ''
-        },
-        config: {
-          icms: '7',
-          prazoBase: 28,
-          prazoSelecionado: '28 DIAS',
-          pctPrazo: 0,
-          valorFrete: 0
-        },
-        contas: {
-          tabelaAtiva: 'M26071',
-          subtotalComDesc: 0,
-          totalIpi: 0,
-          totalFinalLiquido: 0,
-          totalItensQty: 0
-        },
-        subPrazosMap: {
-          28: ["28 DIAS", "14/42 DIAS", "21/35 DIAS", "14/28/42 DIAS"],
-          35: ["35 DIAS", "14/56 DIAS", "21/49 DIAS", "28/42 DIAS", "14/35/56 DIAS", "21/35/49 DIAS", "14/28/42/56 DIAS"],
-          42: ["42 DIAS", "28/56 DIAS", "35/49 DIAS", "14/42/70 DIAS", "28/42/56 DIAS", "21/35/49/63 DIAS", "14/28/42/56/70 DIAS"],
-          56: ["56 DIAS", "28/84 DIAS", "49/63 DIAS", "35/56/77 DIAS", "42/56/70 DIAS", "35/49/63/77 DIAS", "28/42/56/70/84 DIAS", "21/35/49/63/77/91 DIAS"],
-          63: ["63 DIAS", "35/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"]
-        },
-        opcoesSubPrazos: ["28 DIAS", "14/42 DIAS", "21/35 DIAS", "14/28/42 DIAS"],
+function recarregarCatalogo() {
+  carregarDadosDoSistema(true);
+}
 
-        init() {
-          this.carregarDados(false);
-        },
+function popularEstados(estados) {
+  const select = document.getElementById('regra-uf');
+  select.innerHTML = '';
+  estados.forEach(uf => {
+    const opt = document.createElement('option');
+    opt.value = uf;
+    opt.textContent = uf;
+    if(uf === 'SP') opt.selected = true;
+    select.appendChild(opt);
+  });
+}
 
-        carregarDados(forcar) {
-          let url = API_URL;
-          if (forcar) url += '?atualizar=true';
-          
-          fetch(url)
-            .then(res => res.json())
-            .then(data => {
-              this.catalogoCompleto = data.produtos || [];
-              this.listaEstados = data.estados || [];
-              this.recalcular();
-            })
-            .catch(err => alert('Erro na comunicação do catálogo: ' + err.message));
-        },
+// RENDERIZAÇÃO DA GRADE EM QUADRADOS (CARDS) ORIGINAL
+function recalcularPrecosGrade() {
+  const tabela = document.getElementById('regra-icms').value; // '7' ou '12'
+  const grid = document.getElementById('grid-produtos');
+  grid.innerHTML = '';
 
-        selecionarPrazoBase(p) {
-          this.config.prazoBase = p;
-          this.opcoesSubPrazos = this.subPrazosMap[p] || [];
-          this.config.prazoSelecionado = this.opcoesSubPrazos[0] || (p + ' DIAS');
-          this.recalcular();
-        },
+  listaProdutosGlobais.forEach(prod => {
+    const normalPreco = prod.precos[tabela] || 0;
+    const promoPreco  = prod.precosPromo[tabela] || 0;
+    
+    // Define se vai usar preço normal ou promocional ativo
+    let precoFinal = normalPreco;
+    let classePromo = '';
+    let badgePromoHtml = '';
+    let precoAnteriorHtml = '';
 
-        get produtosFiltrados() {
-          if (!this.busca.trim()) return this.catalogoCompleto;
-          let txt = this.busca.toLowerCase().trim();
-          return this.catalogoCompleto.filter(p => 
-            p.codigo.toLowerCase().includes(txt) || 
-            p.descricao.toLowerCase().includes(txt)
-          );
-        },
-
-        obterPrecoBaseUnitario(p) {
-          let tab = this.contas.tabelaAtiva;
-          // Regra crucial: Se item for True (emPromocao), busca o preço da Coluna O (precosPromo)
-          if (p.emPromocao && p.precosPromo && p.precosPromo[tab] !== undefined) {
-            return p.precosPromo[tab] || 0;
-          }
-          return p.precos[tab] || 0;
-        },
-
-        calcularPrecoUnitarioComIpi(p) {
-          let precoBase = this.obterPrecoBaseUnitario(p);
-          let precoComDesc = precoBase * (1 - (this.config.pctPrazo / 100));
-          return precoComDesc * (1 + (p.ipi || 0) / 100);
-        },
-
-        calcularTotalItemComIpi(p) {
-          let qty = parseInt(this.carrinho[p.codigo.toLowerCase().trim()]) || 0;
-          return this.calcularPrecoUnitarioComIpi(p) * qty;
-        },
-
-        recalcular() {
-          // Lógica de determinação dinâmica da tabela baseada em simulação iterativa do total geral do pedido
-          let icmsEscolhido = parseInt(this.config.icms) || 7;
-          let tabCalculada = (icmsEscolhido === 7) ? 'M26071' : 'M26121';
-
-          // Executa primeira rodada de soma com a tabela inicial padrão
-          let resPrimeiraSimulacao = this.executarSomaParaTabela(tabCalculada);
-          
-          // Regras de Limites Financeiros do Pedido para chaveamento automático de tabelas
-          if (icmsEscolhido === 7 && resPrimeiraSimulacao.totalGeral > 5000) {
-            tabCalculada = 'M26072';
-          } else if (icmsEscolhido === 12 && resPrimeiraSimulacao.totalGeral > 2500) {
-            tabCalculada = 'M26122';
-          }
-
-          // Atribui os totais definitivos com base na tabela correta recalculada
-          this.contas.tabelaAtiva = tabCalculada;
-          let totaisDefinitivos = this.executarSomaParaTabela(tabCalculada);
-
-          this.contas.subtotalComDesc    = totaisDefinitivos.subtotalComDesc;
-          this.contas.totalIpi           = totaisDefinitivos.totalIpi;
-          this.contas.totalFinalLiquido  = totaisDefinitivos.totalGeral;
-          this.contas.totalItensQty      = totaisDefinitivos.totalItensQty;
-        },
-
-        executarSomaParaTabela(tab) {
-          let subtotalComDesc = 0;
-          let totalIpi = 0;
-          let totalItensQty = 0;
-
-          this.catalogoCompleto.forEach(p => {
-            let key = p.codigo.toLowerCase().trim();
-            let qty = parseInt(this.carrinho[key]) || 0;
-            if (qty > 0) {
-              let precoBase = (p.emPromocao && p.precosPromo && p.precosPromo[tab] !== undefined) ? (p.precosPromo[tab] || 0) : (p.precos[tab] || 0);
-              let precoComDesc = precoBase * (1 - (this.config.pctPrazo / 100));
-              
-              subtotalComDesc += (precoComDesc * qty);
-              totalIpi        += (precoComDesc * qty * ((p.ipi || 0) / 100));
-              totalItensQty   += qty;
-            }
-          });
-
-          let totalGeral = subtotalComDesc + totalIpi + (parseFloat(this.config.valorFrete) || 0);
-          return { subtotalComDesc, totalIpi, totalGeral, totalItensQty };
-        },
-
-        obterItensCarrinhoFormatados() {
-          let lista = [];
-          this.catalogoCompleto.forEach(p => {
-            let key = p.codigo.toLowerCase().trim();
-            let qty = parseInt(this.carrinho[key]) || 0;
-            if (qty > 0) {
-              lista.push({
-                codigo: p.codigo,
-                descricao: p.descricao,
-                qty: qty,
-                preco: this.obterPrecoBaseUnitario(p),
-                ipi: p.ipi || 0,
-                fileId: p.fileId || '',
-                emPromocao: p.emPromocao
-              });
-            }
-          });
-          return lista;
-        },
-
-        emitirPdf() {
-          let itens = this.obterItensCarrinhoFormatados();
-          if (itens.length === 0) return alert('Adicione pelo menos 1 produto para gerar o PDF.');
-
-          let dadosPdfPayload = {
-            cliente: this.cliente,
-            prazoSelecionado: this.config.prazoSelecionado,
-            itens: itens,
-            contas: {
-              tabelaAtiva: this.contas.tabelaAtiva,
-              brutoProdutos: this.contas.subtotalComDesc, // Já passado líquido do prazo conforme a tela
-              pctPrazo: this.config.pctPrazo,
-              totalIpi: this.contas.totalIpi,
-              valorFrete: this.config.valorFrete,
-              liquido: this.contas.totalFinalLiquido
-            }
-          };
-
-          fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ acao: 'pdf', dadosPdf: dadosPdfPayload })
-          })
-          .then(res => res.json())
-          .then(resData => {
-            if (resData.status === 'success' && resData.base64) {
-              let blobLink = document.createElement('a');
-              blobLink.href = 'data:application/pdf;base64,' + resData.base64;
-              blobLink.download = 'Espelho_Pedido_' + (this.cliente.razao || 'DiSolle') + '.pdf';
-              blobLink.click();
-            } else {
-              alert('Erro na compilação do PDF: ' + resData.message);
-            }
-          })
-          .catch(err => alert('Erro técnico na requisição do PDF: ' + err.message));
-        },
-
-        enviarPedido() {
-          let itens = this.obterItensCarrinhoFormatados();
-          if (itens.length === 0) return alert('Carrinho vazio.');
-
-          let itensString = itens.map(i => i.codigo + ' (' + i.qty + 'x)').join(', ');
-          let dadosPedido = {
-            clienteInfo: 'Razão: ' + this.cliente.razao + ' | CNPJ: ' + this.cliente.cnpj + ' | UF: ' + this.cliente.estado,
-            itens: itensString,
-            qtd: this.contas.totalItensQty,
-            subtotalProdutos: this.contas.subtotalComDesc,
-            totalIpi: this.contas.totalIpi,
-            totalDescontos: (this.contas.subtotalComDesc * (this.config.pctPrazo / 100)),
-            prazo: this.config.prazoSelecionado,
-            total: this.contas.totalFinalLiquido
-          };
-
-          fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(dadosPedido)
-          })
-          .then(res => res.json())
-          .then(resData => {
-            if (resData.status === 'success') {
-              alert('Pedido gravado com sucesso na aba Pedidos!');
-            } else {
-              alert('Falha ao gravar pedido.');
-            }
-          })
-          .catch(err => alert('Erro de rede: ' + err.message));
-        },
-
-        formatarDinheiro(n) {
-          return (parseFloat(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-      };
+    if (prod.emPromocao && promoPreco > 0) {
+      precoFinal = promoPreco;
+      classePromo = 'em-promocao';
+      badgePromoHtml = `<div class="badge-promo">PROMO</div>`;
+      precoAnteriorHtml = `<span class="preco-de">R$ ${fmt(normalPreco)}</span>`;
     }
-  </script>
+
+    if(precoFinal === 0) return; // Oculta caso não possua preço cadastrado na regra
+
+    const codNorm = normalizarReferencia(prod.codigo);
+    const qtdCarrinho = carrinho[codNorm] ? carrinho[codNorm].qty : 0;
+
+    const card = document.createElement('div');
+    card.className = `card-produto ${classePromo}`;
+    card.setAttribute('data-codigo', prod.codigo);
+    card.setAttribute('data-descricao', prod.descricao);
+    card.innerHTML = `
+      ${badgePromoHtml}
+      <div class="prod-img-box">
+        <img src="${prod.fileId ? 'https://drive.google.com/thumbnail?id='+prod.fileId+'&sz=w300' : 'https://placehold.co/150x140?text=Sem+Foto'}" alt="Imagem">
+      </div>
+      <div class="prod-detalhes">
+        <div class="prod-cod">REF: ${prod.codigo}</div>
+        <div class="prod-nome">${prod.descricao}</div>
+        <div class="prod-info-linha">
+          Cx. Master: <b>${prod.qtdEmbalagem} un</b> | IPI: <b>${prod.ipi}%</b>
+        </div>
+      </div>
+      <div class="prod-preco-box">
+        ${precoAnteriorHtml}
+        <span class="preco-por">R$ ${fmt(precoFinal)}</span>
+      </div>
+      <div class="qtd-controle">
+        <button class="qtd-btn" onclick="alterarQtd('${codNorm}', -${prod.qtdEmbalagem})">-</button>
+        <input type="text" id="input-${codNorm}" class="qtd-input" value="${qtdCarrinho}" readonly>
+        <button class="qtd-btn" onclick="alterarQtd('${codNorm}', ${prod.qtdEmbalagem})">+</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  sincronizarCarrinhoComNovaRegra();
+  atualizarTotais();
+}
+
+function normalizarReferencia(val) {
+  let s = String(val).trim();
+  if (s.endsWith('.0')) s = s.slice(0, -2);
+  return s.toLowerCase();
+}
+
+function alterarQtd(codNorm, delta) {
+  const prod = listaProdutosGlobais.find(p => normalizarReferencia(p.codigo) === codNorm);
+  if(!prod) return;
+
+  if(!carrinho[codNorm]) {
+    carrinho[codNorm] = { produto: prod, qty: 0 };
+  }
+
+  let novaQtd = carrinho[codNorm].qty + delta;
+  if(novaQtd < 0) novaQtd = 0;
+
+  carrinho[codNorm].qty = novaQtd;
+  document.getElementById(`input-${codNorm}`).value = novaQtd;
+
+  if(carrinho[codNorm].qty === 0) {
+    delete carrinho[codNorm];
+  }
+
+  sincronizarCarrinhoComNovaRegra();
+  atualizarTotais();
+}
+
+function sincronizarCarrinhoComNovaRegra() {
+  const tabela = document.getElementById('regra-icms').value;
+  Object.keys(carrinho).forEach(codNorm => {
+    const item = carrinho[codNorm];
+    const normalPreco = item.produto.precos[tabela] || 0;
+    const promoPreco  = item.produto.precosPromo[tabela] || 0;
+    
+    item.precoCalculado = (item.produto.emPromocao && promoPreco > 0) ? promoPreco : normalPreco;
+  });
+}
+
+function atualizarTotais() {
+  let totalItens = 0;
+  let brutoProdutos = 0;
+  let totalIpi = 0;
+
+  Object.keys(carrinho).forEach(k => {
+    const item = carrinho[k];
+    if(item.qty > 0) {
+      totalItens += item.qty;
+      const subItem = item.precoCalculado * item.qty;
+      brutoProdutos += subItem;
+      totalIpi += subItem * (item.produto.ipi / 100);
+    }
+  });
+
+  const selectPrazo = document.getElementById('regra-prazo');
+  const optSelecionada = selectPrazo.options[selectPrazo.selectedIndex];
+  const pctDesconto = parseFloat(optSelecionada.getAttribute('data-pct')) || 0;
+
+  const valDesconto = brutoProdutos * (pctDesconto / 100);
+  const liquidoFinal = (brutoProdutos - valDesconto) + totalIpi;
+
+  document.getElementById('tot-itens').innerText = totalItens;
+  document.getElementById('tot-subtotal').innerText = `R$ ${fmt(brutoProdutos)}`;
+  document.getElementById('tot-desconto').innerText = `- R$ ${fmt(valDesconto)}`;
+  document.getElementById('tot-ipi').innerText = `+ R$ ${fmt(totalIpi)}`;
+  document.getElementById('tot-liquido').innerText = `R$ ${fmt(liquidoFinal)}`;
+
+  document.getElementById('btn-gerar').disabled = (totalItens === 0);
+
+  // Armazena dados estruturados para envio do PDF
+  dadosAtuaisDoPedido = {
+    tabelaAtiva: document.getElementById('regra-icms').value,
+    brutoProdutos: brutoProdutos,
+    pctPrazo: pctDesconto,
+    valPrazo: valDesconto,
+    totalIpi: totalIpi,
+    total: liquidoFinal,
+    uf: document.getElementById('regra-uf').value
+  };
+}
+
+function filtrarProdutos() {
+  const termo = document.getElementById('busca').value.toLowerCase().trim();
+  const cards = document.querySelectorAll('.card-produto');
+
+  cards.forEach(card => {
+    const cod = card.getAttribute('data-codigo').toLowerCase();
+    const desc = card.getAttribute('data-descricao').toLowerCase();
+    if(cod.includes(termo) || desc.includes(termo)) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// SOLICITAÇÃO E DOWNLOAD DO PDF (8 COLUNAS NO CODIGO.TXT)
+function baixarPdfPedido() {
+  const razao = document.getElementById('cli-razao').value.trim();
+  if(!razao) {
+    alert('Por favor, informe ao menos a Razão Social do Cliente para gerar o espelho do pedido.');
+    document.getElementById('cli-razao').focus();
+    return;
+  }
+
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('loading').innerText = 'Estruturando listagem e gerando documento PDF corporativo...';
+
+  const clienteCompletoAtivo = {
+    razao: razao,
+    fantasia: document.getElementById('cli-fantasia').value.trim(),
+    cnpj: document.getElementById('cli-cnpj').value.trim(),
+    telefone: document.getElementById('cli-telefone').value.trim(),
+    email: document.getElementById('cli-email').value.trim(),
+    endereco: document.getElementById('cli-endereco').value.trim(),
+    estado: document.getElementById('regra-uf').value,
+    obs: document.getElementById('cli-obs').value.trim()
+  };
+
+  const listaItensFaturamento = [];
+  Object.keys(carrinho).forEach(k => {
+    const item = carrinho[k];
+    listaItensFaturamento.push({
+      codigo: item.produto.codigo,
+      descricao: item.produto.descricao,
+      qty: item.qty,
+      preco: item.precoCalculado,
+      ipi: item.produto.ipi,
+      fileId: item.produto.fileId,
+      emPromocao: item.produto.emPromocao
+    });
+  });
+
+  const payloadPdf = {
+    acao: 'pdf',
+    dadosPdf: {
+      cliente: clienteCompletoAtivo,
+      itens: listaItensFaturamento,
+      contas: {
+        brutoProdutos: dadosAtuaisDoPedido.brutoProdutos,
+        pctPrazo: dadosAtuaisDoPedido.pctPrazo,
+        valPrazo: dadosAtuaisDoPedido.valPrazo,
+        totalIpi: dadosAtuaisDoPedido.totalIpi,
+        uf: dadosAtuaisDoPedido.uf,
+        liquido: dadosAtuaisDoPedido.total,
+        tabelaAtiva: 'ICMS ' + dadosAtuaisDoPedido.tabelaAtiva + '%'
+      }
+    }
+  };
+
+  fetch(URL_GOOGLE_SCRIPT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payloadPdf)
+  })
+  .then(res => res.json())
+  .then(resData => {
+    if(resData.status === 'success' && resData.base64) {
+      var byteChars = atob(resData.base64);
+      var byteNumbers = new Array(byteChars.length);
+      for (var i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
+      var blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
+      
+      var link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `Pedido_${clienteCompletoAtivo.razao.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      alert('Falha interna ao gerar o arquivo PDF: ' + (resData.message || 'Erro Desconhecido'));
+    }
+    document.getElementById('loading').style.display = 'none';
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Erro de comunicação na geração do arquivo PDF.');
+    document.getElementById('loading').style.display = 'none';
+  });
+}
+
+function fmt(n) {
+  return (parseFloat(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+</script>
 </body>
 </html>
