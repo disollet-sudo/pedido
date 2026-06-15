@@ -293,8 +293,8 @@ header img { height: 40px; display: block; }
 </div>
 
 <script>
-// Insira aqui a URL do seu Web App publicado no Google Apps Script
-const URL_GOOGLE_SCRIPT = 'CONECTAR_SUA_URL_DO_GAS_AQUI';
+// URL de implantação atualizada e ativa
+const URL_GOOGLE_SCRIPT = 'https://script.google.com/macros/s/AKfycbwA45PMnDXYPYEkejH2hRgTdmUi9mxUy1SorFtk9rRuxZqUjLL72QRTH3zx_d9iA4pDLQ/exec';
 
 let listaProdutosGlobais = [];
 let carrinho = {}; 
@@ -308,7 +308,7 @@ function carregarDadosDoSistema(forcar) {
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('loading').innerText = forcar ? 'Reconstruindo cache do catálogo...' : 'Carregando catálogo de produtos...';
   
-  let url = https://script.google.com/macros/s/AKfycbwA45PMnDXYPYEkejH2hRgTdmUi9mxUy1SorFtk9rRuxZqUjLL72QRTH3zx_d9iA4pDLQ/exec;
+  let url = URL_GOOGLE_SCRIPT;
   if(forcar) url += '?atualizar=true';
 
   fetch(url)
@@ -352,7 +352,6 @@ function recalcularPrecosGrade() {
     const normalPreco = prod.precos[tabela] || 0;
     const promoPreco  = prod.precosPromo[tabela] || 0;
     
-    // Define se vai usar preço normal ou promocional ativo
     let precoFinal = normalPreco;
     let classePromo = '';
     let badgePromoHtml = '';
@@ -365,7 +364,7 @@ function recalcularPrecosGrade() {
       precoAnteriorHtml = `<span class="preco-de">R$ ${fmt(normalPreco)}</span>`;
     }
 
-    if(precoFinal === 0) return; // Oculta caso não possua preço cadastrado na regra
+    if(precoFinal === 0) return; 
 
     const codNorm = normalizarReferencia(prod.codigo);
     const qtdCarrinho = carrinho[codNorm] ? carrinho[codNorm].qty : 0;
@@ -472,7 +471,6 @@ function atualizarTotais() {
 
   document.getElementById('btn-gerar').disabled = (totalItens === 0);
 
-  // Armazena dados estruturados para envio do PDF
   dadosAtuaisDoPedido = {
     tabelaAtiva: document.getElementById('regra-icms').value,
     brutoProdutos: brutoProdutos,
@@ -499,7 +497,6 @@ function filtrarProdutos() {
   });
 }
 
-// SOLICITAÇÃO E DOWNLOAD DO PDF (8 COLUNAS NO CODIGO.TXT)
 function baixarPdfPedido() {
   const razao = document.getElementById('cli-razao').value.trim();
   if(!razao) {
