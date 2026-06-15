@@ -50,6 +50,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .card-img img.loaded{opacity:1}
 .no-img-icon{font-size:30px;color:#ddd}
 
+/* SKELETON */
+.sk-card{background:var(--branco);border:1.5px solid var(--borda);border-radius:10px;overflow:hidden}
+.skeleton{background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:4px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
 .card-body{padding:10px 12px 12px}
 .card-cod{font-size:11px;font-weight:700;color:var(--verde-dk);margin-bottom:3px}
 .card-desc{font-size:12px;color:var(--texto);font-weight:500;line-height:1.35;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -197,7 +202,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
     <div class="resultado">
       <div class="res-row"><span>Subtotal Itens:</span><b id="rd-bruto-prod">R$ 0,00</b></div>
-      <div class="res-row"><span>Desc. de Volume:</span><b style="color:var(--verde-dk);">Incluso na Tabela</b></div>
+      <div class="res-row"><span>Desc. de Volume:</span><b id="rd-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
       <div class="res-row"><span>Desc. Prazo (<span id="rd-prazo-pct">0</span>%):</span><b id="rd-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
       <div class="res-row"><span>Valor Total IPI (+):</span><b id="rd-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
       <div class="res-row"><span>Valor Frete:</span><b id="rd-frete-val">Selecione o Estado</b></div>
@@ -250,9 +255,20 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     </select>
   </div>
 
+  <div class="resultado">
+    <div class="res-row"><span>Subtotal Itens:</span><b id="rm-bruto-prod">R$ 0,00</b></div>
+    <div class="res-row"><span>Desc. de Volume:</span><b id="rm-icms-val" style="color:var(--verde-dk);">Incluso na Tabela</b></div>
+    <div class="res-row"><span>Desc. Prazo (<span id="rm-prazo-pct">0</span>%):</span><b id="rm-prazo-val" style="color:#c0392b;">- R$ 0,00</b></div>
+    <div class="res-row"><span>Valor Total IPI (+):</span><b id="rm-ipi-val" style="color:#2980b9;">+ R$ 0,00</b></div>
+    <div class="res-row"><span>Valor Frete:</span><b id="rm-frete-val">Selecione o Estado</b></div>
+    <div class="res-sep"></div>
+    <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rm-total">R$ 0,00</b></div>
+  </div>
+
   <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>Finalizar e Salvar Pedido</button>
   <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
-  <button class="btn" onclick="limSel(); fecharSheet();">Limpar seleção</button>
+  <button class="btn" onclick="limSel();fecharSheet()">Limpar seleção</button>
+  <button class="btn" onclick="fecharSheet()">Fechar</button>
 </div>
 
 <div class="modal" id="modal" onclick="clicouFora(event)">
@@ -273,132 +289,151 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
         <input class="qty-big-input" type="number" id="modal-qty" value="1" min="1">
         <button class="qty-big-btn" onclick="mudaQtyModal(1)">&#43;</button>
       </div>
-      <button class="btn-add" id="btn-add-modal" onclick="addModalParaCesta()">Adicionar à Cesta</button>
+      <button class="btn-add" id="btn-add" onclick="adicionarDoModal()">Adicionar ao pedido</button>
     </div>
   </div>
 </div>
 
-<div class="modal" id="modal-cliente">
-  <div class="modal-box" style="padding: 22px;">
-    <h3 style="margin-bottom: 15px; font-size:16px;">📋 Informações Cadastrais do Cliente</h3>
-    <div class="field">
-      <label>Razão Social</label>
-      <input type="text" id="cli-razao" placeholder="Razão Social do Cliente">
+<div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
+  <div class="modal-box" style="max-width:460px; max-height:90vh;">
+    <div style="padding:14px 18px; border-bottom:1px solid var(--borda); display:flex; justify-content:space-between; align-items:center; background:var(--cinza)">
+      <b style="font-size:15px; color:var(--texto)">🏢 Dados Cadastrais do Cliente</b>
+      <button onclick="fecharModalCliente()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--sub)">&times;</button>
     </div>
-    <div class="field">
-      <label>CNPJ</label>
-      <input type="text" id="cli-cnpj" placeholder="00.000.000/0000-00">
+    <div class="modal-info" style="padding:16px 18px; display:flex; flex-direction:column; gap:2px;">
+      <div class="field"><label>CNPJ</label><input type="text" id="cli-cnpj" placeholder="00.000.000/0001-00"></div>
+      <div class="field"><label>RAZÃO SOCIAL</label><input type="text" id="cli-razao" placeholder="Razão Social"></div>
+      <div class="field"><label>FANTASIA</label><input type="text" id="cli-fantasia" placeholder="Nome Fantasia"></div>
+      <div class="field"><label>ENDEREÇO</label><input type="text" id="cli-endereco" placeholder="Endereço Completo"></div>
+      <div class="field"><label>TELEFONE</label><input type="text" id="cli-telefone" placeholder="(00) 00000-0000"></div>
+      <div class="field"><label>E-MAIL</label><input type="email" id="cli-email" placeholder="cliente@email.com"></div>
+      <div class="field"><label>OBSERVAÇÃO</label><textarea id="cli-obs" placeholder="Observações..." style="height:60px; resize:none; font-family:inherit;"></textarea></div>
+      <button class="btn prim" onclick="salvarPedidoNuvem()" style="margin-top:10px; padding:13px;">Confirmar e Enviar Pedido</button>
     </div>
-    <div class="field">
-      <label>E-mail Corporativo</label>
-      <input type="email" id="cli-email" placeholder="exemplo@empresa.com">
-    </div>
-    <button class="btn prim" onclick="salvarPedidoFinal()" style="margin-top: 10px;">Confirmar e Gravar Pedido</button>
-    <button class="btn" onclick="fecharModalCliente()">Voltar</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// INSIRA A URL DO SEU APPS SCRIPT PUBLICADO AQUI:
-var URL_GOOGLE_SCRIPT = 'https://script.google.com/macros/s/AKfycbzsb6oH0LKVeMoZ-qspTsdDzJOXtYyC126oKxgI4usvZIXAInHPy0OTcEc9UB8Hf3N_dg/exec'; 
+// Ajusta automaticamente a URL correta da Web App do Script
+var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzPvUxsr5DHGKKbu8AowtD1ZJR5uZk_7zlc9aEiqQZdDuJaWE8PmkR_hBYa7dqHSDVilA/exec"; 
+if(window.location.href.includes("script.google.com")) {
+  URL_GOOGLE_SCRIPT = window.location.href.split('/exec')[0] + '/exec';
+}
 
-var catalogo = { produtos: [], logoUrl: '', estados: [] };
+var catalogo = { produtos: [], logoUrl: "", fretes: {} };
 var cesta = {};
-var refAtivaModal = null;
+var refModalAtivo = null;
 var fluxoOrigem = 'd';
+var pedidoSalvo = false;
+var clienteCompletoAtivo = null;
+var dadosAtuaisDoPedido = null;
+
+function normalizarReferencia(val) {
+  if (!val) return '';
+  var s = String(val).trim();
+  if (s.endsWith('.0')) s = s.slice(0, -2);
+  return s.toLowerCase();
+}
+
+function fmt(v) {
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  carregarCatalogo(false);
+});
 
 function carregarCatalogo(forceUpdate) {
-  var url = URL_GOOGLE_SCRIPT + (forceUpdate ? '?atualizar=true' : '');
-  document.getElementById('grid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--sub);">Carregando catálogo, aguarde...</div>';
+  var url = URL_GOOGLE_SCRIPT + (forceUpdate ? "?atualizar=true" : "");
   
+  document.getElementById('grid').innerHTML = Array(8).fill().map(() => `
+    <div class="sk-card" style="height:240px; padding:10px;">
+      <div class="skeleton" style="height:130px; margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:15px; width:40%; margin-bottom:6px;"></div>
+      <div class="skeleton" style="height:30px; margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:20px; width:60%;"></div>
+    </div>
+  `).join('');
+
   fetch(url)
     .then(res => res.json())
     .then(data => {
       catalogo = data;
-      
-      // Carrega marcas dinamicamente
-      var marcasSet = {};
-      catalogo.produtos.forEach(p => { if(p.marca) marcasSet[p.marca] = true; });
-      var marcas = Object.keys(marcasSet).sort();
+      pedidoSalvo = false;
+
+      // Alimenta seletor de Marcas dinamicamente com base nas primeiras palavras
+      var marcasSet = new Set();
+      catalogo.produtos.forEach(p => {
+        if(p.descricao) {
+          var prime = p.descricao.trim().split(' ')[0].toUpperCase();
+          if(prime.length > 2) marcasSet.add(prime);
+        }
+      });
       var htmlMarca = '<option value="">TODAS</option>';
-      marcas.forEach(m => { htmlMarca += `<option value="${m}">${m}</option>`; });
+      marcasSet.forEach(m => { htmlMarca += `<option value="${m}">${m}</option>`; });
       document.getElementById('fil-marca').innerHTML = htmlMarca;
-      
-      // Carrega UFs dinamicamente
-      var ufs = [];
-      if (catalogo.estados && catalogo.estados.length > 0) {
-        ufs = catalogo.estados.map(e => e.toUpperCase()).sort();
-      }
+
+      // Alimenta os seletores de Estado (UF) dinamicamente vindo da aba FRETE
+      var ufs = Object.keys(catalogo.fretes || {}).sort();
       var htmlUf = '<option value="">Selecione o Estado...</option>';
       ufs.forEach(uf => { htmlUf += `<option value="${uf}">${uf}</option>`; });
       document.getElementById('uf-d').innerHTML = htmlUf;
       document.getElementById('uf-m').innerHTML = htmlUf;
-      
+
       if(catalogo.logoUrl) {
-        document.getElementById('logo-area').innerHTML = `<img src="${catalogo.logoUrl}" alt="Di Solle">`;
+        document.getElementById('logo-area').innerHTML = `<img src="${catalogo.logoUrl}" alt="Logo">`;
       }
-      
-      filtrar();
+
+      renderizarProdutos(catalogo.produtos);
+      atualizarPainel();
     })
     .catch(err => {
       console.error(err);
-      document.getElementById('grid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--promo);">Falha ao carregar catálogo. Verifique a URL inserida.</div>';
+      document.getElementById('grid').innerHTML = '<div class="vazio" style="grid-column:1/-1">Erro ao carregar catálogo. Certifique-se de que o Script está publicado como Web App para Acesso Anónimo.</div>';
     });
 }
 
-function filtrar() {
-  var busca = document.getElementById('busca').value.toLowerCase().trim();
-  var marcaAtiva = document.getElementById('fil-marca').value;
-  var precoMax = parseFloat(document.getElementById('fil-preco').value) || Infinity;
-  var tabelaAtiva = document.getElementById('icms-d').value;
-
-  var filtrados = catalogo.produtos.filter(p => {
-    var mBusca = !busca || p.codigo.toLowerCase().includes(busca) || p.descricao.toLowerCase().includes(busca);
-    var mMarca = !marcaAtiva || p.marca === marcaAtiva;
-    var precoUn = p.emPromocao ? p.precoPromo : (p.precos[tabelaAtiva] || 0);
-    var mPreco = precoUn <= precoMax;
-    return mBusca && mMarca && mPreco;
-  });
-
-  document.getElementById('cont').textContent = filtrados.length + " produtos vinculados";
-  renderizarProdutos(filtrados);
-}
-
 function renderizarProdutos(lista) {
-  var html = '';
   var tabelaAtiva = document.getElementById('icms-d').value;
+  var html = '';
   
-  if (lista.length === 0) {
-    document.getElementById('grid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--sub);">Nenhum item localizado.</div>';
+  if(lista.length === 0) {
+    document.getElementById('grid').innerHTML = '<div class="vazio" style="grid-column:1/-1">Nenhum produto encontrado.</div>';
+    document.getElementById('cont').textContent = '0 produtos';
     return;
   }
 
   lista.forEach(p => {
-    var ref = p.codigo.replace(/[^a-z0-9]/gi, '_');
-    var precoUn = p.emPromocao ? p.precoPromo : (p.precos[tabelaAtiva] || 0);
-    var estaNaCesta = cesta[p.codigo] ? ' sel' : '';
-    var qtdNaCesta = cesta[p.codigo] ? cesta[p.codigo].qtd : 0;
-    var badgeStyle = qtdNaCesta > 0 ? ' style="display:block;"' : '';
+    var ref = normalizarReferencia(p.codigo);
+    var qty = cesta[ref] || 0;
     
-    var cardClass = p.emPromocao ? 'card promo' : 'card';
-    cardClass += estaNaCesta;
+    var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+    var badgePromo = '';
+    var classePromo = '';
     
-    var imgHtml = p.imagemId ? 
-      `<img src="https://drive.google.com/thumbnail?id=${p.imagemId}&sz=w300" class="loaded">` : 
-      '<span class="no-img-icon">&#128247;</span>';
+    if (p.emPromocao) {
+      var prPromo = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || Object.values(p.precosPromo)[0];
+      if (prPromo) {
+        precoUn = prPromo;
+        badgePromo = '<div class="card-badge-promo">PROMO</div>';
+        classePromo = ' promo';
+      }
+    }
+
+    var imgHtml = p.fileId ? `<img src="https://drive.google.com/thumbnail?id=${p.fileId}&sz=w300" onload="this.classList.add('loaded')">` : '<span class="no-img-icon">📦</span>';
 
     html += `
-      <div class="${cardClass}" id="card-${ref}" onclick="abrirModal('${p.codigo}')">
-        ${p.emPromocao ? '<div class="card-badge-promo">PROMO</div>' : ''}
-        <div class="card-badge-qty" id="badge-qty-${ref}" ${badgeStyle}>${qtdNaCesta}</div>
+      <div class="card${qty > 0 ? ' sel' : ''}${classePromo}" id="card-${ref}" onclick="abrirModal('${ref}')">
+        ${badgePromo}
+        <div class="card-badge-qty" id="badge-qty-${ref}" style="${qty > 0 ? 'display:block' : 'display:none'}">${qty}</div>
         <div class="card-img">${imgHtml}</div>
         <div class="card-body">
           <div class="card-cod">${p.codigo}</div>
           <div class="card-desc" title="${p.descricao}">${p.descricao}</div>
           <div class="card-bottom">
-            <div class="card-preco">R$ ${precoUn.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+            <div class="card-preco">R$ ${fmt(precoUn)}</div>
             <div class="card-emb">Emb: ${p.qtdEmbalagem}</div>
           </div>
         </div>
@@ -407,347 +442,445 @@ function renderizarProdutos(lista) {
   });
 
   document.getElementById('grid').innerHTML = html;
+  document.getElementById('cont').textContent = `${lista.length} ${lista.length === 1 ? 'produto' : 'produtos'}`;
 }
 
-function atualizarPainel() {
-  var ufAtiva = document.getElementById('uf-d').value;
+function filtrar() {
+  if(!catalogo.produtos) return;
+  var busca = document.getElementById('busca').value.toLowerCase().trim();
+  var marca = document.getElementById('fil-marca').value;
+  var precoMax = parseFloat(document.getElementById('fil-preco').value) || Infinity;
   var tabelaAtiva = document.getElementById('icms-d').value;
-  var pctPrazo = parseFloat(document.getElementById('prazo-d').value) || 0;
+
+  var filtrados = catalogo.produtos.filter(p => {
+    var ref = normalizarReferencia(p.codigo);
+    var desc = p.descricao.toLowerCase();
+    var ean = (p.codigoEan || '').toLowerCase();
+    
+    var mBusca = !busca || ref.includes(busca) || desc.includes(busca) || ean.includes(busca);
+    var mMarca = !marca || desc.startsWith(marca.toLowerCase()) || desc.includes(' ' + marca.toLowerCase());
+    
+    var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+    if(p.emPromocao) {
+      precoUn = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || precoUn;
+    }
+    var mPreco = precoUn <= precoMax;
+
+    return mBusca && mMarca && mPreco;
+  });
+
+  renderizarProdutos(filtrados);
+}
+
+function limFiltros() {
+  document.getElementById('busca').value = '';
+  document.getElementById('fil-marca').value = '';
+  document.getElementById('fil-preco').value = '';
+  filtrar();
+}
+
+function sincronizarPlanilha() {
+  var btn = document.getElementById('btn-sync');
+  btn.disabled = true;
+  btn.textContent = "🔄 A atualizar...";
+  carregarCatalogo(true);
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = "🔄 Sincronizar Catálogo";
+  }, 2500);
+}
+
+function syncRegras(idOrigem, idDestino) {
+  var val = document.getElementById(idOrigem).value;
+  document.getElementById(idDestino).value = val;
+  atualizarPainel();
+}
+
+// ─────────────────────────────────────────────
+// CÁLCULO CORE: REGRAS DE PRODUTOS E FRETE POR ESTADO
+// ─────────────────────────────────────────────
+function atualizarPainel() {
+  var tabelaAtiva = document.getElementById('icms-d').value;
+  var pctPrazo = parseInt(document.getElementById('prazo-d').value) || 0;
+  var ufAtiva = document.getElementById('uf-d').value;
 
   var subtotal = 0;
   var totalIpi = 0;
-  var countItens = 0;
+  var totalItensQtd = 0;
+  var htmlLista = '';
+  var itensArray = [];
 
-  for (var cod in cesta) {
-    var item = cesta[cod];
-    var precoUn = item.emPromocao ? item.precoPromo : (item.precos[tabelaAtiva] || 0);
-    subtotal += precoUn * item.qtd;
-    totalIpi += (precoUn * item.qtd) * (item.ipi / 100);
-    countItens += item.qtd;
-  }
+  for (var ref in cesta) {
+    var qty = cesta[ref];
+    if(qty <= 0) continue;
 
-  var valPrazo = subtotal * (pctPrazo / 100);
-  var valorFrete = 0; // Regra padrão: Grátis (Modifique se necessário)
-  var freteTxt = ufAtiva ? "Grátis" : "Selecione o Estado";
-  var liquido = subtotal - valPrazo + totalIpi + valorFrete;
+    var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === ref);
+    if(!p) continue;
 
-  var fmt = v => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  // Renderiza Desktop
-  document.getElementById('rd-bruto-prod').textContent = "R$ " + fmt(subtotal);
-  document.getElementById('rd-prazo-pct').textContent = pctPrazo;
-  document.getElementById('rd-prazo-val').textContent = "- R$ " + fmt(valPrazo);
-  document.getElementById('rd-ipi-val').textContent = "+ R$ " + fmt(totalIpi);
-  document.getElementById('rd-frete-val').textContent = freteTxt;
-  document.getElementById('rd-total').textContent = "R$ " + fmt(liquido);
-
-  var badge = document.getElementById('badge');
-  if (countItens > 0) {
-    badge.textContent = countItens + " un";
-    badge.style.display = "block";
-    document.getElementById('mb-info').textContent = countItens + " itens na cesta | Total: R$ " + fmt(liquido);
-    
-    var bloqueado = !ufAtiva;
-    document.getElementById('btn-orc-d').disabled = bloqueado;
-    document.getElementById('btn-orc-m').disabled = bloqueado;
-    
-    if(!bloqueado) {
-      document.getElementById('btn-xls-d').classList.add('liberado');
-      document.getElementById('btn-xls-m').classList.add('liberado');
-      document.getElementById('btn-xls-d').disabled = false;
-      document.getElementById('btn-xls-m').disabled = false;
-    } else {
-      document.getElementById('btn-xls-d').classList.remove('liberado');
-      document.getElementById('btn-xls-m').classList.remove('liberado');
-      document.getElementById('btn-xls-d').disabled = true;
-      document.getElementById('btn-xls-m').disabled = true;
+    var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+    if (p.emPromocao) {
+      precoUn = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || Object.values(p.precosPromo)[0] || precoUn;
     }
-  } else {
-    badge.style.display = "none";
-    document.getElementById('mb-info').textContent = "Selecione produtos";
-    document.getElementById('btn-orc-d').disabled = true;
-    document.getElementById('btn-orc-m').disabled = true;
-    document.getElementById('btn-xls-d').disabled = true;
-    document.getElementById('btn-xls-m').disabled = true;
-    document.getElementById('btn-xls-d').classList.remove('liberado');
-    document.getElementById('btn-xls-m').classList.remove('liberado');
-  }
 
-  renderizarListasCesta();
-}
+    var totalItem = precoUn * qty;
+    var ipiItem = totalItem * ((p.ipi || 0) / 100);
 
-function renderizarListasCesta() {
-  var html = '';
-  var tabelaAtiva = document.getElementById('icms-d').value;
-  var count = 0;
+    subtotal += totalItem;
+    totalIpi += ipiItem;
+    totalItensQtd += qty;
 
-  for (var cod in cesta) {
-    count++;
-    var item = cesta[cod];
-    var rowHtml = `
+    itensArray.push({
+      codigo: p.codigo,
+      descricao: p.descricao,
+      emb: p.qtdEmbalagem,
+      qty: qty,
+      preco: precoUn,
+      ipi: p.ipi,
+      totalItem: totalItem
+    });
+
+    htmlLista += `
       <div class="sel-row">
-        <div class="sel-cod">${cod}</div>
-        <div class="sel-desc" title="${item.descricao}">${item.descricao}</div>
+        <div class="sel-cod" title="${p.codigo}">${p.codigo}</div>
+        <div class="sel-desc" title="${p.descricao}">${p.descricao}</div>
         <div class="sel-qty-wrap">
-          <button class="qty-btn" onclick="mudaQtyCesta('${cod}', -1)">−</button>
-          <div class="qty-num">${item.qtd}</div>
-          <button class="qty-btn" onclick="mudaQtyCesta('${cod}', 1)">+</button>
+          <button class="qty-btn" onclick="mudaQtyCesta('${ref}', -1)">−</button>
+          <span class="qty-num">${qty}</span>
+          <button class="qty-btn" onclick="mudaQtyCesta('${ref}', 1)">+</button>
         </div>
-        <div class="sel-rm" onclick="removeCesta('${cod}')">&times;</div>
+        <div class="sel-rm" onclick="removeCesta('${ref}')">&times;</div>
       </div>
     `;
-    html += rowHtml;
   }
 
-  var vazioHtml = '<div class="vazio">Nenhum produto selecionado</div>';
-  document.getElementById('lista-d').innerHTML = count === 0 ? vazioHtml : html;
-  document.getElementById('lista-m').innerHTML = count === 0 ? vazioHtml : html;
+  if (totalItensQtd === 0) {
+    var vHtml = '<div class="vazio">Nenhum produto selecionado</div>';
+    document.getElementById('lista-d').innerHTML = vHtml;
+    document.getElementById('lista-m').innerHTML = vHtml;
+    
+    ['rd','rm'].forEach(pfx => {
+      document.getElementById(`${pfx}-bruto-prod`).textContent = 'R$ 0,00';
+      document.getElementById(`${pfx}-prazo-val`).textContent = '- R$ 0,00';
+      document.getElementById(`${pfx}-ipi-val`).textContent = '+ R$ 0,00';
+      document.getElementById(`${pfx}-frete-val`).textContent = 'Selecione o Estado';
+      document.getElementById(`${pfx}-frete-val`).style.color = 'var(--texto)';
+      document.getElementById(`${pfx}-total`).textContent = 'R$ 0,00';
+      document.getElementById(`btn-orc-${pfx.slice(-1)}`).disabled = true;
+      document.getElementById(`btn-orc-${pfx.slice(-1)}`).textContent = 'Finalizar e Salvar Pedido';
+      document.getElementById(`btn-xls-${pfx.slice(-1)}`).disabled = true;
+      document.getElementById(`btn-xls-${pfx.slice(-1)}`).className = 'btn pdf-btn';
+    });
+    
+    document.getElementById('badge').style.display = 'none';
+    document.getElementById('mob-bar').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('lista-d').innerHTML = htmlLista;
+  document.getElementById('lista-m').innerHTML = htmlLista;
+
+  var valPrazo = subtotal * (pctPrazo / 100);
+  
+  // 🚚 Lógica de Precificação de Frete e Validação Restritiva
+  var valorFrete = 0;
+  var freteTxt = 'Grátis';
+  var freteBloqueado = false;
+
+  if (!ufAtiva) {
+    freteTxt = 'Selecione o Estado';
+    freteBloqueado = true;
+  } else if (catalogo.fretes && catalogo.fretes[ufAtiva]) {
+    var regra = catalogo.fretes[ufAtiva];
+    
+    if (subtotal < regra.minimoPedido) {
+      freteTxt = `Abaixo do Limite (Min: R$ ${fmt(regra.minimoPedido)})`;
+      freteBloqueado = true;
+    } else if (subtotal >= regra.freteGratis) {
+      valorFrete = 0;
+      freteTxt = 'Grátis';
+    } else {
+      valorFrete = regra.valorFrete;
+      freteTxt = `R$ ${fmt(valorFrete)}`;
+    }
+  } else {
+    freteTxt = 'Grátis (Sem regra)';
+    valorFrete = 0;
+  }
+
+  var liquido = subtotal - valPrazo + totalIpi + valorFrete;
+
+  // Atualização síncrona UI Desktop e Mobile
+  ['rd','rm'].forEach(pfx => {
+    document.getElementById(`${pfx}-bruto-prod`).textContent = 'R$ ' + fmt(subtotal);
+    document.getElementById(`${pfx}-prazo-pct`).textContent = pctPrazo;
+    document.getElementById(`${pfx}-prazo-val`).textContent = '- R$ ' + fmt(valPrazo);
+    document.getElementById(`${pfx}-ipi-val`).textContent = '+ R$ ' + fmt(totalIpi);
+    document.getElementById(`${pfx}-frete-val`).textContent = freteTxt;
+    document.getElementById(`${pfx}-total`).textContent = 'R$ ' + fmt(liquido);
+
+    var btnFecho = document.getElementById(`btn-orc-${pfx.slice(-1)}`);
+    if(freteBloqueado) {
+      document.getElementById(`${pfx}-frete-val`).style.color = '#e24b4a';
+      document.getElementById(`${pfx}-frete-val`).style.fontWeight = 'bold';
+      btnFecho.disabled = true;
+      btnFecho.textContent = ufAtiva ? 'Abaixo do Limite Mínimo' : 'Selecione o Estado';
+    } else {
+      document.getElementById(`${pfx}-frete-val`).style.color = valorFrete > 0 ? 'var(--texto)' : 'var(--verde-dk)';
+      btnFecho.disabled = false;
+      btnFecho.textContent = 'Finalizar e Salvar Pedido';
+    }
+
+    var btnPdf = document.getElementById(`btn-xls-${pfx.slice(-1)}`);
+    if(pedidoSalvo) {
+      btnPdf.disabled = false;
+      btnPdf.className = 'btn pdf-btn liberado';
+    } else {
+      btnPdf.disabled = true;
+      btnPdf.className = 'btn pdf-btn';
+    }
+  });
+
+  document.getElementById('badge').textContent = `${totalItensQtd} itens`;
+  document.getElementById('badge').style.display = 'block';
+  
+  document.getElementById('mob-bar').style.display = 'flex';
+  document.getElementById('mb-info').innerHTML = `<b>Total: R$ ${fmt(liquido)}</b><br>${totalItensQtd} itens`;
+
+  dadosAtuaisDoPedido = {
+    itens: itensArray,
+    subtotalProdutos: subtotal,
+    totalIpi: totalIpi,
+    totalDescontos: valPrazo,
+    pctPrazo: pctPrazo,
+    valorFrete: valorFrete,
+    uf: ufAtiva,
+    prazo: document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text,
+    tabelaAtiva: tabelaAtiva,
+    total: liquido,
+    qtd: totalItensQtd
+  };
 }
 
-function mudaQtyCesta(cod, delta) {
-  if (!cesta[cod]) return;
-  cesta[cod].qtd += delta;
-  if (cesta[cod].qtd <= 0) {
-    removeCesta(cod);
-  } else {
-    var ref = cod.replace(/[^a-z0-9]/gi, '_');
-    var bQty = document.getElementById(`badge-qty-${ref}`);
-    if (bQty) bQty.textContent = cesta[cod].qtd;
+function mudaQtyCesta(ref, delta) {
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === ref);
+  if(!p) return;
+  var step = p.qtdEmbalagem || 1;
+  
+  if(!cesta[ref]) cesta[ref] = 0;
+  cesta[ref] += (delta * step);
+  
+  if(cesta[ref] <= 0) delete cesta[ref];
+  
+  var bQty = document.getElementById(`badge-qty-${ref}`);
+  var card = document.getElementById(`card-${ref}`);
+  if(card) {
+    if(cesta[ref] > 0) {
+      card.classList.add('sel');
+      if(bQty) { bQty.textContent = cesta[ref]; bQty.style.display = 'block'; }
+    } else {
+      card.classList.remove('sel');
+      if(bQty) bQty.style.display = 'none';
+    }
+  }
+  atualizarPainel();
+}
+
+function removeCesta(ref) {
+  delete cesta[ref];
+  var card = document.getElementById(`card-${ref}`);
+  var bQty = document.getElementById(`badge-qty-${ref}`);
+  if(card) card.classList.remove('sel');
+  if(bQty) bQty.style.display = 'none';
+  atualizarPainel();
+}
+
+function limSel() {
+  if(confirm("Deseja realmente limpar toda a sua cesta?")) {
+    cesta = {};
+    pedidoSalvo = false;
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('sel'));
+    document.querySelectorAll('.card-badge-qty').forEach(b => b.style.display = 'none');
     atualizarPainel();
   }
 }
 
-function removeCesta(cod) {
-  delete cesta[cod];
-  var ref = cod.replace(/[^a-z0-9]/gi, '_');
-  var card = document.getElementById(`card-${ref}`);
-  var bQty = document.getElementById(`badge-qty-${ref}`);
-  if (card) card.classList.remove('sel');
-  if (bQty) bQty.style.display = 'none';
-  atualizarPainel();
+function abrirSheet() { 
+  document.getElementById('sh-ov').classList.add('open'); 
+  document.getElementById('b-sheet').classList.add('open'); 
+  document.body.style.overflow='hidden'; 
+}
+function fecharSheet() { 
+  document.getElementById('sh-ov').classList.remove('open'); 
+  document.getElementById('b-sheet').classList.remove('open'); 
+  document.body.style.overflow=''; 
 }
 
-function abrirModal(cod) {
-  var p = catalogo.produtos.find(item => item.codigo === cod);
-  if (!p) return;
-  refAtivaModal = cod;
-  
+// MODAL PRODUTO
+function abrirModal(ref) {
+  refModalAtivo = ref;
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === ref);
+  if(!p) return;
+
   var tabelaAtiva = document.getElementById('icms-d').value;
-  var precoUn = p.emPromocao ? p.precoPromo : (p.precos[tabelaAtiva] || 0);
-  
-  document.getElementById('modal-cod').textContent = p.codigo;
-  document.getElementById('modal-desc').textContent = p.descricao;
-  document.getElementById('modal-preco').textContent = "R$ " + precoUn.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-  document.getElementById('modal-emb').textContent = "Embalagem Padrão: " + p.qtdEmbalagem + " un.";
-  
-  var inputQty = document.getElementById('modal-qty');
-  inputQty.value = cesta[cod] ? cesta[cod].qtd : p.qtdEmbalagem;
-  
-  var btnAdd = document.getElementById('btn-add-modal');
-  if (cesta[cod]) {
-    btnAdd.textContent = "Atualizar na Cesta";
-    btnAdd.classList.add('adicionado');
-  } else {
-    btnAdd.textContent = "Adicionar à Cesta";
-    btnAdd.classList.remove('adicionado');
+  var precoUn = p.precos[tabelaAtiva] || p.precos['ICMS ' + tabelaAtiva] || Object.values(p.precos)[0] || 0;
+  if(p.emPromocao) {
+    precoUn = p.precosPromo[tabelaAtiva] || p.precosPromo['ICMS ' + tabelaAtiva] || precoUn;
   }
 
-  var imgElement = document.getElementById('modal-img');
-  var spinElement = document.getElementById('modal-spin');
-  spinElement.style.display = 'block';
-  imgElement.style.display = 'none';
+  document.getElementById('modal-cod').textContent = p.codigo;
+  document.getElementById('modal-desc').textContent = p.descricao;
+  document.getElementById('modal-preco').textContent = 'R$ ' + fmt(precoUn);
+  document.getElementById('modal-emb').textContent = 'Multiplicador Master: Múltiplos de ' + p.qtdEmbalagem + ' un';
   
-  if (p.imagemId) {
-    imgElement.src = "https://drive.google.com/thumbnail?id=" + p.imagemId + "&sz=w600";
-    imgElement.onload = function() {
-      spinElement.style.display = 'none';
-      imgElement.style.display = 'block';
-    };
+  var qtyAt = cesta[ref] || 0;
+  document.getElementById('modal-qty').value = qtyAt > 0 ? qtyAt : p.qtdEmbalagem;
+
+  var img = document.getElementById('modal-img');
+  var spin = document.getElementById('modal-spin');
+  spin.style.display = 'block'; img.style.display = 'none';
+
+  if(p.fileId) {
+    img.src = `https://drive.google.com/thumbnail?id=${p.fileId}&sz=w600`;
+    img.onload = () => { spin.style.display = 'none'; img.style.display = 'block'; };
   } else {
-    spinElement.style.display = 'none';
-    imgElement.style.display = 'none';
+    spin.style.display = 'none';
   }
-  
+
+  var btn = document.getElementById('btn-add');
+  if(qtyAt > 0) { btn.textContent = "✓ Atualizar Quantidade"; btn.className = "btn-add adicionado"; }
+  else { btn.textContent = "Adicionar ao pedido"; btn.className = "btn-add"; }
+
   document.getElementById('modal').classList.add('open');
 }
 
-function fecharModal() {
-  document.getElementById('modal').classList.remove('open');
-  refAtivaModal = null;
-}
+function fecharModal() { document.getElementById('modal').classList.remove('open'); refModalAtivo = null; }
+function clicouFora(e) { if(e.target.id === 'modal') fecharModal(); }
 
 function mudaQtyModal(delta) {
-  var p = catalogo.produtos.find(item => item.codigo === refAtivaModal);
+  var inp = document.getElementById('modal-qty');
+  var val = parseInt(inp.value) || 0;
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === refModalAtivo);
   var step = p ? p.qtdEmbalagem : 1;
-  var input = document.getElementById('modal-qty');
-  var val = parseInt(input.value) || 0;
   val += (delta * step);
-  if (val < step) val = step;
-  input.value = val;
+  if(val < step) val = step;
+  inp.value = val;
 }
 
-function addModalParaCesta() {
-  if (!refAtivaModal) return;
-  var p = catalogo.produtos.find(item => item.codigo === refAtivaModal);
-  if (!p) return;
+function adicionarDoModal() {
+  if(!refModalAtivo) return;
+  var val = parseInt(document.getElementById('modal-qty').value) || 0;
+  var p = catalogo.produtos.find(prod => normalizarReferencia(prod.codigo) === refModalAtivo);
   
-  var qty = parseInt(document.getElementById('modal-qty').value) || 1;
-  
-  cesta[refAtivaModal] = {
-    codigo: p.codigo,
-    descricao: p.descricao,
-    precos: p.precos,
-    emPromocao: p.emPromocao,
-    precoPromo: p.precoPromo,
-    ipi: p.ipi,
-    qtdEmbalagem: p.qtdEmbalagem,
-    qtd: qty
-  };
-  
-  var ref = refAtivaModal.replace(/[^a-z0-9]/gi, '_');
-  var card = document.getElementById(`card-${ref}`);
-  var bQty = document.getElementById(`badge-qty-${ref}`);
-  if (card) card.classList.add('sel');
-  if (bQty) { bQty.textContent = qty; bQty.style.display = 'block'; }
-  
+  if(val > 0 && p && val % p.qtdEmbalagem !== 0) {
+    val = Math.ceil(val / p.qtdEmbalagem) * p.qtdEmbalagem;
+  }
+
+  if(val <= 0) delete cesta[refModalAtivo];
+  else cesta[refModalAtivo] = val;
+
+  var card = document.getElementById(`card-${refModalAtivo}`);
+  var bQty = document.getElementById(`badge-qty-${refModalAtivo}`);
+  if(card) {
+    if(val > 0) {
+      card.classList.add('sel');
+      if(bQty) { bQty.textContent = val; bQty.style.display = 'block'; }
+    } else {
+      card.classList.remove('sel');
+      if(bQty) bQty.style.display = 'none';
+    }
+  }
   fecharModal();
   atualizarPainel();
   toast('Cesta atualizada!');
 }
 
-function obterDadosPedido() {
-  var ufAtiva = document.getElementById('uf-d').value;
-  var tabelaAtiva = document.getElementById('icms-d').value;
-  var pctPrazo = parseFloat(document.getElementById('prazo-d').value) || 0;
-
-  var subtotal = 0;
-  var totalIpi = 0;
-  var itensArr = [];
-
-  for (var cod in cesta) {
-    var item = cesta[cod];
-    var precoUn = item.emPromocao ? item.precoPromo : (item.precos[tabelaAtiva] || 0);
-    subtotal += precoUn * item.qtd;
-    totalIpi += (precoUn * item.qtd) * (item.ipi / 100);
-    
-    itensArr.push({
-      codigo: item.codigo,
-      descricao: item.descricao,
-      qtd: item.qtd,
-      preco: precoUn,
-      ipi: item.ipi
-    });
-  }
-
-  var valPrazo = subtotal * (pctPrazo / 100);
-  var valorFrete = 0; 
-  var liquido = subtotal - valPrazo + totalIpi + valorFrete;
-
-  return {
-    bruto: subtotal,
-    descontos: valPrazo,
-    pctPrazo: pctPrazo,
-    totalIpi: totalIpi,
-    valorFrete: valorFrete,
-    uf: ufAtiva,
-    total: liquido,
-    tabelaAtiva: tabelaAtiva,
-    itens: itensArr
-  };
-}
-
+// ENVIO DE PEDIDO
 function abrirFluxoFechamento(origem) {
   fluxoOrigem = origem;
   document.getElementById('modal-cliente').classList.add('open');
 }
+function fecharModalCliente() { document.getElementById('modal-cliente').classList.remove('open'); }
+function clicouForaCliente(e) { if(e.target.id === 'modal-cliente') fecharModalCliente(); }
 
-function fecharModalCliente() {
-  document.getElementById('modal-cliente').classList.remove('open');
-}
-
-function salvarPedidoFinal() {
+function salvarPedidoNuvem() {
   var razao = document.getElementById('cli-razao').value.trim();
-  var cnpj = document.getElementById('cli-cnpj').value.trim();
-  var email = document.getElementById('cli-email').value.trim();
+  if(!razao) { alert('A Razão Social do cliente é obrigatória!'); return; }
 
-  if (!razao || !cnpj || !email) {
-    alert("Por favor, preencha todos os dados cadastrais do cliente.");
-    return;
-  }
-
-  var dadosCalc = obterDadosPedido();
-  var payload = {
-    cliente: { razao: razao, cnpj: cnpj, email: email },
-    contas: {
-      uf: dadosCalc.uf,
-      bruto: dadosCalc.bruto,
-      valPrazo: dadosCalc.descontos,
-      totalIpi: dadosCalc.totalIpi,
-      valorFrete: dadosCalc.valorFrete,
-      liquido: dadosCalc.total,
-      tabelaAtiva: 'ICMS ' + dadosCalc.tabelaAtiva
-    },
-    produtos: dadosCalc.itens
+  var client = {
+    cnpj: document.getElementById('cli-cnpj').value.trim(),
+    razao: razao,
+    fantasia: document.getElementById('cli-fantasia').value.trim(),
+    endereco: document.getElementById('cli-endereco').value.trim(),
+    telefone: document.getElementById('cli-telefone').value.trim(),
+    email: document.getElementById('cli-email').value.trim(),
+    obs: document.getElementById('cli-obs').value.trim()
   };
 
-  var btn = document.querySelector('#modal-cliente .prim');
-  btn.disabled = true;
-  btn.textContent = "Gravando pedido...";
+  var stringItens = dadosAtuaisDoPedido.itens.map(i => `${i.codigo} (${i.qty}un)`).join(', ');
 
-  fetch(URL_GOOGLE_SCRIPT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  var payload = {
+    clienteInfo: `${client.razao} | CNPJ: ${client.cnpj || 'Isento'} | UF: ${dadosAtuaisDoPedido.uf} | Tel: ${client.telefone || '-'}`,
+    itens: stringItens,
+    qtd: dadosAtuaisDoPedido.qtd,
+    subtotalProdutos: dadosAtuaisDoPedido.subtotalProdutos,
+    totalIpi: dadosAtuaisDoPedido.totalIpi,
+    totalDescontos: dadosAtuaisDoPedido.totalDescontos,
+    valorFrete: dadosAtuaisDoPedido.valorFrete,
+    prazo: dadosAtuaisDoPedido.prazo,
+    total: dadosAtuaisDoPedido.total
+  };
+
+  var btn = document.getElementById(fluxoOrigem === 'd' ? 'btn-orc-d' : 'btn-orc-m');
+  btn.disabled = true; btn.textContent = 'A guardar...';
+
+  fecharModalCliente();
+  toast('A registar pedido na folha...');
+
+  fetch(URL_GOOGLE_SCRIPT + "?t=" + new Date().getTime(), {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload)
   })
   .then(res => res.json())
   .then(resData => {
-    btn.disabled = false;
-    btn.textContent = "Confirmar e Gravar Pedido";
-    if (resData.status === 'success') {
-      alert("Pedido registrado perfeitamente na planilha!");
-      fecharModalCliente();
-      fecharSheet();
-      cesta = {};
+    if(resData.status === 'success') {
+      pedidoSalvo = true;
+      clienteCompletoAtivo = client;
+      toast('Pedido guardado com sucesso!');
       atualizarPainel();
-      filtrar();
     } else {
-      alert("Erro do Servidor: " + resData.message);
+      alert('Erro: ' + resData.message);
+      atualizarPainel();
     }
   })
   .catch(err => {
-    btn.disabled = false;
-    btn.textContent = "Confirmar e Gravar Pedido";
     console.error(err);
-    alert("Erro de conexão de rede.");
+    toast('Erro de rede ao guardar.');
+    atualizarPainel();
   });
 }
 
 function baixarPdf() {
-  var razao = document.getElementById('cli-razao').value.trim() || 'Cliente_Temporario';
-  var cnpj = document.getElementById('cli-cnpj').value.trim() || '00.000.000/0001-00';
-  var email = document.getElementById('cli-email').value.trim() || 'vendas@empresa.com';
-  
-  var dadosCalc = obterDadosPedido();
+  if(!pedidoSalvo || !dadosAtuaisDoPedido) { toast('Guarde o pedido primeiro!'); return; }
+  toast('A compilar PDF...');
+
   var payloadPdf = {
     acao: 'pdf',
     dadosPdf: {
-      cliente: { razao: razao, cnpj: cnpj, email: email },
+      cliente: clienteCompletoAtivo,
+      itens: dadosAtuaisDoPedido.itens,
       contas: {
-        bruto: dadosCalc.bruto,
-        valPrazo: dadosCalc.descontos,
-        prazo: dadosCalc.pctPrazo,
-        totalIpi: dadosCalc.totalIpi,
-        valorFrete: dadosCalc.valorFrete,
-        uf: dadosCalc.uf,
-        liquido: dadosCalc.total,
-        tabelaAtiva: 'ICMS ' + dadosCalc.tabelaAtiva
-      },
-      produtos: dadosCalc.itens,
-      logoUrl: catalogo.logoUrl
+        subtotal: dadosAtuaisDoPedido.subtotalProdutos,
+        valPrazo: dadosAtuaisDoPedido.totalDescontos,
+        prazo: dadosAtuaisDoPedido.pctPrazo,
+        totalIpi: dadosAtuaisDoPedido.totalIpi,
+        valorFrete: dadosAtuaisDoPedido.valorFrete,
+        uf: dadosAtuaisDoPedido.uf,
+        liquido: dadosAtuaisDoPedido.total,
+        tabelaAtiva: 'ICMS ' + dadosAtuaisDoPedido.tabelaAtiva
+      }
     }
   };
-
-  toast("Gerando PDF, aguarde...");
 
   fetch(URL_GOOGLE_SCRIPT, {
     method: 'POST',
@@ -764,82 +897,21 @@ function baixarPdf() {
       
       var link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = `Pedido_${razao.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-      document.body.appendChild(link);
+      link.download = `Pedido_${clienteCompletoAtivo.razao.replace(/[^a-z0-9]/gi, '_')}.pdf`;
       link.click();
-      document.body.removeChild(link);
-      toast("PDF baixado com sucesso!");
+      toast('PDF descarregado!');
     } else {
-      alert("Erro: " + (resData.message || "Não foi possível estruturar o PDF"));
+      alert('Erro na geração: ' + resData.message);
     }
   })
-  .catch(err => {
-    console.error(err);
-    alert("Falha de processamento na geração do PDF.");
-  });
-}
-
-function limFiltros() {
-  document.getElementById('busca').value = '';
-  document.getElementById('fil-marca').value = '';
-  document.getElementById('fil-preco').value = '';
-  filtrar();
-}
-
-function sincronizarPlanilha() {
-  var btn = document.getElementById('btn-sync');
-  btn.disabled = true;
-  btn.textContent = "🔄 Sincronizando...";
-  carregarCatalogo(true);
-  setTimeout(() => {
-    btn.disabled = false;
-    btn.textContent = "🔄 Sincronizar Catálogo";
-  }, 2500);
-}
-
-function syncRegras(idOrigem, idDestino) {
-  var val = document.getElementById(idOrigem).value;
-  document.getElementById(idDestino).value = val;
-  if(idOrigem.indexOf('icms') !== -1) {
-    filtrar(); // Re-filtra e atualiza preços se mudar o ICMS
-  } else {
-    atualizarPainel();
-  }
-}
-
-function abrirSheet() {
-  document.getElementById('sh-ov').classList.add('open');
-  document.getElementById('b-sheet').classList.add('open');
-}
-
-function fecharSheet() {
-  document.getElementById('sh-ov').classList.remove('open');
-  document.getElementById('b-sheet').classList.remove('open');
+  .catch(err => { console.error(err); toast('Erro ao chamar motor PDF.'); });
 }
 
 function toast(msg) {
   var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => { t.classList.remove('show'); }, 2000);
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
-
-function limSel() {
-  if(confirm("Deseja esvaziar completamente sua cesta?")) {
-    cesta = {};
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('sel'));
-    document.querySelectorAll('.card-badge-qty').forEach(b => b.style.display = 'none');
-    atualizarPainel();
-  }
-}
-
-function clicouFora(e) {
-  if (e.target.id === 'modal') fecharModal();
-}
-
-window.onload = function() {
-  carregarCatalogo(false);
-};
 </script>
 </body>
 </html>
