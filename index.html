@@ -176,13 +176,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   <aside class="painel">
     <h3>📊 Fechamento do Pedido</h3>
     <div class="lista-sel" id="lista-d"></div>
-    
-    <div class="field">
-      <label>Estado (UF) para Regra de Frete</label>
-      <select id="uf-d" onchange="syncRegras('uf-d','uf-m')">
-        <option value="">Selecione o Estado...</option>
-      </select>
-    </div>
 
     <div class="field">
       <label>Regra de ICMS / Faixa</label>
@@ -237,13 +230,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   <div class="sh-title">📊 Fechamento do Pedido</div>
   <div class="lista-sel" id="lista-m" style="margin-bottom:12px"></div>
   
-  <div class="field">
-    <label>Estado (UF) para Regra de Frete</label>
-    <select id="uf-m" onchange="syncRegras('uf-m','uf-d')">
-      <option value="">Selecione o Estado...</option>
-    </select>
-  </div>
-
   <div class="field">
     <label>Regra de ICMS / Faixa</label>
     <select id="icms-m" onchange="syncRegras('icms-m','icms-d')">
@@ -310,16 +296,41 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 </div>
 
+<div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
+  <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; max-height: 90vh;">
+    <h3 style="margin-bottom:16px; color:var(--verde-dk); font-size: 16px; text-align: center;">📋 PREENCHER DADOS DO CLIENTE</h3>
+    <div class="field">
+      <label>Razão Social / Nome</label>
+      <input type="text" id="cli-nome" placeholder="Digite a Razão Social ou Nome">
+    </div>
+    <div class="field">
+      <label>CNPJ / CPF (Opcional)</label>
+      <input type="text" id="cli-doc" placeholder="Digite o CNPJ ou CPF">
+    </div>
+    <div class="field">
+      <label>UF do Cliente</label>
+      <select id="cli-uf">
+        <option value="">Selecione o Estado...</option>
+      </select>
+    </div>
+    <div style="margin-top: 20px;">
+      <button class="btn prim" id="btn-salvar-cli" onclick="confirmarSalvamentoPedido()" style="margin-bottom: 8px;">Salvar Pedido na Planilha</button>
+      <button class="btn" onclick="fecharModalCliente()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // CONFIGURAÇÃO WEB APP GOOGLE APPLICATION URL
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxbRsGjBETwMAh4bM4VthlalqmheoRfNkwF_5a5RF7CiM6z8bvMPMiHiejETc74ulfH9g/exec"; // Substitua pela sua URL real de publicação
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxbRsGjBETwMAh4bM4VthlalqmheoRfNkwF_5a5RF7CiM6z8bvMPMiHiejETc74ulfH9g/exec"; 
 
 let PRODUTOS = [];
 let SELECIONADOS = {};
 let DADOS_PDF_PRONTO = null;
 
+// Tabelas de Prazos Condicionais fornecidas
 const SUB_PRAZOS = {
   "9": ["28 DIAS", "14/42 DIAS", "21/35 DIAS", "14/28/42 DIAS"],
   "7": ["35 DIAS", "14/56 DIAS", "21/49 DIAS", "28/42 DIAS", "14/35/56 DIAS", "21/35/49 DIAS", "14/28/42/56 DIAS"],
@@ -352,14 +363,12 @@ function carregarDados(force = false) {
         document.getElementById('logo-area').innerHTML = `<img src="${data.logoUrl}" alt="Logo">`;
       }
       
-      const comboUfD = document.getElementById('uf-d');
-      const comboUfM = document.getElementById('uf-m');
+      const comboUf = document.getElementById('cli-uf');
       let htmlUf = '<option value="">Selecione o Estado...</option>';
       if(data.estados) {
         data.estados.forEach(uf => { htmlUf += `<option value="${uf}">${uf}</option>`; });
       }
-      comboUfD.innerHTML = htmlUf;
-      comboUfM.innerHTML = htmlUf;
+      comboUf.innerHTML = htmlUf;
 
       renderizarGrid(PRODUTOS);
       calcularTudo();
@@ -389,7 +398,6 @@ function renderizarGrid(lista) {
     return;
   }
 
-  // Identifica qual tabela de ICMS base deve exibir nos cards baseado no painel lateral
   let icmsBase = document.getElementById('icms-d').value;
   let brutoPrevia = somarBrutoPrevia();
   let tabelaCard = "M26071";
@@ -404,13 +412,7 @@ function renderizarGrid(lista) {
     let isSel = SELECIONADOS[codNorm] ? 'sel' : '';
     let isPromo = p.emPromocao ? 'promo' : '';
     
-    // Calcula o preço dinâmico de exibição imediata na tela
-    let precoExibicao = 0;
-    if(p.emPromocao) {
-      precoExibicao = p.precosPromo[tabelaCard] || p.precosPromo['M26071'] || 0;
-    } else {
-      precoExibicao = p.precos[tabelaCard] || p.precos['M26071'] || 0;
-    }
+    let precoExibicao = p.emPromocao ? (p.precosPromo[tabelaCard] || p.precosPromo['M26071'] || 0) : (p.precos[tabelaCard] || p.precos['M26071'] || 0);
 
     let imgTag = p.fileId 
       ? `<img src="https://drive.google.com/thumbnail?id=${p.fileId}&sz=w300" onload="this.classList.add('loaded')">`
@@ -443,7 +445,6 @@ function renderizarGrid(lista) {
 function somarBrutoPrevia() {
   let totalPrevia = 0;
   Object.values(SELECIONADOS).forEach(item => {
-    // Para a estimativa da faixa de tabela, usamos a tabela padrão 071/121 básica
     let icmsBase = document.getElementById('icms-d').value;
     let tabBase = icmsBase === "7" ? "M26071" : "M26121";
     let pUnit = item.produto.emPromocao ? (item.produto.precosPromo[tabBase] || 0) : (item.produto.precos[tabBase] || 0);
@@ -457,7 +458,6 @@ function filtrar() {
   let promo = document.getElementById('fil-promo').value;
   let pMax = parseFloat(document.getElementById('fil-preco').value) || Infinity;
 
-  // Recalcula tabelas antes de filtrar para manter coerência visual
   let icmsBase = document.getElementById('icms-d').value;
   let brutoPrevia = somarBrutoPrevia();
   let tabelaCard = "M26071";
@@ -470,10 +470,8 @@ function filtrar() {
   let filtrados = PRODUTOS.filter(p => {
     let matchTxt = p.codigo.toLowerCase().includes(txt) || p.descricao.toLowerCase().includes(txt) || p.codigoEan.toLowerCase().includes(txt);
     let matchPromo = promo === 'sim' ? p.emPromocao : true;
-    
     let precoRef = p.emPromocao ? (p.precosPromo[tabelaCard] || 0) : (p.precos[tabelaCard] || 0);
     let matchPreco = precoRef <= pMax;
-
     return matchTxt && matchPromo && matchPreco;
   });
 
@@ -507,7 +505,7 @@ function abrirModalProduto(codigo) {
   document.getElementById('modal-cod').innerText = "Referência: " + p.codigo;
   document.getElementById('modal-desc').innerText = p.descricao;
   document.getElementById('modal-preco').innerText = "R$ " + precoRef.toFixed(2).replace('.', ',');
-  document.getElementById('modal-emb').innerText = `Embalagem Master: ${p.qtdEmbalagem} itens (O pedido deve respeitar múltiplos deste valor)`;
+  document.getElementById('modal-emb').innerText = `Embalagem Master: ${p.qtdEmbalagem} itens`;
   
   let key = p.codigo.toLowerCase().trim();
   document.getElementById('modal-qty').value = SELECIONADOS[key] ? SELECIONADOS[key].qtd : p.qtdEmbalagem;
@@ -570,7 +568,6 @@ function confirmarAddModal() {
 
   if (qty % mult !== 0) {
     qty = Math.ceil(qty / mult) * mult;
-    showToast(`Quantidade ajustada para R$ {qty} para respeitar o múltiplo da embalagem.`);
   }
 
   let key = PRODUTO_MODAL_ATIVO.codigo.toLowerCase().trim();
@@ -581,20 +578,21 @@ function confirmarAddModal() {
 
   fecharModal();
   calcularTudo();
-  filtrar(); // Força a atualização dos valores nas tags visíveis da tela principal
+  filtrar(); 
   showToast("Item adicionado/atualizado com sucesso!");
 }
 
+// ESTA FUNÇÃO FOI ATUALIZADA: Agora chama filtrar() atualizando a tela na hora!
 function syncRegras(idOrigem, idDestino) {
   const val = document.getElementById(idOrigem).value;
   document.getElementById(idDestino).value = val;
   calcularTudo();
+  filtrar();
 }
 
 function alterouPrazoBase(idOrigem, idDestino) {
   const pBase = document.getElementById(idOrigem).value;
   document.getElementById(idDestino).value = pBase;
-  
   renderizarSubPrazos(pBase);
   calcularTudo();
 }
@@ -657,7 +655,6 @@ function calcularTudo() {
     tabelaAtiva = subtotalBrutoInicial <= 2500 ? "M26121" : "M26122";
   }
 
-  // Agora recalcula com base na tabela correta definida pelo montante
   let subtotalProdutos = 0;
   let totalIpi = 0;
   let contItens = 0;
@@ -671,7 +668,6 @@ function calcularTudo() {
     subtotalProdutos += totalItemOriginal;
     contItens += item.qtd;
 
-    // Cálculo das 8 colunas para o PDF e conferência individual
     let valorComDescontoPrazo = precoUnit * (1 - (prazoPct / 100));
     let valorIpiCada = valorComDescontoPrazo * (p.ipi / 100);
     let valorItemComIpi = valorComDescontoPrazo + valorIpiCada;
@@ -692,10 +688,9 @@ function calcularTudo() {
   });
 
   let valorPrazo = subtotalProdutos * (prazoPct / 100);
-  let valorFrete = 0; // Pode ser plugado lógica dinâmica vinda da aba de Frete se desejado
+  let valorFrete = 0;
   let valorFinalLiquido = (subtotalProdutos - valorPrazo) + totalIpi + valorFrete;
 
-  // Atualiza as labels nos dois painéis (Desktop e Mobile)
   document.getElementById('rd-tabela-ativa').innerText = tabelaAtiva;
   document.getElementById('rm-tabela-ativa').innerText = tabelaAtiva;
   
@@ -717,26 +712,21 @@ function calcularTudo() {
   document.getElementById('rd-total').innerText = "R$ " + valorFinalLiquido.toFixed(2).replace('.',',');
   document.getElementById('rm-total').innerText = "R$ " + valorFinalLiquido.toFixed(2).replace('.',',');
 
-  // Atualiza Headers e Mobile bars
   document.getElementById('badge').innerText = `${contItens} itens`;
   document.getElementById('badge').style.display = contItens > 0 ? 'block' : 'none';
   document.getElementById('mb-info').innerHTML = `<b>Total: R$ ${valorFinalLiquido.toFixed(2).replace('.',',')}</b><br>${contItens} itens selecionados`;
 
-  // Habilita ou desabilita botões de ação
   const liberado = contItens > 0;
   document.getElementById('btn-orc-d').disabled = !liberado;
   document.getElementById('btn-orc-m').disabled = !liberado;
 
-  // Renderiza as listagens laterais expandidas
   renderizarListaLateral('lista-d');
   renderizarListaLateral('lista-m');
 
-  // Guardar Payload estruturado do PDF pronto para envio
   if(liberado) {
     let selectPrazo = document.getElementById('prazo-d');
     let textoPrazoFinal = selectPrazo.options[selectPrazo.selectedIndex].text;
     
-    // Se houver subprazo ativo/visível, usa-se o texto dele para envio impresso
     if(SUB_PRAZOS[prazoPct]) {
       let subSelect = document.getElementById('subprazo-d');
       if(subSelect && subSelect.value) {
@@ -762,6 +752,8 @@ function calcularTudo() {
     DADOS_PDF_PRONTO = null;
     document.getElementById('btn-xls-d').classList.remove('liberado');
     document.getElementById('btn-xls-m').classList.remove('liberado');
+    document.getElementById('btn-xls-d').disabled = true;
+    document.getElementById('btn-xls-m').disabled = true;
   }
 }
 
@@ -787,7 +779,6 @@ function renderizarListaLateral(containerId) {
     let p = item.produto;
     let key = p.codigo.toLowerCase().trim();
     let precoRef = p.emPromocao ? (p.precosPromo[tabelaCard] || 0) : (p.precos[tabelaCard] || 0);
-    let totalItem = precoRef * item.qtd;
 
     return `
       <div class="sel-row">
@@ -813,18 +804,31 @@ function fecharSheet() {
   document.getElementById('b-sheet').classList.remove('open');
 }
 
+// ---- LOGICA DO MODAL DO CLIENTE ----
 function abrirFluxoFechamento(origem) {
-  let uf = document.getElementById('uf-' + origem).value;
-  if(!uf) {
-    alert("Por favor, selecione um Estado (UF) para validar o pedido.");
+  if (Object.keys(SELECIONADOS).length === 0) {
+    alert("Adicione itens ao pedido primeiro.");
     return;
   }
+  document.getElementById('modal-cliente').classList.add('open');
+}
 
-  let r = prompt("Digite a Razão Social / Nome do Cliente:");
-  if(!r) return;
-  let c = prompt("Digite o CNPJ ou CPF do Cliente (Opcional):") || "Não Informado";
+function fecharModalCliente() {
+  document.getElementById('modal-cliente').classList.remove('open');
+}
 
-  let totalFinalStr = document.getElementById('rd-total').innerText;
+function clicouForaCliente(e) {
+  if(e.target.id === 'modal-cliente') fecharModalCliente();
+}
+
+function confirmarSalvamentoPedido() {
+  let r = document.getElementById('cli-nome').value.trim();
+  let c = document.getElementById('cli-doc').value.trim() || "Não Informado";
+  let uf = document.getElementById('cli-uf').value;
+
+  if(!r) { alert("Por favor, preencha a Razão Social / Nome."); return; }
+  if(!uf) { alert("Por favor, selecione a UF do Cliente."); return; }
+
   let totalItensStr = document.getElementById('badge').innerText;
   let tabelaAtivaStr = document.getElementById('rd-tabela-ativa').innerText;
 
@@ -841,10 +845,9 @@ function abrirFluxoFechamento(origem) {
     total: DADOS_PDF_PRONTO.contas.liquido
   };
 
-  // Trava botões durante salvamento
-  document.getElementById('btn-orc-d').disabled = true;
-  document.getElementById('btn-orc-m').disabled = true;
-  document.getElementById('btn-orc-d').innerText = "Salvando...";
+  const btnCli = document.getElementById('btn-salvar-cli');
+  btnCli.disabled = true;
+  btnCli.innerText = "Salvando...";
 
   fetch(URL_GOOGLE_SCRIPT, {
     method: 'POST',
@@ -853,26 +856,32 @@ function abrirFluxoFechamento(origem) {
   })
   .then(res => res.json())
   .then(resData => {
+    btnCli.disabled = false;
+    btnCli.innerText = "Salvar Pedido na Planilha";
+
     if(resData.status === 'success') {
+      fecharModalCliente();
       showToast("Pedido salvo na planilha com sucesso! PDF Liberado.");
       
-      // Atualiza cabeçalhos do cliente na prévia do PDF interno
       DADOS_PDF_PRONTO.clienteInfo = `Razão Social: ${r}\nCNPJ/CPF: ${c}\nEstado Destino: ${uf}`;
       
+      // LIBERA O BOTÃO DO PDF DEPOIS DO SUCESSO!
       document.getElementById('btn-xls-d').classList.add('liberado');
       document.getElementById('btn-xls-m').classList.add('liberado');
+      document.getElementById('btn-xls-d').disabled = false;
+      document.getElementById('btn-xls-m').disabled = false;
+      
       document.getElementById('btn-orc-d').innerText = "Pedido Salvo! ✓";
+      document.getElementById('btn-orc-m').innerText = "Pedido Salvo! ✓";
     } else {
       alert("Erro ao registrar: " + resData.message);
-      document.getElementById('btn-orc-d').disabled = false;
-      document.getElementById('btn-orc-d').innerText = "Finalizar e Salvar Pedido";
     }
   })
   .catch(err => {
     console.error(err);
     alert("Erro de rede ao salvar pedido.");
-    document.getElementById('btn-orc-d').disabled = false;
-    document.getElementById('btn-orc-d').innerText = "Finalizar e Salvar Pedido";
+    btnCli.disabled = false;
+    btnCli.innerText = "Salvar Pedido na Planilha";
   });
 }
 
