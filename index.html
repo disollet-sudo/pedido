@@ -141,11 +141,21 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 </head>
 <body>
 
-<div class="modal open" id="modal-repre" style="display:flex;">
+<!-- Modal do Código do Representante -->
+<div class="modal" id="modal-repre">
   <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; justify-content: center; align-items: center; text-align: center;">
     <h3 style="margin-bottom:16px; color:var(--verde-dk); font-size: 16px;">👤 Informe seu Código de Representante</h3>
     <input type="text" id="repre-codigo" placeholder="Digite seu código..." style="width:100%; padding:12px; border:1px solid var(--borda); border-radius:8px; margin-bottom:16px; font-size: 15px; text-align: center;">
     <button class="btn prim" onclick="salvarRepre()">Entrar no Sistema</button>
+  </div>
+</div>
+
+<!-- Modal de Carregamento (Enviando E-mail/PDF) -->
+<div class="modal" id="loading-modal">
+  <div class="modal-box" style="padding: 30px; max-width: 320px; height: auto; justify-content: center; align-items: center; text-align: center; background: #fff;">
+    <div class="modal-spin" style="display:block; margin-bottom:16px;"></div>
+    <div style="font-weight:bold; color:var(--verde-dk); font-size: 16px;">Enviando Pedido...</div>
+    <div style="font-size:12px; color:var(--sub); margin-top:8px;">Aguarde, isso pode levar alguns segundos. Não feche a página.</div>
   </div>
 </div>
 
@@ -174,6 +184,12 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <button class="btn-lim" onclick="limFiltros()">✕ Limpar</button>
     
     <div class="top-actions">
+      <!-- Visor do Código de Representante com botão Alterar -->
+      <span style="font-size:13px; font-weight:600; color:var(--verde-dk); display:none; align-items:center; gap:6px; background:var(--verde-lt); padding:4px 10px; border-radius:12px;" id="info-repre-box">
+        Rep: <span id="info-repre-txt"></span>
+        <button onclick="abrirModalRepre()" style="background:none; border:none; color:var(--sub); text-decoration:underline; cursor:pointer; font-size:11px;">(Alterar)</button>
+      </span>
+      
       <span style="font-size:12px;color:var(--sub)" id="cont"></span>
       <button class="btn-lim btn-sync" id="btn-sync" onclick="sincronizarPlanilha()">🔄 Sincronizar Catálogo</button>
     </div>
@@ -355,15 +371,29 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// CONFIGURAÇÃO WEB APP GOOGLE APPLICATION URL
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbz_Z-XJtvU7lE5y2j1UEiUSBtfwdNseFt_QtJzT8ld3GPJRyV7SXuRgeR1uTjenYpVKuQ/exec"; 
+// ATENÇÃO: Verifique se essa é a URL correta após gerar uma "Nova Implantação"
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxR6Fu8OXcyq9FE2Cz6FCiSNopjTQyid0INOGy68hKz4avEvotPDifLndacn1wCDWZXgQ/exec"; 
 
 let PRODUTOS = [];
 let SELECIONADOS = {};
 let DADOS_PDF_PRONTO = null;
 
-// Lógica de Código Representante Obrigatório
-let CODIGO_REPRE = "";
+// Lógica de Código Representante com localStorage (Salva no navegador)
+let CODIGO_REPRE = localStorage.getItem('repre_cod') || "";
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Verifica se já tem código salvo
+  if(!CODIGO_REPRE) {
+    document.getElementById('modal-repre').style.display = 'flex';
+    document.getElementById('modal-repre').classList.add('open');
+  } else {
+    document.getElementById('modal-repre').style.display = 'none';
+    document.getElementById('modal-repre').classList.remove('open');
+    atualizarExibicaoRepre();
+  }
+  
+  carregarDados();
+});
 
 function salvarRepre() {
   let val = document.getElementById('repre-codigo').value.trim();
@@ -372,8 +402,23 @@ function salvarRepre() {
     return;
   }
   CODIGO_REPRE = val;
+  localStorage.setItem('repre_cod', val); // Salva na memória do navegador
+  
   document.getElementById('modal-repre').style.display = 'none';
   document.getElementById('modal-repre').classList.remove('open');
+  atualizarExibicaoRepre();
+  showToast("Código de representante salvo!");
+}
+
+function atualizarExibicaoRepre() {
+  document.getElementById('info-repre-txt').innerText = CODIGO_REPRE;
+  document.getElementById('info-repre-box').style.display = 'flex';
+}
+
+function abrirModalRepre() {
+  document.getElementById('repre-codigo').value = CODIGO_REPRE;
+  document.getElementById('modal-repre').style.display = 'flex';
+  document.getElementById('modal-repre').classList.add('open');
 }
 
 // Tabelas de Prazos Condicionais
@@ -384,10 +429,6 @@ const SUB_PRAZOS = {
   "2": ["56 DIAS", "28/84 DIAS", "49/63 DIAS", "35/56/77 DIAS", "42/56/70 DIAS", "35/49/63/77 DIAS", "28/42/56/70/84 DIAS", "21/35/49/63/77/91 DIAS"],
   "0": ["63 DIAS", "35/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"]
 };
-
-window.addEventListener('DOMContentLoaded', () => {
-  carregarDados();
-});
 
 function showToast(m) {
   const t = document.getElementById('toast');
@@ -725,7 +766,7 @@ function calcularTudo() {
       descricao: p.descricao,
       qtd: item.qtd,
       fileId: p.fileId,
-      ipi: p.ipi, // IPI Adicionado para o gerador de PDF
+      ipi: p.ipi, 
       valorComDesconto: valorComDescontoPrazo,
       valorIpiCada: valorIpiCada,
       valorComIpi: valorItemComIpi,
@@ -850,7 +891,6 @@ function fecharSheet() {
   document.getElementById('b-sheet').classList.remove('open');
 }
 
-// ---- LOGICA DO MODAL DO CLIENTE ----
 function abrirFluxoFechamento(origem) {
   if (Object.keys(SELECIONADOS).length === 0) {
     alert("Adicione itens ao pedido primeiro.");
@@ -885,7 +925,6 @@ function confirmarSalvamentoPedido() {
 
   let txtItens = Object.values(SELECIONADOS).map(x => `${x.produto.codigo} (${x.qtd} un)`).join(' | ');
   
-  // BLOCO DE TEXTO ESTRUTURADO PARA PLANILHA E PDF INCLUINDO CÓDIGO DO REPRESENTANTE
   let stringDadosCliente = `REPRESENTANTE: ${CODIGO_REPRE}\nRAZÃO SOCIAL: ${razao}\nFANTASIA: ${fantasia}\nCNPJ/CPF: ${cnpj}\nENDEREÇO: ${endereco}\nTELEFONE: ${telefone}\nE-MAIL: ${email}\nESTADO DESTINO: ${uf}\nTABELA APLICADA: ${tabelaAtivaStr}`;
   
   let payloadPlanilha = {
@@ -917,7 +956,6 @@ function confirmarSalvamentoPedido() {
       fecharModalCliente();
       showToast("Pedido salvo na planilha com sucesso! Opção de envio liberada.");
       
-      // Injeta os dados estruturados no Payload do PDF e guarda um Nome Seguro
       DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente;
       DADOS_PDF_PRONTO.razaoSegura = razao;
       DADOS_PDF_PRONTO.codigoRepre = CODIGO_REPRE;
@@ -927,7 +965,6 @@ function confirmarSalvamentoPedido() {
       document.getElementById('btn-xls-d').disabled = false;
       document.getElementById('btn-xls-m').disabled = false;
       
-      // ALtera o nome do botão
       document.getElementById('btn-xls-d').innerText = "Enviar o pedido";
       document.getElementById('btn-xls-m').innerText = "Enviar o pedido";
       
@@ -948,7 +985,9 @@ function confirmarSalvamentoPedido() {
 function baixarPdf() {
   if(!DADOS_PDF_PRONTO) return;
   
-  showToast("Enviando e gerando o pedido, aguarde...");
+  // ABRE O POP-UP DE CARREGAMENTO
+  document.getElementById('loading-modal').style.display = 'flex';
+  document.getElementById('loading-modal').classList.add('open');
   
   fetch(URL_GOOGLE_SCRIPT, {
     method: 'POST',
@@ -957,20 +996,22 @@ function baixarPdf() {
   })
   .then(res => res.json())
   .then(resData => {
+    // FECHA O POP-UP DE CARREGAMENTO
+    document.getElementById('loading-modal').style.display = 'none';
+    document.getElementById('loading-modal').classList.remove('open');
+
     if(resData.status === 'success' && resData.base64) {
       let byteChars = atob(resData.base64);
       let byteNumbers = new Array(byteChars.length);
       for (let i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
       let blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
       
-      // Formatação da data para o nome do arquivo
       let dataAtual = new Date();
       let dia = String(dataAtual.getDate()).padStart(2, '0');
       let mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
       let ano = dataAtual.getFullYear();
       let dataStr = `${dia}-${mes}-${ano}`;
       
-      // Definição do nome do arquivo com base no Representante
       let nomeRepreSeguro = (DADOS_PDF_PRONTO.codigoRepre || 'Repre').replace(/[^a-z0-9]/gi, '_');
       
       let link = document.createElement('a');
@@ -984,8 +1025,11 @@ function baixarPdf() {
     }
   })
   .catch(err => {
+    // FECHA O POP-UP DE CARREGAMENTO NO ERRO
+    document.getElementById('loading-modal').style.display = 'none';
+    document.getElementById('loading-modal').classList.remove('open');
     console.error(err);
-    alert("Erro de rede ao processar PDF.");
+    alert("Erro de rede ao processar PDF/E-mail.");
   });
 }
 </script>
