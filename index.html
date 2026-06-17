@@ -79,17 +79,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 }
 
 .painel-header {
-  padding: 18px 18px 10px;
+  padding: 14px 18px;
   flex-shrink: 0;
   border-bottom: 1px solid var(--borda);
-}
-.painel-header h3 {
-  font-size: 14px;
-  font-weight: 600;
   display: flex;
-  align-items: center;
-  gap: 7px;
-  margin: 0;
+  justify-content: center;
 }
 
 .painel-scroll {
@@ -111,8 +105,10 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .field label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600}
 .field select, .field input[type=text], .field input[type=email], .field textarea{width:100%;padding:8px 10px;border:1px solid var(--borda);border-radius:7px;font-size:13px;outline:none;background:#fff;color:var(--texto)}
 
-/* A lista já não tem altura máxima nem overflow-y pois o pai (.painel-scroll) faz isso */
-.lista-sel{border:1px solid var(--borda);border-radius:8px;margin-bottom:12px; background:#fff;}
+/* LISTA CARRINHO */
+.lista-sel{border:1px solid var(--borda);border-radius:8px;margin-bottom:12px; background:#fff; max-height: 50vh; overflow-y: auto;}
+.lista-sel::-webkit-scrollbar { width: 6px; }
+.lista-sel::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 .sel-row{display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid var(--borda);gap:6px}
 .sel-row:last-child{border-bottom:none}
 .sel-cod{font-size:11px;font-weight:700;color:var(--verde-dk);flex-shrink:0;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -124,6 +120,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .sel-rm:hover{color:#e24b4a}
 .vazio{text-align:center;padding:18px;color:var(--sub);font-size:12px}
 
+/* BOTÕES GERAIS */
 .btn{width:100%;padding:11px;border:1px solid var(--borda);border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;margin-bottom:8px;background:var(--branco);color:var(--texto)}
 .btn:hover{border-color:var(--verde);color:var(--verde)}
 .btn.prim{background:var(--verde);border-color:var(--verde);color:#fff}
@@ -132,6 +129,10 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .btn.pdf-btn.liberado{background:#fff;color:var(--verde-dk);border-color:var(--verde);cursor:pointer}
 .btn.pdf-btn.liberado:hover{background:var(--verde-lt)}
 .btn:disabled{opacity:.5;cursor:not-allowed;background-color:#eee !important;color:#999 !important}
+
+/* GRUPO DE BOTÕES (Lado a Lado) */
+.btn-group {display: flex; gap: 8px;}
+.btn-group .btn {margin-bottom: 0; flex: 1;}
 
 .resultado{background:var(--verde-lt);border:1px solid #9FE1CB;border-radius:8px;padding:12px;margin-bottom:12px}
 .res-row{display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px}
@@ -221,6 +222,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 </head>
 <body>
 
+<!-- Modal do Código do Representante -->
 <div class="modal" id="modal-repre">
   <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; justify-content: center; align-items: center; text-align: center;">
     <h3 style="margin-bottom:16px; color:var(--verde-dk); font-size: 16px;">👤 Informe seu Código de Representante</h3>
@@ -229,6 +231,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 </div>
 
+<!-- Modal de Carregamento -->
 <div class="modal" id="loading-modal">
   <div class="modal-box" style="padding: 30px; max-width: 320px; height: auto; justify-content: center; align-items: center; text-align: center; background: #fff;">
     <div class="modal-spin" style="display:block; margin-bottom:16px;"></div>
@@ -237,6 +240,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 </div>
 
+<!-- Modal de Sucesso -->
 <div class="modal" id="modal-sucesso" onclick="clicouForaSucesso(event)">
   <div class="modal-box" style="padding: 30px 20px; max-width: 320px; height: auto; text-align: center; position: relative; background: #fff;">
     <button class="modal-close-btn" onclick="fecharModalSucesso()" style="background:#f4f4f2; color:#333;">✕</button>
@@ -244,6 +248,20 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <h3 style="color:var(--verde-dk); font-size: 20px; margin-bottom: 8px;">Pedido Enviado!</h3>
     <p style="font-size:13px; color:var(--sub);">O PDF foi gerado e enviado com sucesso.</p>
     <button class="btn prim" onclick="fecharModalSucesso()" style="margin-top: 20px;">Concluir e Voltar</button>
+  </div>
+</div>
+
+<!-- Modal do Carrinho de Compras (Desktop e Mobile) -->
+<div class="modal" id="modal-carrinho" onclick="clicouForaCarrinho(event)">
+  <div class="modal-box" style="padding: 20px; max-width: 450px; max-height: 85vh;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="color: var(--verde-dk); font-size: 16px; display:flex; align-items:center; gap:6px;">🛒 Carrinho de Compras</h3>
+      <button onclick="fecharCarrinho()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666;">✕</button>
+    </div>
+    
+    <div class="lista-sel" id="lista-d" style="border: none;"></div>
+    
+    <button class="btn" onclick="limSel(); fecharCarrinho()" style="margin-top: 10px; margin-bottom: 0;">🗑️ Esvaziar Carrinho</button>
   </div>
 </div>
 
@@ -288,14 +306,15 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div id="grid" class="grid"></div>
   </div>
   
+  <!-- PAINEL DESKTOP OTIMIZADO -->
   <aside class="painel">
     <div class="painel-header">
-      <h3>📊 Fechamento do Pedido</h3>
+      <button class="btn prim" onclick="abrirCarrinho()" style="margin:0; font-size:14px; width:100%;">
+        🛒 Ver Carrinho (<span id="cart-count">0</span> itens)
+      </button>
     </div>
     
     <div class="painel-scroll">
-      <div class="lista-sel" id="lista-d"></div>
-
       <div class="field">
         <label>Regra de ICMS / Faixa</label>
         <select id="icms-d" onchange="syncRegras('icms-d','icms-m')">
@@ -340,29 +359,36 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
         <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rd-total">R$ 0,00</b></div>
       </div>
       
-      <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>Selecione a UF p/ Frete</button>
-      <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
-      <button class="btn" onclick="limSel()" style="margin-bottom: 0;">Limpar seleção</button>
+      <div class="btn-group">
+        <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled title="Finalizar e informar dados do cliente">
+          ✓ Finalizar
+        </button>
+        <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled title="Gerar PDF e Disparar E-mail">
+          🚀 Enviar
+        </button>
+      </div>
     </div>
   </aside>
 </div>
 
+<!-- BARRA MOBILE -->
 <div class="mob-bar" id="mob-bar">
   <div class="mb-info" id="mb-info">Selecione produtos</div>
-  <button class="mb-btn" onclick="abrirSheet()">Ver resumo</button>
+  <button class="mb-btn" onclick="abrirSheet()">Avançar</button>
 </div>
 
 <div class="sh-overlay" id="sh-ov" onclick="fecharSheet()"></div>
 
+<!-- BOTTOM SHEET MOBILE OTIMIZADO -->
 <div class="b-sheet" id="b-sheet">
   <div class="sh-header">
     <div class="sh-handle"></div>
-    <div class="sh-title">📊 Fechamento do Pedido</div>
+    <button class="btn prim" onclick="abrirCarrinho()" style="margin:0 auto; font-size:14px; width:80%;">
+      🛒 Ver Carrinho (<span id="cart-count-m">0</span> itens)
+    </button>
   </div>
   
   <div class="sh-scroll">
-    <div class="lista-sel" id="lista-m" style="margin-bottom:12px"></div>
-    
     <div class="field">
       <label>Regra de ICMS / Faixa</label>
       <select id="icms-m" onchange="syncRegras('icms-m','icms-d')">
@@ -407,12 +433,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rm-total">R$ 0,00</b></div>
     </div>
     
-    <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>Selecione a UF p/ Frete</button>
-    <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
-    <div style="display:flex; gap:10px; margin-bottom:0;">
-      <button class="btn" onclick="limSel();fecharSheet()" style="margin-bottom:0;">Limpar seleção</button>
-      <button class="btn" onclick="fecharSheet()" style="margin-bottom:0;">Fechar</button>
+    <div class="btn-group">
+      <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>✓ Finalizar</button>
+      <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>🚀 Enviar</button>
     </div>
+    <button class="btn" onclick="fecharSheet()" style="margin-top: 10px; margin-bottom:0;">Fechar Aba</button>
   </div>
 </div>
 
@@ -546,6 +571,18 @@ function showToast(m) {
   t.innerText = m; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+/* ==================== NOVAS FUNÇÕES DO CARRINHO ==================== */
+function abrirCarrinho() {
+  document.getElementById('modal-carrinho').classList.add('open');
+}
+function fecharCarrinho() {
+  document.getElementById('modal-carrinho').classList.remove('open');
+}
+function clicouForaCarrinho(e) {
+  if(e.target.id === 'modal-carrinho') fecharCarrinho();
+}
+/* =================================================================== */
 
 function carregarDados(force = false) {
   document.getElementById('grid').innerHTML = Array(8).fill('<div class="sk-card"><div class="skeleton" style="height:145px"></div><div style="padding:10px"><div class="skeleton" style="height:12px;width:40%;margin-bottom:6px"></div><div class="skeleton" style="height:14px;margin-bottom:12px"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>').join('');
@@ -809,27 +846,30 @@ function calcularTudo() {
     });
   });
 
+  // Atualiza as tags do carrinho com a contagem de itens
+  document.getElementById('cart-count').innerText = contItens;
+  document.getElementById('cart-count-m').innerText = contItens;
+
   let valorPrazo = subtotalProdutos * (prazoPct / 100);
   let subtotalLiquidoParcial = (subtotalProdutos - valorPrazo) + totalIpi;
   
   let uf = document.getElementById('uf-d').value;
   let valorFrete = 0;
   let txtFrete = "R$ 0,00";
-  let txtBotaoOrc = "Finalizar e Salvar Pedido";
+  let txtBotaoOrc = "✓ Finalizar";
   let liberado = contItens > 0;
 
   if (contItens > 0) {
       if (!uf) {
          liberado = false;
          txtFrete = "Selecione a UF";
-         txtBotaoOrc = "Selecione a UF p/ Frete";
+         txtBotaoOrc = "Selecione UF";
       } else if (FRETE_REGRAS && FRETE_REGRAS[uf]) {
          let r = FRETE_REGRAS[uf];
-         // MUDANÇA AQUI: Mensagem mais clara de quanto é o mínimo
          if (subtotalLiquidoParcial < r.pedidoMinimo) {
              liberado = false;
              txtFrete = `Falta Mín. (Mín é R$ ${r.pedidoMinimo.toFixed(2).replace('.',',')})`;
-             txtBotaoOrc = `Pedido Mínimo de R$ ${r.pedidoMinimo.toFixed(2).replace('.',',')} não atingido`;
+             txtBotaoOrc = `Falta Mínimo`;
          } else if (subtotalLiquidoParcial >= r.gratis) {
              valorFrete = 0;
              txtFrete = "Grátis!";
@@ -865,7 +905,7 @@ function calcularTudo() {
   document.getElementById('btn-orc-d').innerText = txtBotaoOrc; document.getElementById('btn-orc-m').innerText = txtBotaoOrc;
   document.getElementById('btn-orc-d').disabled = !liberado; document.getElementById('btn-orc-m').disabled = !liberado;
 
-  renderizarListaLateral('lista-d'); renderizarListaLateral('lista-m');
+  renderizarListaCarrinho('lista-d'); 
 
   if(liberado) {
     let selectPrazo = document.getElementById('prazo-d'); let textoPrazoFinal = selectPrazo.options[selectPrazo.selectedIndex].text;
@@ -886,10 +926,11 @@ function calcularTudo() {
   }
 }
 
-function renderizarListaLateral(containerId) {
+// O Carrinho agora renderiza apenas a lista-d, já que ela fica centralizada no Modal acessível pelo desktop e mobile.
+function renderizarListaCarrinho(containerId) {
   const container = document.getElementById(containerId);
   const arr = Object.values(SELECIONADOS);
-  if(arr.length === 0) { container.innerHTML = '<div class="vazio">Nenhum produto selecionado.</div>'; return; }
+  if(arr.length === 0) { container.innerHTML = '<div class="vazio">Carrinho vazio. Adicione produtos na tela inicial.</div>'; return; }
 
   let icmsBase = document.getElementById('icms-d').value;
   let brutoPrevia = somarBrutoPrevia();
@@ -960,10 +1001,11 @@ function confirmarSalvamentoPedido() {
       fecharModalCliente();
       showToast("Pedido salvo na planilha com sucesso! Opção de envio liberada.");
       DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente; DADOS_PDF_PRONTO.razaoSegura = razao; DADOS_PDF_PRONTO.codigoRepre = CODIGO_REPRE;
+      
       document.getElementById('btn-xls-d').classList.add('liberado'); document.getElementById('btn-xls-m').classList.add('liberado');
       document.getElementById('btn-xls-d').disabled = false; document.getElementById('btn-xls-m').disabled = false;
-      document.getElementById('btn-xls-d').innerText = "Enviar o pedido"; document.getElementById('btn-xls-m').innerText = "Enviar o pedido";
-      document.getElementById('btn-orc-d').innerText = "Pedido Salvo! ✓"; document.getElementById('btn-orc-m').innerText = "Pedido Salvo! ✓";
+      document.getElementById('btn-xls-d').innerText = "🚀 Enviar"; document.getElementById('btn-xls-m').innerText = "🚀 Enviar";
+      document.getElementById('btn-orc-d').innerText = "Salvo ✓"; document.getElementById('btn-orc-m').innerText = "Salvo ✓";
     } else { alert("Erro ao registar: " + resData.message); }
   })
   .catch(err => {
