@@ -141,7 +141,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 </head>
 <body>
 
-<!-- Modal do Código do Representante -->
 <div class="modal" id="modal-repre">
   <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; justify-content: center; align-items: center; text-align: center;">
     <h3 style="margin-bottom:16px; color:var(--verde-dk); font-size: 16px;">👤 Informe seu Código de Representante</h3>
@@ -150,12 +149,21 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 </div>
 
-<!-- Modal de Carregamento (Enviando E-mail/PDF) -->
 <div class="modal" id="loading-modal">
   <div class="modal-box" style="padding: 30px; max-width: 320px; height: auto; justify-content: center; align-items: center; text-align: center; background: #fff;">
     <div class="modal-spin" style="display:block; margin-bottom:16px;"></div>
-    <div style="font-weight:bold; color:var(--verde-dk); font-size: 16px;">Enviando Pedido...</div>
-    <div style="font-size:12px; color:var(--sub); margin-top:8px;">Aguarde, isso pode levar alguns segundos. Não feche a página.</div>
+    <div style="font-weight:bold; color:var(--verde-dk); font-size: 16px;">Processando Pedido...</div>
+    <div style="font-size:12px; color:var(--sub); margin-top:8px;">Gerando arquivo e disparando e-mail. Não feche a página.</div>
+  </div>
+</div>
+
+<div class="modal" id="modal-sucesso" onclick="clicouForaSucesso(event)">
+  <div class="modal-box" style="padding: 30px 20px; max-width: 320px; height: auto; text-align: center; position: relative; background: #fff;">
+    <button class="modal-close-btn" onclick="fecharModalSucesso()" style="background:#f4f4f2; color:#333;">✕</button>
+    <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
+    <h3 style="color:var(--verde-dk); font-size: 20px; margin-bottom: 8px;">Pedido Enviado!</h3>
+    <p style="font-size:13px; color:var(--sub);">O PDF foi gerado e enviado com sucesso.</p>
+    <button class="btn prim" onclick="fecharModalSucesso()" style="margin-top: 20px;">Concluir e Voltar</button>
   </div>
 </div>
 
@@ -184,7 +192,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <button class="btn-lim" onclick="limFiltros()">✕ Limpar</button>
     
     <div class="top-actions">
-      <!-- Visor do Código de Representante com botão Alterar -->
       <span style="font-size:13px; font-weight:600; color:var(--verde-dk); display:none; align-items:center; gap:6px; background:var(--verde-lt); padding:4px 10px; border-radius:12px;" id="info-repre-box">
         Rep: <span id="info-repre-txt"></span>
         <button onclick="abrirModalRepre()" style="background:none; border:none; color:var(--sub); text-decoration:underline; cursor:pointer; font-size:11px;">(Alterar)</button>
@@ -226,8 +233,15 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     </div>
 
     <div class="field" id="wrapper-subprazo-d" style="display:none;">
-      <label>Opções de Desmembramento (Não altera o preço)</label>
+      <label>Opções de Desmembramento</label>
       <select id="subprazo-d" onchange="syncRegras('subprazo-d','subprazo-m')"></select>
+    </div>
+    
+    <div class="field">
+      <label>UF Destino (Cálculo de Frete)</label>
+      <select id="uf-d" onchange="alterouUF('uf-d')">
+        <option value="">Selecione o Estado...</option>
+      </select>
     </div>
 
     <div class="resultado">
@@ -240,7 +254,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rd-total">R$ 0,00</b></div>
     </div>
     
-    <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>Finalizar e Salvar Pedido</button>
+    <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>Selecione a UF p/ Frete</button>
     <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
     <button class="btn" onclick="limSel()">Limpar seleção</button>
   </aside>
@@ -279,8 +293,15 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 
   <div class="field" id="wrapper-subprazo-m" style="display:none;">
-    <label>Opções de Desmembramento (Não altera o preço)</label>
+    <label>Opções de Desmembramento</label>
     <select id="subprazo-m" onchange="syncRegras('subprazo-m','subprazo-d')"></select>
+  </div>
+
+  <div class="field">
+    <label>UF Destino (Cálculo de Frete)</label>
+    <select id="uf-m" onchange="alterouUF('uf-m')">
+      <option value="">Selecione o Estado...</option>
+    </select>
   </div>
 
   <div class="resultado">
@@ -293,7 +314,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div class="res-row" style="font-size:15px"><span>TOTAL LÍQUIDO:</span><b id="rm-total">R$ 0,00</b></div>
   </div>
   
-  <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>Finalizar e Salvar Pedido</button>
+  <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>Selecione a UF p/ Frete</button>
   <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
   <button class="btn" onclick="limSel();fecharSheet()">Limpar seleção</button>
   <button class="btn" onclick="fecharSheet()">Fechar</button>
@@ -353,9 +374,9 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
         <label>E-mail</label>
         <input type="email" id="cli-email" placeholder="email@cliente.com">
       </div>
-      <div class="field">
+      <div class="field" style="display:none;">
         <label>UF do Cliente</label>
-        <select id="cli-uf">
+        <select id="cli-uf" onchange="alterouUF('cli-uf')">
           <option value="">Selecione o Estado...</option>
         </select>
       </div>
@@ -371,18 +392,18 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// ATENÇÃO: Verifique se essa é a URL correta após gerar uma "Nova Implantação"
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwF4tcHZWvnOgmtNpRf3ZyqXxjtjXfBhluAAkPxO-hV1_nTphRTIhL3Vx4wM8jURcO_Jw/exec"; 
+// ATENÇÃO: Verifique se essa é a URL correta após gerar a Nova Implantação!
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbz0rq7xcSAeZM_27OdnekVl8Exb_nlZf7doUZjaOPJm8v-2gtmN8CXxsA_5Tw9EPBoP9Q/exec"; 
 
 let PRODUTOS = [];
 let SELECIONADOS = {};
 let DADOS_PDF_PRONTO = null;
+let FRETE_REGRAS = {};
 
-// Lógica de Código Representante com localStorage (Salva no navegador)
+// Lógica de Código Representante com localStorage
 let CODIGO_REPRE = localStorage.getItem('repre_cod') || "";
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Verifica se já tem código salvo
   if(!CODIGO_REPRE) {
     document.getElementById('modal-repre').style.display = 'flex';
     document.getElementById('modal-repre').classList.add('open');
@@ -391,7 +412,6 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-repre').classList.remove('open');
     atualizarExibicaoRepre();
   }
-  
   carregarDados();
 });
 
@@ -402,7 +422,7 @@ function salvarRepre() {
     return;
   }
   CODIGO_REPRE = val;
-  localStorage.setItem('repre_cod', val); // Salva na memória do navegador
+  localStorage.setItem('repre_cod', val); 
   
   document.getElementById('modal-repre').style.display = 'none';
   document.getElementById('modal-repre').classList.remove('open');
@@ -421,7 +441,6 @@ function abrirModalRepre() {
   document.getElementById('modal-repre').classList.add('open');
 }
 
-// Tabelas de Prazos Condicionais
 const SUB_PRAZOS = {
   "9": ["28 DIAS", "14/42 DIAS", "21/35 DIAS", "14/28/42 DIAS"],
   "7": ["35 DIAS", "14/56 DIAS", "21/49 DIAS", "28/42 DIAS", "14/35/56 DIAS", "21/35/49 DIAS", "14/28/42/56 DIAS"],
@@ -451,11 +470,18 @@ function carregarDados(force = false) {
       }
       
       const comboUf = document.getElementById('cli-uf');
+      const comboUfD = document.getElementById('uf-d');
+      const comboUfM = document.getElementById('uf-m');
+      
       let htmlUf = '<option value="">Selecione o Estado...</option>';
       if(data.estados) {
         data.estados.forEach(uf => { htmlUf += `<option value="${uf}">${uf}</option>`; });
       }
       comboUf.innerHTML = htmlUf;
+      comboUfD.innerHTML = htmlUf;
+      comboUfM.innerHTML = htmlUf;
+
+      FRETE_REGRAS = data.freteRegras || {};
 
       renderizarGrid(PRODUTOS);
       calcularTudo();
@@ -498,7 +524,6 @@ function renderizarGrid(lista) {
     let codNorm = p.codigo.toLowerCase().trim();
     let isSel = SELECIONADOS[codNorm] ? 'sel' : '';
     let isPromo = p.emPromocao ? 'promo' : '';
-    
     let precoExibicao = p.emPromocao ? (p.precosPromo[tabelaCard] || p.precosPromo['M26071'] || 0) : (p.precos[tabelaCard] || p.precos['M26071'] || 0);
 
     let imgTag = p.fileId 
@@ -544,9 +569,9 @@ function filtrar() {
   let txt = document.getElementById('busca').value.toLowerCase().trim();
   let promo = document.getElementById('fil-promo').value;
   let pMax = parseFloat(document.getElementById('fil-preco').value) || Infinity;
-
   let icmsBase = document.getElementById('icms-d').value;
   let brutoPrevia = somarBrutoPrevia();
+  
   let tabelaCard = "M26071";
   if(icmsBase === "7") {
     tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072";
@@ -561,7 +586,6 @@ function filtrar() {
     let matchPreco = precoRef <= pMax;
     return matchTxt && matchPromo && matchPreco;
   });
-
   renderizarGrid(filtrados);
 }
 
@@ -634,7 +658,6 @@ function mudarQtyModal(fator) {
   let input = document.getElementById('modal-qty');
   let v = parseInt(input.value) || 0;
   let mult = PRODUTO_MODAL_ATIVO.qtdEmbalagem || 1;
-  
   v += (fator * mult);
   if(v < mult) v = mult;
   input.value = v;
@@ -653,20 +676,15 @@ function confirmarAddModal() {
   let qty = parseInt(input.value) || 0;
   let mult = PRODUTO_MODAL_ATIVO.qtdEmbalagem || 1;
 
-  if (qty % mult !== 0) {
-    qty = Math.ceil(qty / mult) * mult;
-  }
+  if (qty % mult !== 0) { qty = Math.ceil(qty / mult) * mult; }
 
   let key = PRODUTO_MODAL_ATIVO.codigo.toLowerCase().trim();
-  SELECIONADOS[key] = {
-    produto: PRODUTO_MODAL_ATIVO,
-    qtd: qty
-  };
+  SELECIONADOS[key] = { produto: PRODUTO_MODAL_ATIVO, qtd: qty };
 
   fecharModal();
   calcularTudo();
   filtrar(); 
-  showToast("Item adicionado/atualizado com sucesso!");
+  showToast("Item adicionado com sucesso!");
 }
 
 function syncRegras(idOrigem, idDestino) {
@@ -674,6 +692,14 @@ function syncRegras(idOrigem, idDestino) {
   document.getElementById(idDestino).value = val;
   calcularTudo();
   filtrar();
+}
+
+function alterouUF(idOrigem) {
+  const val = document.getElementById(idOrigem).value;
+  document.getElementById('uf-d').value = val;
+  document.getElementById('uf-m').value = val;
+  document.getElementById('cli-uf').value = val; // Mantém a UF no Modal Cliente
+  calcularTudo();
 }
 
 function alterouPrazoBase(idOrigem, idDestino) {
@@ -707,10 +733,7 @@ function mudarQtyLista(key, fator) {
   if(!SELECIONADOS[key]) return;
   let mult = SELECIONADOS[key].produto.qtdEmbalagem || 1;
   SELECIONADOS[key].qtd += (fator * mult);
-  
-  if(SELECIONADOS[key].qtd <= 0) {
-    delete SELECIONADOS[key];
-  }
+  if(SELECIONADOS[key].qtd <= 0) { delete SELECIONADOS[key]; }
   calcularTudo();
   filtrar();
 }
@@ -762,39 +785,68 @@ function calcularTudo() {
     totalIpi += (valorIpiCada * item.qtd);
 
     listaItensPdf.push({
-      codigo: p.codigo,
-      descricao: p.descricao,
-      qtd: item.qtd,
-      fileId: p.fileId,
-      ipi: p.ipi, 
-      valorComDesconto: valorComDescontoPrazo,
-      valorIpiCada: valorIpiCada,
-      valorComIpi: valorItemComIpi,
-      valorTotalItem: valorTotalLiquidoItem
+      codigo: p.codigo, descricao: p.descricao, qtd: item.qtd, fileId: p.fileId, ipi: p.ipi, 
+      valorComDesconto: valorComDescontoPrazo, valorIpiCada: valorIpiCada, valorComIpi: valorItemComIpi, valorTotalItem: valorTotalLiquidoItem
     });
   });
 
   let valorPrazo = subtotalProdutos * (prazoPct / 100);
+  let subtotalLiquidoParcial = (subtotalProdutos - valorPrazo) + totalIpi;
+  
+  let uf = document.getElementById('uf-d').value;
   let valorFrete = 0;
-  let valorFinalLiquido = (subtotalProdutos - valorPrazo) + totalIpi + valorFrete;
+  let txtFrete = "R$ 0,00";
+  let txtBotaoOrc = "Finalizar e Salvar Pedido";
+  let liberado = contItens > 0;
+
+  if (contItens > 0) {
+      if (!uf) {
+         liberado = false;
+         txtFrete = "Selecione a UF";
+         txtBotaoOrc = "Selecione a UF p/ Frete";
+      } else if (FRETE_REGRAS && FRETE_REGRAS[uf]) {
+         let r = FRETE_REGRAS[uf];
+         if (subtotalLiquidoParcial < r.pedidoMinimo) {
+             liberado = false;
+             txtFrete = `Falta Mín. (R$ ${r.pedidoMinimo.toFixed(2).replace('.',',')})`;
+             txtBotaoOrc = `Pedido Mínimo não atingido`;
+         } else if (subtotalLiquidoParcial >= r.gratis) {
+             valorFrete = 0;
+             txtFrete = "Grátis!";
+         } else {
+             valorFrete = r.intervalo;
+             txtFrete = "R$ " + valorFrete.toFixed(2).replace('.', ',');
+         }
+      }
+  }
+
+  let valorFinalLiquido = subtotalLiquidoParcial + valorFrete;
 
   document.getElementById('rd-tabela-ativa').innerText = tabelaAtiva;
   document.getElementById('rm-tabela-ativa').innerText = tabelaAtiva;
-  
   document.getElementById('rd-bruto-prod').innerText = "R$ " + subtotalProdutos.toFixed(2).replace('.',',');
   document.getElementById('rm-bruto-prod').innerText = "R$ " + subtotalProdutos.toFixed(2).replace('.',',');
-
   document.getElementById('rd-prazo-pct').innerText = prazoPct;
   document.getElementById('rm-prazo-pct').innerText = prazoPct;
-
   document.getElementById('rd-prazo-val').innerText = "- R$ " + valorPrazo.toFixed(2).replace('.',',');
   document.getElementById('rm-prazo-val').innerText = "- R$ " + valorPrazo.toFixed(2).replace('.',',');
-
   document.getElementById('rd-ipi-val').innerText = "+ R$ " + totalIpi.toFixed(2).replace('.',',');
   document.getElementById('rm-ipi-val').innerText = "+ R$ " + totalIpi.toFixed(2).replace('.',',');
-
-  document.getElementById('rd-frete-val').innerText = "R$ " + valorFrete.toFixed(2).replace('.', ',');
-  document.getElementById('rm-frete-val').innerText = "R$ " + valorFrete.toFixed(2).replace('.', ',');
+  
+  document.getElementById('rd-frete-val').innerText = txtFrete;
+  document.getElementById('rm-frete-val').innerText = txtFrete;
+  
+  // Cores dinâmicas para o frete
+  if(txtFrete === "Grátis!") {
+      document.getElementById('rd-frete-val').style.color = "var(--verde-dk)";
+      document.getElementById('rm-frete-val').style.color = "var(--verde-dk)";
+  } else if (!liberado && uf && contItens > 0) {
+      document.getElementById('rd-frete-val').style.color = "var(--promo)";
+      document.getElementById('rm-frete-val').style.color = "var(--promo)";
+  } else {
+      document.getElementById('rd-frete-val').style.color = "var(--texto)";
+      document.getElementById('rm-frete-val').style.color = "var(--texto)";
+  }
 
   document.getElementById('rd-total').innerText = "R$ " + valorFinalLiquido.toFixed(2).replace('.',',');
   document.getElementById('rm-total').innerText = "R$ " + valorFinalLiquido.toFixed(2).replace('.',',');
@@ -803,7 +855,8 @@ function calcularTudo() {
   document.getElementById('badge').style.display = contItens > 0 ? 'block' : 'none';
   document.getElementById('mb-info').innerHTML = `<b>Total: R$ ${valorFinalLiquido.toFixed(2).replace('.',',')}</b><br>${contItens} itens selecionados`;
 
-  const liberado = contItens > 0;
+  document.getElementById('btn-orc-d').innerText = txtBotaoOrc;
+  document.getElementById('btn-orc-m').innerText = txtBotaoOrc;
   document.getElementById('btn-orc-d').disabled = !liberado;
   document.getElementById('btn-orc-m').disabled = !liberado;
 
@@ -813,12 +866,9 @@ function calcularTudo() {
   if(liberado) {
     let selectPrazo = document.getElementById('prazo-d');
     let textoPrazoFinal = selectPrazo.options[selectPrazo.selectedIndex].text;
-    
     if(SUB_PRAZOS[prazoPct]) {
       let subSelect = document.getElementById('subprazo-d');
-      if(subSelect && subSelect.value) {
-        textoPrazoFinal = subSelect.value;
-      }
+      if(subSelect && subSelect.value) { textoPrazoFinal = subSelect.value; }
     }
 
     DADOS_PDF_PRONTO = {
@@ -826,13 +876,8 @@ function calcularTudo() {
       prazo: textoPrazoFinal,
       itens: listaItensPdf,
       contas: {
-        subtotal: subtotalProdutos,
-        pctPrazo: prazoPct,
-        valPrazo: valorPrazo,
-        totalIpi: totalIpi,
-        valorFrete: valorFrete,
-        liquido: valorFinalLiquido,
-        tabelaAtiva: tabelaAtiva + " (ICMS " + icmsBase + "%)"
+        subtotal: subtotalProdutos, pctPrazo: prazoPct, valPrazo: valorPrazo, totalIpi: totalIpi,
+        valorFrete: valorFrete, liquido: valorFinalLiquido, tabelaAtiva: tabelaAtiva + " (ICMS " + icmsBase + "%)"
       }
     };
   } else {
@@ -847,24 +892,16 @@ function calcularTudo() {
 function renderizarListaLateral(containerId) {
   const container = document.getElementById(containerId);
   const arr = Object.values(SELECIONADOS);
-  
-  if(arr.length === 0) {
-    container.innerHTML = '<div class="vazio">Nenhum produto selecionado.</div>';
-    return;
-  }
+  if(arr.length === 0) { container.innerHTML = '<div class="vazio">Nenhum produto selecionado.</div>'; return; }
 
   let icmsBase = document.getElementById('icms-d').value;
   let brutoPrevia = somarBrutoPrevia();
   let tabelaCard = "M26071";
-  if(icmsBase === "7") {
-    tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072";
-  } else {
-    tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122";
-  }
+  if(icmsBase === "7") { tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072"; } 
+  else { tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
 
   container.innerHTML = arr.map(item => {
-    let p = item.produto;
-    let key = p.codigo.toLowerCase().trim();
+    let p = item.produto; let key = p.codigo.toLowerCase().trim();
     let precoRef = p.emPromocao ? (p.precosPromo[tabelaCard] || 0) : (p.precos[tabelaCard] || 0);
 
     return `
@@ -882,30 +919,16 @@ function renderizarListaLateral(containerId) {
   }).join('');
 }
 
-function abrirSheet() {
-  document.getElementById('sh-ov').classList.add('open');
-  document.getElementById('b-sheet').classList.add('open');
-}
-function fecharSheet() {
-  document.getElementById('sh-ov').classList.remove('open');
-  document.getElementById('b-sheet').classList.remove('open');
-}
+function abrirSheet() { document.getElementById('sh-ov').classList.add('open'); document.getElementById('b-sheet').classList.add('open'); }
+function fecharSheet() { document.getElementById('sh-ov').classList.remove('open'); document.getElementById('b-sheet').classList.remove('open'); }
 
 function abrirFluxoFechamento(origem) {
-  if (Object.keys(SELECIONADOS).length === 0) {
-    alert("Adicione itens ao pedido primeiro.");
-    return;
-  }
+  if (Object.keys(SELECIONADOS).length === 0) { alert("Adicione itens ao pedido primeiro."); return; }
   document.getElementById('modal-cliente').classList.add('open');
 }
 
-function fecharModalCliente() {
-  document.getElementById('modal-cliente').classList.remove('open');
-}
-
-function clicouForaCliente(e) {
-  if(e.target.id === 'modal-cliente') fecharModalCliente();
-}
+function fecharModalCliente() { document.getElementById('modal-cliente').classList.remove('open'); }
+function clicouForaCliente(e) { if(e.target.id === 'modal-cliente') fecharModalCliente(); }
 
 function confirmarSalvamentoPedido() {
   let cnpj = (document.getElementById('cli-cnpj').value || '').trim();
@@ -918,120 +941,86 @@ function confirmarSalvamentoPedido() {
 
   if(!cnpj) { alert("Por favor, preencha o CNPJ ou CPF."); return; }
   if(!razao) { alert("Por favor, preencha a Razão Social ou Nome."); return; }
-  if(!uf) { alert("Por favor, selecione a UF do Cliente."); return; }
+  if(!uf) { alert("A UF do Cliente não foi selecionada (volte ao painel de Frete)."); return; }
 
   let totalItensStr = document.getElementById('badge').innerText;
   let tabelaAtivaStr = document.getElementById('rd-tabela-ativa').innerText;
-
   let txtItens = Object.values(SELECIONADOS).map(x => `${x.produto.codigo} (${x.qtd} un)`).join(' | ');
-  
   let stringDadosCliente = `REPRESENTANTE: ${CODIGO_REPRE}\nRAZÃO SOCIAL: ${razao}\nFANTASIA: ${fantasia}\nCNPJ/CPF: ${cnpj}\nENDEREÇO: ${endereco}\nTELEFONE: ${telefone}\nE-MAIL: ${email}\nESTADO DESTINO: ${uf}\nTABELA APLICADA: ${tabelaAtivaStr}`;
   
   let payloadPlanilha = {
-    clienteInfo: stringDadosCliente,
-    itens: txtItens,
-    qtd: parseInt(totalItensStr) || 1,
-    subtotalProdutos: DADOS_PDF_PRONTO.contas.subtotal,
-    totalIpi: DADOS_PDF_PRONTO.contas.totalIpi,
-    totalDescontos: DADOS_PDF_PRONTO.contas.valPrazo,
-    prazo: DADOS_PDF_PRONTO.prazo,
-    total: DADOS_PDF_PRONTO.contas.liquido
+    clienteInfo: stringDadosCliente, itens: txtItens, qtd: parseInt(totalItensStr) || 1,
+    subtotalProdutos: DADOS_PDF_PRONTO.contas.subtotal, totalIpi: DADOS_PDF_PRONTO.contas.totalIpi,
+    totalDescontos: DADOS_PDF_PRONTO.contas.valPrazo, prazo: DADOS_PDF_PRONTO.prazo, total: DADOS_PDF_PRONTO.contas.liquido
   };
 
   const btnCli = document.getElementById('btn-salvar-cli');
-  btnCli.disabled = true;
-  btnCli.innerText = "Salvando...";
+  btnCli.disabled = true; btnCli.innerText = "Salvando...";
 
-  fetch(URL_GOOGLE_SCRIPT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payloadPlanilha)
-  })
+  fetch(URL_GOOGLE_SCRIPT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payloadPlanilha) })
   .then(res => res.json())
   .then(resData => {
-    btnCli.disabled = false;
-    btnCli.innerText = "Salvar Pedido na Planilha";
-
+    btnCli.disabled = false; btnCli.innerText = "Salvar Pedido na Planilha";
     if(resData.status === 'success') {
       fecharModalCliente();
       showToast("Pedido salvo na planilha com sucesso! Opção de envio liberada.");
-      
-      DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente;
-      DADOS_PDF_PRONTO.razaoSegura = razao;
-      DADOS_PDF_PRONTO.codigoRepre = CODIGO_REPRE;
-      
-      document.getElementById('btn-xls-d').classList.add('liberado');
-      document.getElementById('btn-xls-m').classList.add('liberado');
-      document.getElementById('btn-xls-d').disabled = false;
-      document.getElementById('btn-xls-m').disabled = false;
-      
-      document.getElementById('btn-xls-d').innerText = "Enviar o pedido";
-      document.getElementById('btn-xls-m').innerText = "Enviar o pedido";
-      
-      document.getElementById('btn-orc-d').innerText = "Pedido Salvo! ✓";
-      document.getElementById('btn-orc-m').innerText = "Pedido Salvo! ✓";
-    } else {
-      alert("Erro ao registar: " + resData.message);
-    }
+      DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente; DADOS_PDF_PRONTO.razaoSegura = razao; DADOS_PDF_PRONTO.codigoRepre = CODIGO_REPRE;
+      document.getElementById('btn-xls-d').classList.add('liberado'); document.getElementById('btn-xls-m').classList.add('liberado');
+      document.getElementById('btn-xls-d').disabled = false; document.getElementById('btn-xls-m').disabled = false;
+      document.getElementById('btn-xls-d').innerText = "Enviar o pedido"; document.getElementById('btn-xls-m').innerText = "Enviar o pedido";
+      document.getElementById('btn-orc-d').innerText = "Pedido Salvo! ✓"; document.getElementById('btn-orc-m').innerText = "Pedido Salvo! ✓";
+    } else { alert("Erro ao registar: " + resData.message); }
   })
   .catch(err => {
-    console.error(err);
     alert("Erro de rede ao salvar pedido.");
-    btnCli.disabled = false;
-    btnCli.innerText = "Salvar Pedido na Planilha";
+    btnCli.disabled = false; btnCli.innerText = "Salvar Pedido na Planilha";
   });
 }
 
 function baixarPdf() {
   if(!DADOS_PDF_PRONTO) return;
-  
-  // ABRE O POP-UP DE CARREGAMENTO
   document.getElementById('loading-modal').style.display = 'flex';
   document.getElementById('loading-modal').classList.add('open');
   
-  fetch(URL_GOOGLE_SCRIPT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ acao: 'pdf', dadosPdf: DADOS_PDF_PRONTO })
-  })
+  fetch(URL_GOOGLE_SCRIPT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ acao: 'pdf', dadosPdf: DADOS_PDF_PRONTO }) })
   .then(res => res.json())
   .then(resData => {
-    // FECHA O POP-UP DE CARREGAMENTO
     document.getElementById('loading-modal').style.display = 'none';
     document.getElementById('loading-modal').classList.remove('open');
 
     if(resData.status === 'success' && resData.base64) {
-      let byteChars = atob(resData.base64);
-      let byteNumbers = new Array(byteChars.length);
+      let byteChars = atob(resData.base64); let byteNumbers = new Array(byteChars.length);
       for (let i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
       let blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
       
       let dataAtual = new Date();
-      let dia = String(dataAtual.getDate()).padStart(2, '0');
-      let mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
-      let ano = dataAtual.getFullYear();
-      let dataStr = `${dia}-${mes}-${ano}`;
-      
+      let dataStr = `${String(dataAtual.getDate()).padStart(2, '0')}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}-${dataAtual.getFullYear()}`;
       let nomeRepreSeguro = (DADOS_PDF_PRONTO.codigoRepre || 'Repre').replace(/[^a-z0-9]/gi, '_');
       
-      let link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `${nomeRepreSeguro}_${dataStr}.pdf`;
-      link.click();
+      let link = document.createElement('a'); link.href = window.URL.createObjectURL(blob);
+      link.download = `${nomeRepreSeguro}_${dataStr}.pdf`; link.click();
+
+      // ALERTA EXTRA DE SEGURANÇA SOBRE O E-MAIL (caso não tenha sido implantado direito)
+      if(resData.emailStatus && resData.emailStatus.includes("Erro")) {
+        alert("O PDF e a Planilha foram salvos, MAS o E-mail não pôde ser enviado para a fábrica!\n\nMotivo: " + resData.emailStatus + "\n\nPara o e-mail funcionar, você PRECISA realizar a \"Nova Implantação\" do App Script e autorizar o acesso à sua conta Google.");
+      }
       
-      showToast("Pedido enviado com sucesso e download iniciado!");
-    } else {
-      alert("Erro ao construir/enviar PDF: " + resData.message);
-    }
+      document.getElementById('modal-sucesso').style.display = 'flex';
+      document.getElementById('modal-sucesso').classList.add('open');
+    } else { alert("Erro ao construir/enviar PDF: " + resData.message); }
   })
   .catch(err => {
-    // FECHA O POP-UP DE CARREGAMENTO NO ERRO
-    document.getElementById('loading-modal').style.display = 'none';
-    document.getElementById('loading-modal').classList.remove('open');
-    console.error(err);
+    document.getElementById('loading-modal').style.display = 'none'; document.getElementById('loading-modal').classList.remove('open');
     alert("Erro de rede ao processar PDF/E-mail.");
   });
 }
+
+function fecharModalSucesso() {
+  document.getElementById('modal-sucesso').style.display = 'none';
+  document.getElementById('modal-sucesso').classList.remove('open');
+  // window.location.reload(); 
+}
+function clicouForaSucesso(e) { if(e.target.id === 'modal-sucesso') fecharModalSucesso(); }
 </script>
 </body>
 </html>
