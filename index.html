@@ -134,13 +134,20 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .toast.show{opacity:1;transform:translateY(0)}
 @media(min-width:881px){.toast{bottom:20px}}
 
-/* NOVO: Ajustes para rolagem do Modal do Cliente */
 .scroll-form { overflow-y: auto; max-height: 60vh; padding-right: 5px; margin-bottom: 10px; }
 .scroll-form::-webkit-scrollbar { width: 6px; }
 .scroll-form::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 </style>
 </head>
 <body>
+
+<div class="modal open" id="modal-repre" style="display:flex;">
+  <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; justify-content: center; align-items: center; text-align: center;">
+    <h3 style="margin-bottom:16px; color:var(--verde-dk); font-size: 16px;">👤 Informe seu Código de Representante</h3>
+    <input type="text" id="repre-codigo" placeholder="Digite seu código..." style="width:100%; padding:12px; border:1px solid var(--borda); border-radius:8px; margin-bottom:16px; font-size: 15px; text-align: center;">
+    <button class="btn prim" onclick="salvarRepre()">Entrar no Sistema</button>
+  </div>
+</div>
 
 <header>
   <div class="header-inner">
@@ -304,11 +311,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
   <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; max-height: 94vh;">
     <h3 style="margin-bottom:12px; color:var(--verde-dk); font-size: 16px; text-align: center;">📋 DADOS DO CLIENTE</h3>
-
-    <div class="field">
-  <label>Código do Representante</label>
-  <input type="text" id="cli-representante" placeholder="Ex: REP001" style="text-transform:uppercase;">
-</div>
+    
     <div class="scroll-form">
       <div class="field">
         <label>CNPJ / CPF</label>
@@ -353,11 +356,25 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // CONFIGURAÇÃO WEB APP GOOGLE APPLICATION URL
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwBU2rFzfe0Y2XM70A-faWsZC6WDu6_7yRWG6sXJ0da0MKtjvfX-cHc7Xx-2YCInoj_yQ/exec"; 
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbz_Z-XJtvU7lE5y2j1UEiUSBtfwdNseFt_QtJzT8ld3GPJRyV7SXuRgeR1uTjenYpVKuQ/exec"; 
 
 let PRODUTOS = [];
 let SELECIONADOS = {};
 let DADOS_PDF_PRONTO = null;
+
+// Lógica de Código Representante Obrigatório
+let CODIGO_REPRE = "";
+
+function salvarRepre() {
+  let val = document.getElementById('repre-codigo').value.trim();
+  if(!val) {
+    alert("Por favor, digite seu código de representante.");
+    return;
+  }
+  CODIGO_REPRE = val;
+  document.getElementById('modal-repre').style.display = 'none';
+  document.getElementById('modal-repre').classList.remove('open');
+}
 
 // Tabelas de Prazos Condicionais
 const SUB_PRAZOS = {
@@ -708,6 +725,7 @@ function calcularTudo() {
       descricao: p.descricao,
       qtd: item.qtd,
       fileId: p.fileId,
+      ipi: p.ipi, // IPI Adicionado para o gerador de PDF
       valorComDesconto: valorComDescontoPrazo,
       valorIpiCada: valorIpiCada,
       valorComIpi: valorItemComIpi,
@@ -850,7 +868,6 @@ function clicouForaCliente(e) {
 }
 
 function confirmarSalvamentoPedido() {
-  // RECOLHA DOS NOVOS CAMPOS DO CLIENTE (Com Trim defensivo)
   let cnpj = (document.getElementById('cli-cnpj').value || '').trim();
   let razao = (document.getElementById('cli-razao').value || '').trim();
   let fantasia = (document.getElementById('cli-fantasia').value || '').trim();
@@ -868,8 +885,8 @@ function confirmarSalvamentoPedido() {
 
   let txtItens = Object.values(SELECIONADOS).map(x => `${x.produto.codigo} (${x.qtd} un)`).join(' | ');
   
-  // BLOCO DE TEXTO ESTRUTURADO PARA PLANILHA E PDF
-  let stringDadosCliente = `RAZÃO SOCIAL: ${razao}\nFANTASIA: ${fantasia}\nCNPJ/CPF: ${cnpj}\nENDEREÇO: ${endereco}\nTELEFONE: ${telefone}\nE-MAIL: ${email}\nESTADO DESTINO: ${uf}\nTABELA APLICADA: ${tabelaAtivaStr}`;
+  // BLOCO DE TEXTO ESTRUTURADO PARA PLANILHA E PDF INCLUINDO CÓDIGO DO REPRESENTANTE
+  let stringDadosCliente = `REPRESENTANTE: ${CODIGO_REPRE}\nRAZÃO SOCIAL: ${razao}\nFANTASIA: ${fantasia}\nCNPJ/CPF: ${cnpj}\nENDEREÇO: ${endereco}\nTELEFONE: ${telefone}\nE-MAIL: ${email}\nESTADO DESTINO: ${uf}\nTABELA APLICADA: ${tabelaAtivaStr}`;
   
   let payloadPlanilha = {
     clienteInfo: stringDadosCliente,
@@ -898,16 +915,21 @@ function confirmarSalvamentoPedido() {
 
     if(resData.status === 'success') {
       fecharModalCliente();
-      showToast("Pedido salvo na planilha com sucesso! PDF Liberado.");
+      showToast("Pedido salvo na planilha com sucesso! Opção de envio liberada.");
       
       // Injeta os dados estruturados no Payload do PDF e guarda um Nome Seguro
       DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente;
       DADOS_PDF_PRONTO.razaoSegura = razao;
+      DADOS_PDF_PRONTO.codigoRepre = CODIGO_REPRE;
       
       document.getElementById('btn-xls-d').classList.add('liberado');
       document.getElementById('btn-xls-m').classList.add('liberado');
       document.getElementById('btn-xls-d').disabled = false;
       document.getElementById('btn-xls-m').disabled = false;
+      
+      // ALtera o nome do botão
+      document.getElementById('btn-xls-d').innerText = "Enviar o pedido";
+      document.getElementById('btn-xls-m').innerText = "Enviar o pedido";
       
       document.getElementById('btn-orc-d').innerText = "Pedido Salvo! ✓";
       document.getElementById('btn-orc-m').innerText = "Pedido Salvo! ✓";
@@ -926,7 +948,7 @@ function confirmarSalvamentoPedido() {
 function baixarPdf() {
   if(!DADOS_PDF_PRONTO) return;
   
-  showToast("A gerar ficheiro PDF, aguarde...");
+  showToast("Enviando e gerando o pedido, aguarde...");
   
   fetch(URL_GOOGLE_SCRIPT, {
     method: 'POST',
@@ -941,16 +963,24 @@ function baixarPdf() {
       for (let i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
       let blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
       
-      // Tratamento Defensivo na hora de dar o nome ao Ficheiro para o utilizador final baixar
-      let razaoLimpa = (DADOS_PDF_PRONTO.razaoSegura || 'Cliente').replace(/[^a-z0-9]/gi, '_');
+      // Formatação da data para o nome do arquivo
+      let dataAtual = new Date();
+      let dia = String(dataAtual.getDate()).padStart(2, '0');
+      let mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+      let ano = dataAtual.getFullYear();
+      let dataStr = `${dia}-${mes}-${ano}`;
+      
+      // Definição do nome do arquivo com base no Representante
+      let nomeRepreSeguro = (DADOS_PDF_PRONTO.codigoRepre || 'Repre').replace(/[^a-z0-9]/gi, '_');
       
       let link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = `Pedido_${razaoLimpa}.pdf`;
+      link.download = `${nomeRepreSeguro}_${dataStr}.pdf`;
       link.click();
-      showToast("Download do PDF iniciado!");
+      
+      showToast("Pedido enviado com sucesso e download iniciado!");
     } else {
-      alert("Erro ao construir PDF: " + resData.message);
+      alert("Erro ao construir/enviar PDF: " + resData.message);
     }
   })
   .catch(err => {
