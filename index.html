@@ -134,28 +134,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .toast.show{opacity:1;transform:translateY(0)}
 @media(min-width:881px){.toast{bottom:20px}}
 
+/* NOVO: Ajustes para rolagem do Modal do Cliente */
 .scroll-form { overflow-y: auto; max-height: 60vh; padding-right: 5px; margin-bottom: 10px; }
 .scroll-form::-webkit-scrollbar { width: 6px; }
 .scroll-form::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-
-/* NOVO: OVERLAY DE LOGIN DO REPRESENTANTE */
-.login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; }
-.login-box { background: var(--branco); padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 </style>
 </head>
 <body>
-
-<div class="login-overlay" id="login-overlay">
-  <div class="login-box">
-    <img src="https://drive.google.com/thumbnail?id=1mS6_4Yv74x6tq7B10kZz2m7FndNly7gq&sz=w300" alt="Di Solle" style="max-height: 60px; margin-bottom: 20px;">
-    <h3 style="margin-bottom: 15px; color: var(--verde-dk);">Bem-vindo(a)</h3>
-    <div class="field" style="text-align: left;">
-      <label>Digite seu Código Representante</label>
-      <input type="text" id="input-rep-code" placeholder="Ex: REP123">
-    </div>
-    <button class="btn prim" onclick="logarRepresentante()" style="margin-top: 15px;">Acessar Sistema</button>
-  </div>
-</div>
 
 <header>
   <div class="header-inner">
@@ -182,7 +167,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <button class="btn-lim" onclick="limFiltros()">✕ Limpar</button>
     
     <div class="top-actions">
-      <span style="font-size:12px;color:var(--verde-dk); cursor:pointer; font-weight: bold;" onclick="sairRepresentante()" title="Trocar Representante" id="rep-logado"></span>
       <span style="font-size:12px;color:var(--sub)" id="cont"></span>
       <button class="btn-lim btn-sync" id="btn-sync" onclick="sincronizarPlanilha()">🔄 Sincronizar Catálogo</button>
     </div>
@@ -234,7 +218,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     </div>
     
     <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>Finalizar e Salvar Pedido</button>
-    <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 Enviar o Pedido</button>
+    <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
     <button class="btn" onclick="limSel()">Limpar seleção</button>
   </aside>
 </div>
@@ -287,7 +271,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
   
   <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>Finalizar e Salvar Pedido</button>
-  <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 Enviar o Pedido</button>
+  <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>📄 PDF (Guardar p/ Liberar)</button>
   <button class="btn" onclick="limSel();fecharSheet()">Limpar seleção</button>
   <button class="btn" onclick="fecharSheet()">Fechar</button>
 </div>
@@ -365,12 +349,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // CONFIGURAÇÃO WEB APP GOOGLE APPLICATION URL
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyQUl9lHuvKFezC8uhQwf3S9O3mSlx1xKtXV6CrZRkiy6fIsZv4ByzV_s5wkeCBnThy_w/exec"; 
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxR6Fu8OXcyq9FE2Cz6FCiSNopjTQyid0INOGy68hKz4avEvotPDifLndacn1wCDWZXgQ/exec"; 
 
 let PRODUTOS = [];
 let SELECIONADOS = {};
 let DADOS_PDF_PRONTO = null;
-let CODIGO_REPRESENTANTE = "";
 
 // Tabelas de Prazos Condicionais
 const SUB_PRAZOS = {
@@ -382,38 +365,8 @@ const SUB_PRAZOS = {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
-  verificarLogin();
   carregarDados();
 });
-
-// LOGICA DE LOGIN DO REPRESENTANTE
-function verificarLogin() {
-  const codSalvo = localStorage.getItem('repCode');
-  if (codSalvo) {
-    CODIGO_REPRESENTANTE = codSalvo;
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('rep-logado').innerText = "Rep: " + CODIGO_REPRESENTANTE + " (Sair)";
-  }
-}
-
-function logarRepresentante() {
-  const val = document.getElementById('input-rep-code').value.trim();
-  if (!val) {
-    alert("Por favor, informe seu código de representante.");
-    return;
-  }
-  CODIGO_REPRESENTANTE = val;
-  localStorage.setItem('repCode', val);
-  document.getElementById('login-overlay').style.display = 'none';
-  document.getElementById('rep-logado').innerText = "Rep: " + CODIGO_REPRESENTANTE + " (Sair)";
-}
-
-function sairRepresentante() {
-  if(confirm("Deseja desconectar seu código de representante?")) {
-    localStorage.removeItem('repCode');
-    location.reload();
-  }
-}
 
 function showToast(m) {
   const t = document.getElementById('toast');
@@ -875,6 +828,7 @@ function fecharSheet() {
   document.getElementById('b-sheet').classList.remove('open');
 }
 
+// ---- LOGICA DO MODAL DO CLIENTE ----
 function abrirFluxoFechamento(origem) {
   if (Object.keys(SELECIONADOS).length === 0) {
     alert("Adicione itens ao pedido primeiro.");
@@ -892,6 +846,7 @@ function clicouForaCliente(e) {
 }
 
 function confirmarSalvamentoPedido() {
+  // RECOLHA DOS NOVOS CAMPOS DO CLIENTE (Com Trim defensivo)
   let cnpj = (document.getElementById('cli-cnpj').value || '').trim();
   let razao = (document.getElementById('cli-razao').value || '').trim();
   let fantasia = (document.getElementById('cli-fantasia').value || '').trim();
@@ -909,15 +864,10 @@ function confirmarSalvamentoPedido() {
 
   let txtItens = Object.values(SELECIONADOS).map(x => `${x.produto.codigo} (${x.qtd} un)`).join(' | ');
   
+  // BLOCO DE TEXTO ESTRUTURADO PARA PLANILHA E PDF
   let stringDadosCliente = `RAZÃO SOCIAL: ${razao}\nFANTASIA: ${fantasia}\nCNPJ/CPF: ${cnpj}\nENDEREÇO: ${endereco}\nTELEFONE: ${telefone}\nE-MAIL: ${email}\nESTADO DESTINO: ${uf}\nTABELA APLICADA: ${tabelaAtivaStr}`;
   
-  // INJETANDO DADOS PARA O PDF (Para o backend conseguir salvar e enviar e-mail)
-  DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente;
-  DADOS_PDF_PRONTO.razaoSegura = razao;
-
-  // NOVO PAYLOAD COM CODIGO REPRESENTANTE E DADOS DO PDF
   let payloadPlanilha = {
-    codigoRepresentante: CODIGO_REPRESENTANTE, // Envia o código que ele digitou no início
     clienteInfo: stringDadosCliente,
     itens: txtItens,
     qtd: parseInt(totalItensStr) || 1,
@@ -925,13 +875,12 @@ function confirmarSalvamentoPedido() {
     totalIpi: DADOS_PDF_PRONTO.contas.totalIpi,
     totalDescontos: DADOS_PDF_PRONTO.contas.valPrazo,
     prazo: DADOS_PDF_PRONTO.prazo,
-    total: DADOS_PDF_PRONTO.contas.liquido,
-    dadosPdf: DADOS_PDF_PRONTO // Envia para o backend para ele gerar e enviar pro Drive no mesmo pulso
+    total: DADOS_PDF_PRONTO.contas.liquido
   };
 
   const btnCli = document.getElementById('btn-salvar-cli');
   btnCli.disabled = true;
-  btnCli.innerText = "Enviando ao Servidor...";
+  btnCli.innerText = "Salvando...";
 
   fetch(URL_GOOGLE_SCRIPT, {
     method: 'POST',
@@ -945,15 +894,19 @@ function confirmarSalvamentoPedido() {
 
     if(resData.status === 'success') {
       fecharModalCliente();
-      showToast("Pedido salvo e enviado com sucesso! Clique em Enviar o Pedido para baixar sua cópia.");
+      showToast("Pedido salvo na planilha com sucesso! PDF Liberado.");
+      
+      // Injeta os dados estruturados no Payload do PDF e guarda um Nome Seguro
+      DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente;
+      DADOS_PDF_PRONTO.razaoSegura = razao;
       
       document.getElementById('btn-xls-d').classList.add('liberado');
       document.getElementById('btn-xls-m').classList.add('liberado');
       document.getElementById('btn-xls-d').disabled = false;
       document.getElementById('btn-xls-m').disabled = false;
       
-      document.getElementById('btn-orc-d').innerText = "Pedido Enviado! ✓";
-      document.getElementById('btn-orc-m').innerText = "Pedido Enviado! ✓";
+      document.getElementById('btn-orc-d').innerText = "Pedido Salvo! ✓";
+      document.getElementById('btn-orc-m').innerText = "Pedido Salvo! ✓";
     } else {
       alert("Erro ao registar: " + resData.message);
     }
@@ -969,7 +922,7 @@ function confirmarSalvamentoPedido() {
 function baixarPdf() {
   if(!DADOS_PDF_PRONTO) return;
   
-  showToast("A gerar a cópia do seu PDF, aguarde...");
+  showToast("A gerar ficheiro PDF, aguarde...");
   
   fetch(URL_GOOGLE_SCRIPT, {
     method: 'POST',
@@ -984,15 +937,16 @@ function baixarPdf() {
       for (let i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
       let blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
       
+      // Tratamento Defensivo na hora de dar o nome ao Ficheiro para o utilizador final baixar
       let razaoLimpa = (DADOS_PDF_PRONTO.razaoSegura || 'Cliente').replace(/[^a-z0-9]/gi, '_');
       
       let link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = `Pedido_${CODIGO_REPRESENTANTE}_${razaoLimpa}.pdf`;
+      link.download = `Pedido_${razaoLimpa}.pdf`;
       link.click();
-      showToast("Download da cópia em PDF concluída!");
+      showToast("Download do PDF iniciado!");
     } else {
-      alert("Erro ao baixar PDF local: " + resData.message);
+      alert("Erro ao construir PDF: " + resData.message);
     }
   })
   .catch(err => {
