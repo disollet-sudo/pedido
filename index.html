@@ -9,8 +9,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--verde:#1D9E75;--verde-lt:#E1F5EE;--verde-dk:#0F6E56;--cinza:#f4f4f2;--borda:#e0dfd8;--texto:#1a1a18;--sub:#6b6b65;--branco:#fff;--promo:#E24B4A}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--cinza);color:var(--texto);font-size:14px;line-height:1.5;padding-bottom:80px}
-
-/* HEADER */
 header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:sticky;top:0;z-index:200}
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px}
 .logo-area{flex-shrink:0;display:flex;align-items:center}
@@ -20,8 +18,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .search-wrap input:focus{border-color:var(--verde)}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#888;font-size:15px;pointer-events:none}
 .badge{background:var(--verde);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;white-space:nowrap;display:none}
-
-/* FILTROS E SYNC */
 .filtros{background:var(--branco);border-bottom:1px solid var(--borda);padding:8px 20px}
 .filtros-inner{max-width:1200px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .filtros-inner label{font-size:12px;color:var(--sub);font-weight:600}
@@ -31,12 +27,8 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .btn-sync{background:#E1F5EE;color:var(--verde-dk);border:1px solid var(--verde);font-weight:700;}
 .btn-sync:hover{background:var(--verde);color:#fff;}
 .top-actions{margin-left:auto; display:flex; align-items:center; gap:12px;}
-
-/* LAYOUT */
 .main{max-width:1200px;margin:0 auto;padding:16px 20px;display:grid;grid-template-columns:1fr 350px;gap:16px;align-items:start}
 @media(max-width:880px){.main{grid-template-columns:1fr;padding:10px} .top-actions{margin-left:0; width:100%; justify-content:space-between; margin-top:5px;}}
-
-/* GRID E CARDS */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
 @media(max-width:500px){.grid{grid-template-columns:repeat(2,1fr);gap:8px}}
 .card{background:var(--branco);border:1.5px solid var(--borda);border-radius:10px;overflow:hidden;position:relative;display:flex;flex-direction:column;cursor:pointer;transition:border-color .15s,box-shadow .15s}
@@ -49,12 +41,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .card-img img{width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .3s}
 .card-img img.loaded{opacity:1}
 .no-img-icon{font-size:30px;color:#ddd}
-
-/* SKELETON */
-.sk-card{background:var(--branco);border:1.5px solid var(--borda);border-radius:10px;overflow:hidden}
-.skeleton{background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:4px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
 .card-body{padding:10px 12px 12px}
 .card-body .tabela-atual-visivel {font-size:11px; font-weight:bold; color:#777; margin-bottom:2px;}
 .card-cod{font-size:11px;font-weight:700;color:var(--verde-dk);margin-bottom:3px}
@@ -62,50 +48,15 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .card-bottom{display:flex;justify-content:space-between;align-items:center}
 .card-preco{font-size:15px;font-weight:800;color:var(--verde-dk)}
 .card-emb{font-size:11px;background:var(--cinza);padding:2px 6px;border-radius:4px;color:var(--sub)}
-
-/* =========================================
-   PAINEL E MODALS (Fixo c/ Scroll Interno)
-   ========================================= */
-.painel {
-  background: var(--branco);
-  border: 1px solid var(--borda);
-  border-radius: 12px;
-  position: sticky;
-  top: 90px;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 110px);
-  overflow: hidden;
-}
-
-.painel-header {
-  padding: 14px 18px;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--borda);
-  display: flex;
-  justify-content: center;
-}
-
-.painel-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px 18px;
-}
+.painel {background: var(--branco);border: 1px solid var(--borda);border-radius: 12px;position: sticky;top: 90px;display: flex;flex-direction: column;max-height: calc(100vh - 110px);overflow: hidden;}
+.painel-header {padding: 14px 18px;flex-shrink: 0;border-bottom: 1px solid var(--borda);display: flex;justify-content: center;}
+.painel-scroll {flex: 1;overflow-y: auto;padding: 14px 18px;}
 .painel-scroll::-webkit-scrollbar { width: 6px; }
 .painel-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-
-.painel-footer {
-  flex-shrink: 0;
-  padding: 14px 18px 18px;
-  background: var(--branco);
-  border-top: 1px solid var(--borda);
-}
-
+.painel-footer {flex-shrink: 0;padding: 14px 18px 18px;background: var(--branco);border-top: 1px solid var(--borda);}
 .field{margin-bottom:12px}
 .field label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600}
 .field select, .field input[type=text], .field input[type=email], .field textarea{width:100%;padding:8px 10px;border:1px solid var(--borda);border-radius:7px;font-size:13px;outline:none;background:#fff;color:var(--texto)}
-
-/* LISTA CARRINHO */
 .lista-sel{border:1px solid var(--borda);border-radius:8px;margin-bottom:12px; background:#fff; max-height: 50vh; overflow-y: auto;}
 .lista-sel::-webkit-scrollbar { width: 6px; }
 .lista-sel::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
@@ -119,8 +70,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .sel-rm{cursor:pointer;color:#ccc;font-size:18px;flex-shrink:0}
 .sel-rm:hover{color:#e24b4a}
 .vazio{text-align:center;padding:18px;color:var(--sub);font-size:12px}
-
-/* BOTÕES GERAIS */
 .btn{width:100%;padding:11px;border:1px solid var(--borda);border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;margin-bottom:8px;background:var(--branco);color:var(--texto)}
 .btn:hover{border-color:var(--verde);color:var(--verde)}
 .btn.prim{background:var(--verde);border-color:var(--verde);color:#fff}
@@ -129,66 +78,25 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .btn.pdf-btn.liberado{background:#fff;color:var(--verde-dk);border-color:var(--verde);cursor:pointer}
 .btn.pdf-btn.liberado:hover{background:var(--verde-lt)}
 .btn:disabled{opacity:.5;cursor:not-allowed;background-color:#eee !important;color:#999 !important}
-
-/* GRUPO DE BOTÕES (Lado a Lado) */
-.btn-group {display: flex; gap: 8px;}
-.btn-group .btn {margin-bottom: 0; flex: 1;}
-
+.btn-group {display: flex; flex-wrap: wrap; gap: 8px;}
+.btn-group .btn {margin-bottom: 0; flex: 1 1 45%; padding: 10px; font-size: 12px;}
 .resultado{background:var(--verde-lt);border:1px solid #9FE1CB;border-radius:8px;padding:12px;margin-bottom:12px}
 .res-row{display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px}
 .res-row span:first-child{color:var(--texto);font-weight:500}
 .res-row b{color:var(--verde-dk)}
 .res-sep{border-top:1px solid #9FE1CB;margin:6px 0}
-
-/* =========================================
-   BOTTOM BAR E MOBILE SHEET (Fixo c/ Scroll)
-   ========================================= */
 .mob-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--branco);border-top:1px solid var(--borda);padding:10px 16px;z-index:150;align-items:center;gap:10px}
 .mob-bar .mb-info{flex:1;font-size:13px;line-height:1.3}
 .mob-bar .mb-btn{padding:10px 18px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700}
 @media(max-width:880px){.mob-bar{display:flex}.painel{display:none}}
-
 .sh-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300}
 .sh-overlay.open{display:block}
-
-.b-sheet {
-  position:fixed;bottom:0;left:0;right:0;
-  background:var(--branco);
-  border-radius:16px 16px 0 0;
-  z-index:400;
-  transform:translateY(100%);
-  transition:transform .3s ease;
-  max-height:88vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+.b-sheet {position:fixed;bottom:0;left:0;right:0;background:var(--branco);border-radius:16px 16px 0 0;z-index:400;transform:translateY(100%);transition:transform .3s ease;max-height:88vh;display: flex;flex-direction: column;overflow: hidden;}
 .b-sheet.open{transform:translateY(0)}
-
-.sh-header {
-  padding: 16px 16px 10px;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--borda);
-  text-align: center;
-}
+.sh-header {padding: 16px 16px 10px;flex-shrink: 0;border-bottom: 1px solid var(--borda);text-align: center;}
 .sh-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 14px}
-.sh-title{font-size:15px;font-weight:600; margin: 0;}
-
-.sh-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px 16px;
-}
-.sh-scroll::-webkit-scrollbar { width: 6px; }
-.sh-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-
-.sh-footer {
-  flex-shrink: 0;
-  padding: 14px 16px 24px;
-  border-top: 1px solid var(--borda);
-  background: var(--branco);
-}
-
+.sh-scroll {flex: 1;overflow-y: auto;padding: 14px 16px;}
+.sh-footer {flex-shrink: 0;padding: 14px 16px 24px;border-top: 1px solid var(--borda);background: var(--branco);}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;justify-content:center;align-items:center;padding:16px}
 .modal.open{display:flex}
 .modal-box{background:var(--branco);border-radius:14px;overflow:hidden;width:100%;max-width:480px;max-height:94vh;display:flex;flex-direction:column}
@@ -205,16 +113,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .qty-row{display:flex;align-items:center;margin-bottom:14px}
 .qty-row label{font-size:13px;color:var(--sub);margin-right:10px;font-weight:500}
 .qty-big-btn{width:36px;height:36px;border:1.5px solid var(--borda);background:var(--cinza);cursor:pointer;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.qty-big-btn:first-of-type{border-radius:8px 0 0 8px}
-.qty-big-btn:last-of-type{border-radius:0 8px 8px 0}
 .qty-big-input{width:65px;height:36px;border:1.5px solid var(--borda);border-left:none;border-right:none;text-align:center;font-size:16px;font-weight:700;outline:none}
 .btn-add{width:100%;padding:13px;background:var(--verde);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
-.btn-add.adicionado{background:var(--verde-dk)}
-
 .toast{position:fixed;bottom:76px;right:16px;background:#1a1a18;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(min-width:881px){.toast{bottom:20px}}
-
 .scroll-form { overflow-y: auto; max-height: 60vh; padding-right: 5px; margin-bottom: 10px; }
 .scroll-form::-webkit-scrollbar { width: 6px; }
 .scroll-form::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
@@ -222,7 +125,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 </head>
 <body>
 
-<!-- Modal do Código do Representante -->
 <div class="modal" id="modal-repre">
   <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; justify-content: center; align-items: center; text-align: center;">
     <h3 style="margin-bottom:16px; color:var(--verde-dk); font-size: 16px;">👤 Informe seu Código de Representante</h3>
@@ -231,36 +133,31 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </div>
 </div>
 
-<!-- Modal de Carregamento -->
 <div class="modal" id="loading-modal">
   <div class="modal-box" style="padding: 30px; max-width: 320px; height: auto; justify-content: center; align-items: center; text-align: center; background: #fff;">
     <div class="modal-spin" style="display:block; margin-bottom:16px;"></div>
-    <div style="font-weight:bold; color:var(--verde-dk); font-size: 16px;">Processando Pedido...</div>
-    <div style="font-size:12px; color:var(--sub); margin-top:8px;">Gerando arquivo e disparando e-mail. Não feche a página.</div>
+    <div style="font-weight:bold; color:var(--verde-dk); font-size: 16px;">Processando Solicitação...</div>
+    <div style="font-size:12px; color:var(--sub); margin-top:8px;">Aguarde, gerando arquivos. Não feche a página.</div>
   </div>
 </div>
 
-<!-- Modal de Sucesso -->
 <div class="modal" id="modal-sucesso" onclick="clicouForaSucesso(event)">
   <div class="modal-box" style="padding: 30px 20px; max-width: 320px; height: auto; text-align: center; position: relative; background: #fff;">
     <button class="modal-close-btn" onclick="fecharModalSucesso()" style="background:#f4f4f2; color:#333;">✕</button>
     <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
-    <h3 style="color:var(--verde-dk); font-size: 20px; margin-bottom: 8px;">Pedido Enviado!</h3>
-    <p style="font-size:13px; color:var(--sub);">O PDF foi gerado e enviado com sucesso.</p>
-    <button class="btn prim" onclick="fecharModalSucesso()" style="margin-top: 20px;">Concluir e Voltar</button>
+    <h3 style="color:var(--verde-dk); font-size: 20px; margin-bottom: 8px;">Ação Concluída!</h3>
+    <p style="font-size:13px; color:var(--sub);">O PDF foi gerado e salvo com sucesso.</p>
+    <button class="btn prim" onclick="fecharModalSucesso()" style="margin-top: 20px;">Fechar</button>
   </div>
 </div>
 
-<!-- Modal do Carrinho de Compras (Desktop e Mobile) -->
 <div class="modal" id="modal-carrinho" onclick="clicouForaCarrinho(event)">
   <div class="modal-box" style="padding: 20px; max-width: 450px; max-height: 85vh;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
       <h3 style="color: var(--verde-dk); font-size: 16px; display:flex; align-items:center; gap:6px;">🛒 Carrinho de Compras</h3>
       <button onclick="fecharCarrinho()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666;">✕</button>
     </div>
-    
     <div class="lista-sel" id="lista-d" style="border: none;"></div>
-    
     <button class="btn" onclick="limSel(); fecharCarrinho()" style="margin-top: 10px; margin-bottom: 0;">🗑️ Esvaziar Carrinho</button>
   </div>
 </div>
@@ -280,11 +177,8 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <div class="filtros">
   <div class="filtros-inner">
-    <label>APENAS PROMOÇÕES:</label>
-    <select id="fil-promo" onchange="filtrar()">
-      <option value="">TODOS</option>
-      <option value="sim">SIM</option>
-    </select>
+    <label>PROMOÇÕES:</label>
+    <select id="fil-promo" onchange="filtrar()"><option value="">TODOS</option><option value="sim">SIM</option></select>
     <label>PREÇO ATÉ:</label>
     <input type="number" id="fil-preco" placeholder="R$" oninput="filtrar()" style="width:80px">
     <button class="btn-lim" onclick="limFiltros()">✕ Limpar</button>
@@ -292,9 +186,8 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div class="top-actions">
       <span style="font-size:13px; font-weight:600; color:var(--verde-dk); display:none; align-items:center; gap:6px; background:var(--verde-lt); padding:4px 10px; border-radius:12px;" id="info-repre-box">
         Rep: <span id="info-repre-txt"></span>
-        <button onclick="abrirModalRepre()" style="background:none; border:none; color:var(--sub); text-decoration:underline; cursor:pointer; font-size:11px;">(Alterar)</button>
+        <button onclick="abrirModalRepre()" style="background:none; border:none; color:var(--sub); text-decoration:underline; cursor:pointer; font-size:11px;">(Trocar)</button>
       </span>
-      
       <span style="font-size:12px;color:var(--sub)" id="cont"></span>
       <button class="btn-lim btn-sync" id="btn-sync" onclick="sincronizarPlanilha()">🔄 Sincronizar Catálogo</button>
     </div>
@@ -302,25 +195,17 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 </div>
 
 <div class="main">
-  <div>
-    <div id="grid" class="grid"></div>
-  </div>
+  <div><div id="grid" class="grid"></div></div>
   
-  <!-- PAINEL DESKTOP OTIMIZADO -->
   <aside class="painel">
     <div class="painel-header">
-      <button class="btn prim" onclick="abrirCarrinho()" style="margin:0; font-size:14px; width:100%;">
-        🛒 Ver Carrinho (<span id="cart-count">0</span> itens)
-      </button>
+      <button class="btn prim" onclick="abrirCarrinho()" style="margin:0; font-size:14px; width:100%;">🛒 Ver Carrinho (<span id="cart-count">0</span> itens)</button>
     </div>
     
     <div class="painel-scroll">
       <div class="field">
-        <label>Regra de ICMS / Faixa</label>
-        <select id="icms-d" onchange="syncRegras('icms-d','icms-m')">
-          <option value="7">ICMS 7</option>
-          <option value="12">ICMS 12</option>
-        </select>
+        <label>UF Destino / Estado</label>
+        <select id="uf-d" onchange="alterouUF('uf-d')"><option value="">Selecione o Estado...</option></select>
       </div>
       
       <div class="field">
@@ -339,13 +224,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
         <label>Opções de Desmembramento</label>
         <select id="subprazo-d" onchange="syncRegras('subprazo-d','subprazo-m')"></select>
       </div>
-      
-      <div class="field">
-        <label>UF Destino (Cálculo de Frete)</label>
-        <select id="uf-d" onchange="alterouUF('uf-d')">
-          <option value="">Selecione o Estado...</option>
-        </select>
-      </div>
     </div>
 
     <div class="painel-footer">
@@ -360,12 +238,10 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       </div>
       
       <div class="btn-group">
-        <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled title="Finalizar e informar dados do cliente">
-          ✓ Finalizar
-        </button>
-        <button class="btn pdf-btn" id="btn-xls-d" onclick="baixarPdf()" disabled title="Gerar PDF e Disparar E-mail">
-          🚀 Enviar
-        </button>
+        <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>✓ Finalizar</button>
+        <button class="btn" id="btn-baixar-d" onclick="acionarPdf('baixar')" disabled>⬇️ Baixar PDF</button>
+        <button class="btn pdf-btn" id="btn-xls-d" onclick="acionarPdf('enviar')" disabled>🚀 Enviar</button>
+        <button class="btn pdf-btn" id="btn-disolle-d" onclick="acionarPdf('enviar_disolle')" disabled>🚀 Enviar Di Solle</button>
       </div>
     </div>
   </aside>
@@ -383,20 +259,14 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="b-sheet" id="b-sheet">
   <div class="sh-header">
     <div class="sh-handle"></div>
-    <button class="btn prim" onclick="abrirCarrinho()" style="margin:0 auto; font-size:14px; width:80%;">
-      🛒 Ver Carrinho (<span id="cart-count-m">0</span> itens)
-    </button>
+    <button class="btn prim" onclick="abrirCarrinho()" style="margin:0 auto; font-size:14px; width:80%;">🛒 Ver Carrinho (<span id="cart-count-m">0</span> itens)</button>
   </div>
   
   <div class="sh-scroll">
     <div class="field">
-      <label>Regra de ICMS / Faixa</label>
-      <select id="icms-m" onchange="syncRegras('icms-m','icms-d')">
-        <option value="7">ICMS 7</option>
-        <option value="12">ICMS 12</option>
-      </select>
+      <label>UF Destino / Estado</label>
+      <select id="uf-m" onchange="alterouUF('uf-m')"><option value="">Selecione o Estado...</option></select>
     </div>
-    
     <div class="field">
       <label>Prazo de Pagamento Base</label>
       <select id="prazo-m" onchange="alterouPrazoBase('prazo-m','prazo-d')">
@@ -408,17 +278,9 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
         <option value="0">63 dias (0%)</option>
       </select>
     </div>
-
     <div class="field" id="wrapper-subprazo-m" style="display:none;">
       <label>Opções de Desmembramento</label>
       <select id="subprazo-m" onchange="syncRegras('subprazo-m','subprazo-d')"></select>
-    </div>
-
-    <div class="field">
-      <label>UF Destino (Cálculo de Frete)</label>
-      <select id="uf-m" onchange="alterouUF('uf-m')">
-        <option value="">Selecione o Estado...</option>
-      </select>
     </div>
   </div>
 
@@ -435,9 +297,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     
     <div class="btn-group">
       <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>✓ Finalizar</button>
-      <button class="btn pdf-btn" id="btn-xls-m" onclick="baixarPdf()" disabled>🚀 Enviar</button>
+      <button class="btn" id="btn-baixar-m" onclick="acionarPdf('baixar')" disabled>⬇️ Baixar PDF</button>
+      <button class="btn pdf-btn" id="btn-xls-m" onclick="acionarPdf('enviar')" disabled>🚀 Enviar</button>
+      <button class="btn pdf-btn" id="btn-disolle-m" onclick="acionarPdf('enviar_disolle')" disabled>🚀 Enviar Di Solle</button>
     </div>
-    <button class="btn" onclick="fecharSheet()" style="margin-top: 10px; margin-bottom:0;">Fechar Aba</button>
+    <button class="btn" onclick="fecharSheet()" style="margin-top: 10px; margin-bottom:0; width: 100%;">Fechar Aba</button>
   </div>
 </div>
 
@@ -457,7 +321,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="qty-row">
         <label>Quantidade:</label>
         <button class="qty-big-btn" onclick="mudarQtyModal(-1)">-</button>
-        <input type="number" class="qty-big-input" id="modal-qty" value="1" min="1" oninput="validarQtyModal(this)">
+        <input type="number" class="qty-big-input" id="modal-qty" value="1" min="1" onfocus="this.select()" onblur="corrigirQtyModal(this)">
         <button class="qty-big-btn" onclick="mudarQtyModal(1)">+</button>
       </div>
       
@@ -469,40 +333,15 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="modal" id="modal-cliente" onclick="clicouForaCliente(event)">
   <div class="modal-box" style="padding: 24px; max-width: 400px; height: auto; max-height: 94vh;">
     <h3 style="margin-bottom:12px; color:var(--verde-dk); font-size: 16px; text-align: center;">📋 DADOS DO CLIENTE</h3>
-    
     <div class="scroll-form">
-      <div class="field">
-        <label>CNPJ / CPF</label>
-        <input type="text" id="cli-cnpj" placeholder="Digite o CNPJ ou CPF">
-      </div>
-      <div class="field">
-        <label>Razão Social</label>
-        <input type="text" id="cli-razao" placeholder="Razão Social ou Nome Completo">
-      </div>
-      <div class="field">
-        <label>Fantasia (Opcional)</label>
-        <input type="text" id="cli-fantasia" placeholder="Nome Fantasia">
-      </div>
-      <div class="field">
-        <label>Endereço Completo</label>
-        <input type="text" id="cli-endereco" placeholder="Rua, Número, Bairro, Cidade">
-      </div>
-      <div class="field">
-        <label>Telefone</label>
-        <input type="text" id="cli-telefone" placeholder="(XX) XXXXX-XXXX">
-      </div>
-      <div class="field">
-        <label>E-mail</label>
-        <input type="email" id="cli-email" placeholder="email@cliente.com">
-      </div>
-      <div class="field" style="display:none;">
-        <label>UF do Cliente</label>
-        <select id="cli-uf" onchange="alterouUF('cli-uf')">
-          <option value="">Selecione o Estado...</option>
-        </select>
-      </div>
+      <div class="field"><label>CNPJ / CPF</label><input type="text" id="cli-cnpj" placeholder="Digite o CNPJ ou CPF"></div>
+      <div class="field"><label>Razão Social</label><input type="text" id="cli-razao" placeholder="Razão Social ou Nome Completo"></div>
+      <div class="field"><label>Fantasia (Opcional)</label><input type="text" id="cli-fantasia" placeholder="Nome Fantasia"></div>
+      <div class="field"><label>Endereço Completo</label><input type="text" id="cli-endereco" placeholder="Rua, Número, Bairro, Cidade"></div>
+      <div class="field"><label>Telefone</label><input type="text" id="cli-telefone" placeholder="(XX) XXXXX-XXXX"></div>
+      <div class="field"><label>E-mail</label><input type="email" id="cli-email" placeholder="email@cliente.com"></div>
+      <div class="field"><label>Observações</label><textarea id="cli-obs" rows="3" placeholder="Informações adicionais do pedido..."></textarea></div>
     </div>
-    
     <div style="margin-top: 10px;">
       <button class="btn prim" id="btn-salvar-cli" onclick="confirmarSalvamentoPedido()" style="margin-bottom: 8px;">Salvar Pedido na Planilha</button>
       <button class="btn" onclick="fecharModalCliente()">Cancelar</button>
@@ -513,15 +352,14 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// !!! ATENÇÃO: NÃO SE ESQUEÇA DE ATUALIZAR ESSA URL DEPOIS DE GERAR A NOVA IMPLANTAÇÃO !!!
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwJ_Ud71nnAoNTM6gLkF2g5X0f9wpSkrj7nq9YeW7mPtuZKthmGbPEUnpQdF3HhTHv8ew/exec"; 
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyzY7o6bq6jgtuRuUZ3FrxzZ_NPJZ9rN6pocSTrDfyVz6K8vo9IsoXh0WQZIyO9kMW6oQ/exec"; 
 
 let PRODUTOS = [];
 let SELECIONADOS = {};
 let DADOS_PDF_PRONTO = null;
 let FRETE_REGRAS = {};
-
 let CODIGO_REPRE = localStorage.getItem('repre_cod') || "";
+let PRODUTO_MODAL_ATIVO = null;
 
 window.addEventListener('DOMContentLoaded', () => {
   if(!CODIGO_REPRE) {
@@ -537,521 +375,300 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function salvarRepre() {
   let val = document.getElementById('repre-codigo').value.trim();
-  if(!val) { alert("Por favor, digite seu código de representante."); return; }
-  CODIGO_REPRE = val;
-  localStorage.setItem('repre_cod', val); 
-  
+  if(!val) { alert("Digite o código."); return; }
+  CODIGO_REPRE = val; localStorage.setItem('repre_cod', val); 
   document.getElementById('modal-repre').style.display = 'none';
-  document.getElementById('modal-repre').classList.remove('open');
-  atualizarExibicaoRepre();
-  showToast("Código de representante salvo!");
+  atualizarExibicaoRepre(); showToast("Representante salvo!");
 }
-
-function atualizarExibicaoRepre() {
-  document.getElementById('info-repre-txt').innerText = CODIGO_REPRE;
-  document.getElementById('info-repre-box').style.display = 'flex';
-}
-
-function abrirModalRepre() {
-  document.getElementById('repre-codigo').value = CODIGO_REPRE;
-  document.getElementById('modal-repre').style.display = 'flex';
-  document.getElementById('modal-repre').classList.add('open');
-}
+function atualizarExibicaoRepre() { document.getElementById('info-repre-txt').innerText = CODIGO_REPRE; document.getElementById('info-repre-box').style.display = 'flex'; }
+function abrirModalRepre() { document.getElementById('repre-codigo').value = CODIGO_REPRE; document.getElementById('modal-repre').style.display = 'flex'; document.getElementById('modal-repre').classList.add('open'); }
 
 const SUB_PRAZOS = {
   "9": ["28 DIAS", "14/42 DIAS", "21/35 DIAS", "14/28/42 DIAS"],
   "7": ["35 DIAS", "14/56 DIAS", "21/49 DIAS", "28/42 DIAS", "14/35/56 DIAS", "21/35/49 DIAS", "14/28/42/56 DIAS"],
   "5": ["42 DIAS", "28/56 DIAS", "35/49 DIAS", "14/42/70 DIAS", "28/42/56 DIAS", "21/35/49/63 DIAS", "14/28/42/56/70 DIAS"],
   "2": ["56 DIAS", "28/84 DIAS", "49/63 DIAS", "35/56/77 DIAS", "42/56/70 DIAS", "35/49/63/77 DIAS", "28/42/56/70/84 DIAS", "21/35/49/63/77/91 DIAS"],
-  "0": ["63 DIAS", "35/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"]
+  "0": ["63 DIAS", "35/91 DIAS", "35/63/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"]
 };
 
-function showToast(m) {
-  const t = document.getElementById('toast');
-  t.innerText = m; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function formatDin(v) { return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+
+async function carregarDados(force=false){
+  try{
+    const r = await fetch(URL_GOOGLE_SCRIPT + (force?'?atualizar=true':''));
+    const d = await r.json();
+    PRODUTOS = d.produtos || []; FRETE_REGRAS = d.freteRegras || {};
+    let ufs = d.estados || Object.keys(FRETE_REGRAS);
+    let ufd = document.getElementById('uf-d'), ufm = document.getElementById('uf-m');
+    ufd.innerHTML = '<option value="">Selecione o Estado...</option>'; ufm.innerHTML = '<option value="">Selecione o Estado...</option>';
+    ufs.forEach(e => { ufd.innerHTML+=`<option value="${e}">${e}</option>`; ufm.innerHTML+=`<option value="${e}">${e}</option>`; });
+    filtrar();
+  }catch(e){ showToast('Erro de conexão.'); }
 }
 
-/* ==================== NOVAS FUNÇÕES DO CARRINHO ==================== */
-function abrirCarrinho() {
-  document.getElementById('modal-carrinho').classList.add('open');
-}
-function fecharCarrinho() {
-  document.getElementById('modal-carrinho').classList.remove('open');
-}
-function clicouForaCarrinho(e) {
-  if(e.target.id === 'modal-carrinho') fecharCarrinho();
-}
-/* =================================================================== */
-
-function carregarDados(force = false) {
-  document.getElementById('grid').innerHTML = Array(8).fill('<div class="sk-card"><div class="skeleton" style="height:145px"></div><div style="padding:10px"><div class="skeleton" style="height:12px;width:40%;margin-bottom:6px"></div><div class="skeleton" style="height:14px;margin-bottom:12px"></div><div class="skeleton" style="height:16px;width:60%"></div></div></div>').join('');
-  
-  let url = URL_GOOGLE_SCRIPT;
-  if(force) url += "?atualizar=true";
-
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      PRODUTOS = data.produtos || [];
-      if(data.logoUrl) { document.getElementById('logo-area').innerHTML = `<img src="${data.logoUrl}" alt="Logo">`; }
-      
-      const comboUf = document.getElementById('cli-uf');
-      const comboUfD = document.getElementById('uf-d');
-      const comboUfM = document.getElementById('uf-m');
-      
-      let htmlUf = '<option value="">Selecione o Estado...</option>';
-      if(data.estados) { data.estados.forEach(uf => { htmlUf += `<option value="${uf}">${uf}</option>`; }); }
-      comboUf.innerHTML = htmlUf; comboUfD.innerHTML = htmlUf; comboUfM.innerHTML = htmlUf;
-
-      FRETE_REGRAS = data.freteRegras || {};
-
-      renderizarGrid(PRODUTOS);
-      calcularTudo();
-    })
-    .catch(err => { console.error(err); showToast("Erro ao carregar dados."); });
+function sincronizarPlanilha(){
+  document.getElementById('btn-sync').innerText = "Sincronizando..."; document.getElementById('grid').innerHTML = "";
+  carregarDados(true).then(()=> { document.getElementById('btn-sync').innerText = "🔄 Sincronizar Catálogo"; showToast("Catálogo atualizado!"); });
 }
 
-function sincronizarPlanilha() {
-  const btn = document.getElementById('btn-sync');
-  btn.disabled = true; btn.innerText = "🔄 Sincronizando...";
-  carregarDados(true);
-  setTimeout(() => { btn.disabled = false; btn.innerText = "🔄 Sincronizar Catálogo"; }, 2000);
-}
-
-function renderizarGrid(lista) {
-  const grid = document.getElementById('grid');
-  if(lista.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--sub)">Nenhum produto encontrado.</div>';
-    document.getElementById('cont').innerText = "0 produtos"; return;
-  }
-
-  let icmsBase = document.getElementById('icms-d').value;
-  let brutoPrevia = somarBrutoPrevia();
-  let tabelaCard = "M26071";
-  if(icmsBase === "7") { tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072"; } 
-  else { tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
-
-  grid.innerHTML = lista.map(p => {
-    let codNorm = p.codigo.toLowerCase().trim();
-    let isSel = SELECIONADOS[codNorm] ? 'sel' : '';
-    let isPromo = p.emPromocao ? 'promo' : '';
-    let precoExibicao = p.emPromocao ? (p.precosPromo[tabelaCard] || p.precosPromo['M26071'] || 0) : (p.precos[tabelaCard] || p.precos['M26071'] || 0);
-
-    let imgTag = p.fileId ? `<img src="https://drive.google.com/thumbnail?id=${p.fileId}&sz=w300" onload="this.classList.add('loaded')">` : `<span class="no-img-icon">&#128247;</span>`;
-    let badgePromo = p.emPromocao ? `<div class="card-badge-promo">PROMO</div>` : '';
-    let currentQty = SELECIONADOS[codNorm] ? SELECIONADOS[codNorm].qtd : 0;
-
-    return `
-      <div class="card ${isSel} ${isPromo}" onclick="abrirModalProduto('${p.codigo}')">
-        ${badgePromo}
-        <div class="card-badge-qty" id="badge-qty-${p.codigo}">${currentQty}</div>
-        <div class="card-img">${imgTag}</div>
-        <div class="card-body">
-          <div class="tabela-atual-visivel">${tabelaCard}</div>
-          <div class="card-cod">Ref: ${p.codigo}</div>
-          <div class="card-desc" title="${p.descricao} ${p.codigoEan}">${p.descricao}</div>
-          <div class="card-bottom">
-            <span class="card-preco">R$ ${precoExibicao.toFixed(2).replace('.',',')}</span>
-            <span class="card-emb">emb: ${p.qtdEmbalagem}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  document.getElementById('cont').innerText = `${lista.length} produtos exibidos`;
-}
-
-function somarBrutoPrevia() {
-  let totalPrevia = 0;
-  Object.values(SELECIONADOS).forEach(item => {
-    let icmsBase = document.getElementById('icms-d').value;
-    let tabBase = icmsBase === "7" ? "M26071" : "M26121";
-    let pUnit = item.produto.emPromocao ? (item.produto.precosPromo[tabBase] || 0) : (item.produto.precos[tabBase] || 0);
-    totalPrevia += pUnit * item.qtd;
+function renderizar(arr){
+  const g = document.getElementById('grid'); g.innerHTML='';
+  document.getElementById('cont').innerText = `${arr.length} produtos`;
+  arr.forEach(p => {
+    let tAtiva = document.getElementById('uf-d').value === 'RS' ? 'M26071' : 'M26071';
+    let pFinal = p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva];
+    if(!pFinal) return;
+    let qty = SELECIONADOS[p.codigoNorm] || 0;
+    let c = document.createElement('div');
+    c.className = `card ${qty>0?'sel':''} ${p.emPromocao?'promo':''}`;
+    c.onclick = () => abrirModal(p);
+    let html = `<div class="card-img">`;
+    if(qty>0) html+= `<div class="card-badge-qty">${qty}</div>`;
+    if(p.emPromocao) html+= `<div class="card-badge-promo">PROMO</div>`;
+    if(p.fileId) html+= `<img src="https://drive.google.com/thumbnail?id=${p.fileId}&sz=w300" onload="this.classList.add('loaded')">`;
+    else html+= `<div class="no-img-icon">📷</div>`;
+    html+= `</div><div class="card-body"><div class="card-cod">${p.codigo}</div><div class="card-desc">${p.descricao}</div><div class="card-bottom"><div class="card-preco">${formatDin(pFinal)}</div><div class="card-emb">cx ${p.qtdEmbalagem}</div></div></div>`;
+    c.innerHTML = html; g.appendChild(c);
   });
-  return totalPrevia;
 }
 
-function filtrar() {
-  let txt = document.getElementById('busca').value.toLowerCase().trim();
+function filtrar(){
+  let b = document.getElementById('busca').value.toLowerCase();
   let promo = document.getElementById('fil-promo').value;
-  let pMax = parseFloat(document.getElementById('fil-preco').value) || Infinity;
-  let icmsBase = document.getElementById('icms-d').value;
-  let brutoPrevia = somarBrutoPrevia();
-  
-  let tabelaCard = "M26071";
-  if(icmsBase === "7") { tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072"; } 
-  else { tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
-
-  let filtrados = PRODUTOS.filter(p => {
-    let matchTxt = p.codigo.toLowerCase().includes(txt) || p.descricao.toLowerCase().includes(txt) || p.codigoEan.toLowerCase().includes(txt);
-    let matchPromo = promo === 'sim' ? p.emPromocao : true;
-    let precoRef = p.emPromocao ? (p.precosPromo[tabelaCard] || 0) : (p.precos[tabelaCard] || 0);
-    let matchPreco = precoRef <= pMax;
-    return matchTxt && matchPromo && matchPreco;
+  let pMax = parseFloat(document.getElementById('fil-preco').value) || 0;
+  let tAtiva = 'M26071';
+  let f = PRODUTOS.filter(p => {
+    let preco = p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva];
+    if(!preco) return false;
+    let mat = (p.codigo||'').toLowerCase().includes(b) || (p.descricao||'').toLowerCase().includes(b) || (p.codigoEan||'').includes(b);
+    if(promo==='sim' && !p.emPromocao) mat = false;
+    if(pMax>0 && preco>pMax) mat = false;
+    return mat;
   });
-  renderizarGrid(filtrados);
+  renderizar(f);
 }
+function limFiltros(){ document.getElementById('busca').value=''; document.getElementById('fil-promo').value=''; document.getElementById('fil-preco').value=''; filtrar(); }
 
-function limFiltros() {
-  document.getElementById('busca').value = ""; document.getElementById('fil-promo').value = ""; document.getElementById('fil-preco').value = "";
-  filtrar();
-}
-
-let PRODUTO_MODAL_ATIVO = null;
-function abrirModalProduto(codigo) {
-  let p = PRODUTOS.find(x => x.codigo === codigo);
-  if(!p) return;
+function abrirModal(p){
   PRODUTO_MODAL_ATIVO = p;
-
-  let icmsBase = document.getElementById('icms-d').value;
-  let brutoPrevia = somarBrutoPrevia();
-  let tabelaCard = "M26071";
-  if(icmsBase === "7") { tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072"; } 
-  else { tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
-
-  let precoRef = p.emPromocao ? (p.precosPromo[tabelaCard] || 0) : (p.precos[tabelaCard] || 0);
-
-  document.getElementById('modal-cod').innerText = "Referência: " + p.codigo;
-  document.getElementById('modal-desc').innerText = p.descricao;
-  document.getElementById('modal-preco').innerText = "R$ " + precoRef.toFixed(2).replace('.', ',');
-  document.getElementById('modal-emb').innerText = `Embalagem Master: ${p.qtdEmbalagem} itens`;
+  let tAtiva = 'M26071';
+  document.getElementById('modal-img').src = p.fileId ? `https://drive.google.com/thumbnail?id=${p.fileId}&sz=w600` : '';
+  document.getElementById('modal-img').style.display = 'none'; document.getElementById('modal-spin').style.display = 'block';
+  document.getElementById('modal-cod').innerText = p.codigo; document.getElementById('modal-desc').innerText = p.descricao;
+  document.getElementById('modal-preco').innerText = formatDin(p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva]);
+  document.getElementById('modal-emb').innerText = `Múltiplo: ${p.qtdEmbalagem} | NCM: ${p.ncm} | IPI: ${p.ipi}%`;
   
-  let key = p.codigo.toLowerCase().trim();
-  document.getElementById('modal-qty').value = SELECIONADOS[key] ? SELECIONADOS[key].qtd : p.qtdEmbalagem;
-  
-  const mImg = document.getElementById('modal-img'); const spin = document.getElementById('modal-spin');
-  spin.style.display = 'block'; mImg.style.display = 'none';
-  if(p.fileId) { mImg.src = `https://drive.google.com/thumbnail?id=${p.fileId}&sz=w600`; } 
-  else { spin.style.display = 'none'; mImg.style.display = 'none'; }
-
-  const btnAdd = document.getElementById('btn-add-modal');
-  if(SELECIONADOS[key]) { btnAdd.innerText = "Atualizar Quantidade"; btnAdd.classList.add('adicionado'); } 
-  else { btnAdd.innerText = "Adicionar ao Pedido"; btnAdd.classList.remove('adicionado'); }
-
+  let q = SELECIONADOS[p.codigoNorm] || p.qtdEmbalagem;
+  document.getElementById('modal-qty').value = q;
+  document.getElementById('btn-add-modal').innerText = SELECIONADOS[p.codigoNorm] ? "Atualizar Quantidade" : "Adicionar ao Pedido";
   document.getElementById('modal').classList.add('open');
 }
 
-function fecharModal() { document.getElementById('modal').classList.remove('open'); PRODUTO_MODAL_ATIVO = null; }
-function clicouFora(e) { if(e.target.id === 'modal') fecharModal(); }
+function fecharModal(){ document.getElementById('modal').classList.remove('open'); PRODUTO_MODAL_ATIVO = null; }
+function clicouFora(e){ if(e.target===document.getElementById('modal')) fecharModal(); }
 
-function mudarQtyModal(fator) {
-  if(!PRODUTO_MODAL_ATIVO) return;
-  let input = document.getElementById('modal-qty');
-  let v = parseInt(input.value) || 0;
-  let mult = PRODUTO_MODAL_ATIVO.qtdEmbalagem || 1;
-  v += (fator * mult);
-  if(v < mult) v = mult;
-  input.value = v;
-}
-
-function validarQtyModal(input) {
+// VALIDAÇÃO E CORREÇÃO NATIVA AO DIGITAR
+function corrigirQtyModal(input){
   if(!PRODUTO_MODAL_ATIVO) return;
   let v = parseInt(input.value) || 0;
-  let mult = PRODUTO_MODAL_ATIVO.qtdEmbalagem || 1;
-  if(v < mult) input.value = mult;
+  let m = PRODUTO_MODAL_ATIVO.qtdEmbalagem || 1;
+  if(v < m) {
+    input.value = m;
+  } else if(v % m !== 0) {
+    let old = v;
+    input.value = Math.ceil(v / m) * m;
+    showToast(`Corrigido de ${old} para ${input.value} (múltiplo de ${m})`);
+  }
 }
 
-function confirmarAddModal() {
+function mudarQtyModal(d){
   if(!PRODUTO_MODAL_ATIVO) return;
-  let input = document.getElementById('modal-qty');
-  let qty = parseInt(input.value) || 0;
-  let mult = PRODUTO_MODAL_ATIVO.qtdEmbalagem || 1;
-
-  if (qty % mult !== 0) { qty = Math.ceil(qty / mult) * mult; }
-
-  let key = PRODUTO_MODAL_ATIVO.codigo.toLowerCase().trim();
-  SELECIONADOS[key] = { produto: PRODUTO_MODAL_ATIVO, qtd: qty };
-
-  fecharModal(); calcularTudo(); filtrar(); 
-  showToast("Item adicionado com sucesso!");
+  let i = document.getElementById('modal-qty');
+  let v = parseInt(i.value) || 0;
+  let m = PRODUTO_MODAL_ATIVO.qtdEmbalagem;
+  v += (d * m);
+  if(v < m) v = m;
+  i.value = v;
 }
 
-function syncRegras(idOrigem, idDestino) {
-  document.getElementById(idDestino).value = document.getElementById(idOrigem).value;
-  calcularTudo(); filtrar();
+function confirmarAddModal(){
+  if(!PRODUTO_MODAL_ATIVO) return;
+  let i = document.getElementById('modal-qty');
+  corrigirQtyModal(i); // Força a correção antes de salvar
+  let v = parseInt(i.value);
+  SELECIONADOS[PRODUTO_MODAL_ATIVO.codigoNorm] = v;
+  fecharModal(); calcularTudo(); filtrar(); showToast("Item adicionado.");
 }
 
-function alterouUF(idOrigem) {
-  const val = document.getElementById(idOrigem).value;
-  document.getElementById('uf-d').value = val;
-  document.getElementById('uf-m').value = val;
-  document.getElementById('cli-uf').value = val; 
+function limSel(){ SELECIONADOS={}; calcularTudo(); filtrar(); }
+function rmItem(cod){ delete SELECIONADOS[cod]; calcularTudo(); filtrar(); }
+
+function alterouUF(id){
+  let val = document.getElementById(id).value;
+  document.getElementById('uf-d').value = val; document.getElementById('uf-m').value = val;
+  calcularTudo();
+}
+function syncRegras(idO, idD){ document.getElementById(idD).value = document.getElementById(idO).value; calcularTudo(); }
+function alterouPrazoBase(idO, idD){
+  let val = document.getElementById(idO).value; document.getElementById(idD).value = val;
+  let wD = document.getElementById('wrapper-subprazo-d'), wM = document.getElementById('wrapper-subprazo-m');
+  let sD = document.getElementById('subprazo-d'), sM = document.getElementById('subprazo-m');
+  if(SUB_PRAZOS[val]){
+    wD.style.display='block'; wM.style.display='block'; sD.innerHTML=''; sM.innerHTML='';
+    SUB_PRAZOS[val].forEach(p=>{ sD.innerHTML+=`<option value="${p}">${p}</option>`; sM.innerHTML+=`<option value="${p}">${p}</option>`; });
+  } else { wD.style.display='none'; wM.style.display='none'; sD.innerHTML=''; sM.innerHTML=''; }
   calcularTudo();
 }
 
-function alterouPrazoBase(idOrigem, idDestino) {
-  const pBase = document.getElementById(idOrigem).value;
-  document.getElementById(idDestino).value = pBase;
-  renderizarSubPrazos(pBase); calcularTudo();
-}
-
-function renderizarSubPrazos(pBase) {
-  const wrapD = document.getElementById('wrapper-subprazo-d'); const wrapM = document.getElementById('wrapper-subprazo-m');
-  const subD = document.getElementById('subprazo-d'); const subM = document.getElementById('subprazo-m');
-
-  if(SUB_PRAZOS[pBase]) {
-    let opcoes = SUB_PRAZOS[pBase].map(sp => `<option value="${sp}">${sp}</option>`).join('');
-    subD.innerHTML = opcoes; subM.innerHTML = opcoes;
-    wrapD.style.display = 'block'; wrapM.style.display = 'block';
-  } else {
-    subD.innerHTML = ""; subM.innerHTML = "";
-    wrapD.style.display = 'none'; wrapM.style.display = 'none';
-  }
-}
-
-function mudarQtyLista(key, fator) {
-  if(!SELECIONADOS[key]) return;
-  let mult = SELECIONADOS[key].produto.qtdEmbalagem || 1;
-  SELECIONADOS[key].qtd += (fator * mult);
-  if(SELECIONADOS[key].qtd <= 0) { delete SELECIONADOS[key]; }
-  calcularTudo(); filtrar();
-}
-
-function removerItemLista(key) { delete SELECIONADOS[key]; calcularTudo(); filtrar(); }
-
-function limSel() { SELECIONADOS = {}; calcularTudo(); filtrar(); showToast("Seleção esvaziada."); }
-
-function calcularTudo() {
-  let icmsBase = document.getElementById('icms-d').value;
-  let prazoPct = parseInt(document.getElementById('prazo-d').value) || 0;
+function calcularTudo(){
+  let cont = 0, gross = 0, ipi = 0, itensPdf = [], totalItens = 0;
+  let tAtiva = 'M26071';
   
-  let subtotalBrutoInicial = somarBrutoPrevia();
-  let tabelaAtiva = "M26071";
-
-  if(icmsBase === "7") { tabelaAtiva = subtotalBrutoInicial <= 5000 ? "M26071" : "M26072"; } 
-  else { tabelaAtiva = subtotalBrutoInicial <= 2500 ? "M26121" : "M26122"; }
-
-  let subtotalProdutos = 0; let totalIpi = 0; let contItens = 0; let listaItensPdf = [];
-
-  Object.values(SELECIONADOS).forEach(item => {
-    let p = item.produto;
-    let precoUnit = p.emPromocao ? (p.precosPromo[tabelaAtiva] || 0) : (p.precos[tabelaAtiva] || 0);
-    
-    let totalItemOriginal = precoUnit * item.qtd;
-    subtotalProdutos += totalItemOriginal; contItens += item.qtd;
-
-    let valorComDescontoPrazo = precoUnit * (1 - (prazoPct / 100));
-    let valorIpiCada = valorComDescontoPrazo * (p.ipi / 100);
-    let valorItemComIpi = valorComDescontoPrazo + valorIpiCada;
-    let valorTotalLiquidoItem = valorItemComIpi * item.qtd;
-
-    totalIpi += (valorIpiCada * item.qtd);
-
-    listaItensPdf.push({
-      codigo: p.codigo, descricao: p.descricao, qtd: item.qtd, fileId: p.fileId, ipi: p.ipi, 
-      valorComDesconto: valorComDescontoPrazo, valorIpiCada: valorIpiCada, valorComIpi: valorItemComIpi, valorTotalItem: valorTotalLiquidoItem
-    });
-  });
-
-  // Atualiza as tags do carrinho com a contagem de itens
-  document.getElementById('cart-count').innerText = contItens;
-  document.getElementById('cart-count-m').innerText = contItens;
-
-  let valorPrazo = subtotalProdutos * (prazoPct / 100);
-  let subtotalLiquidoParcial = (subtotalProdutos - valorPrazo) + totalIpi;
-  
+  // DEDUÇÃO AUTOMÁTICA DE ICMS PELA UF
   let uf = document.getElementById('uf-d').value;
-  let valorFrete = 0;
-  let txtFrete = "R$ 0,00";
-  let txtBotaoOrc = "✓ Finalizar";
-  let liberado = contItens > 0;
+  let icmsBase = (["RS","SC","PR","MG","RJ"].includes(uf)) ? "12" : "7";
 
-  if (contItens > 0) {
-      if (!uf) {
-         liberado = false;
-         txtFrete = "Selecione a UF";
-         txtBotaoOrc = "Selecione UF";
-      } else if (FRETE_REGRAS && FRETE_REGRAS[uf]) {
-         let r = FRETE_REGRAS[uf];
-         if (subtotalLiquidoParcial < r.pedidoMinimo) {
-             liberado = false;
-             txtFrete = `Falta Mín. (Mín é R$ ${r.pedidoMinimo.toFixed(2).replace('.',',')})`;
-             txtBotaoOrc = `Falta Mínimo`;
-         } else if (subtotalLiquidoParcial >= r.gratis) {
-             valorFrete = 0;
-             txtFrete = "Grátis!";
-         } else {
-             valorFrete = r.intervalo;
-             txtFrete = "R$ " + valorFrete.toFixed(2).replace('.', ',');
-         }
-      }
-  }
+  let prazoBase = parseInt(document.getElementById('prazo-d').value)||0;
+  let pctPrazo = (100 - prazoBase) / 100;
+  let prazoTexto = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
+  if(SUB_PRAZOS[prazoBase]) prazoTexto = document.getElementById('subprazo-d').value || prazoTexto;
 
-  let valorFinalLiquido = subtotalLiquidoParcial + valorFrete;
-
-  document.getElementById('rd-tabela-ativa').innerText = tabelaAtiva; document.getElementById('rm-tabela-ativa').innerText = tabelaAtiva;
-  document.getElementById('rd-bruto-prod').innerText = "R$ " + subtotalProdutos.toFixed(2).replace('.',','); document.getElementById('rm-bruto-prod').innerText = "R$ " + subtotalProdutos.toFixed(2).replace('.',',');
-  document.getElementById('rd-prazo-pct').innerText = prazoPct; document.getElementById('rm-prazo-pct').innerText = prazoPct;
-  document.getElementById('rd-prazo-val').innerText = "- R$ " + valorPrazo.toFixed(2).replace('.',','); document.getElementById('rm-prazo-val').innerText = "- R$ " + valorPrazo.toFixed(2).replace('.',',');
-  document.getElementById('rd-ipi-val').innerText = "+ R$ " + totalIpi.toFixed(2).replace('.',','); document.getElementById('rm-ipi-val').innerText = "+ R$ " + totalIpi.toFixed(2).replace('.',',');
+  let hd = document.getElementById('lista-d'); hd.innerHTML='';
   
-  document.getElementById('rd-frete-val').innerText = txtFrete; document.getElementById('rm-frete-val').innerText = txtFrete;
+  for(let c in SELECIONADOS){
+    let p = PRODUTOS.find(x => x.codigoNorm===c);
+    if(!p) continue;
+    let qty = SELECIONADOS[c]; cont++; totalItens += qty;
+    let prc = p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva];
+    
+    // Matemtática IPI e Descontos
+    let baseComIcms = prc;
+    if(icmsBase === "7") baseComIcms = prc * 1.053;
+    let descAplicado = p.emPromocao ? baseComIcms : (baseComIcms * pctPrazo);
+    let totalDescItem = descAplicado * qty;
+    let valorIpiItem = totalDescItem * (p.ipi/100);
+    
+    gross += totalDescItem; ipi += valorIpiItem;
+    
+    itensPdf.push({
+      fileId: p.fileId, codigo: p.codigo, descricao: p.descricao, qtd: qty, ncm: p.ncm,
+      valorComDesconto: descAplicado, valorIpiCada: descAplicado*(p.ipi/100), ipi: p.ipi,
+      valorComIpi: descAplicado + (descAplicado*(p.ipi/100)), valorTotalItem: totalDescItem + valorIpiItem
+    });
+    
+    hd.innerHTML+= `<div class="sel-row"><div class="sel-cod">${p.codigo}</div><div class="sel-desc">${p.descricao}</div><div class="sel-qty-wrap">${qty} x ${formatDin(descAplicado)}</div><div class="sel-rm" onclick="rmItem('${c}')">✕</div></div>`;
+  }
   
-  if(txtFrete === "Grátis!") {
-      document.getElementById('rd-frete-val').style.color = "var(--verde-dk)"; document.getElementById('rm-frete-val').style.color = "var(--verde-dk)";
-  } else if (!liberado && uf && contItens > 0) {
-      document.getElementById('rd-frete-val').style.color = "var(--promo)"; document.getElementById('rm-frete-val').style.color = "var(--promo)";
-  } else {
-      document.getElementById('rd-frete-val').style.color = "var(--texto)"; document.getElementById('rm-frete-val').style.color = "var(--texto)";
-  }
+  if(cont===0){ hd.innerHTML='<div class="vazio">Carrinho vazio</div>'; }
+  document.getElementById('badge').innerText = `${totalItens} cx`; document.getElementById('badge').style.display = totalItens>0?'inline-block':'none';
+  document.getElementById('cart-count').innerText = cont; document.getElementById('cart-count-m').innerText = cont;
+  
+  let valDescPrazo = 0, subOrig = gross;
+  if(prazoBase > 0) { subOrig = gross / pctPrazo; valDescPrazo = subOrig - gross; }
+  
+  let freteVal = 0, configFrete = FRETE_REGRAS[uf] || null;
+  if(configFrete && gross < configFrete.pedidoMinimo) freteVal = -1;
+  else if(configFrete && gross < configFrete.gratis) freteVal = configFrete.intervalo;
+  
+  let tot = gross + ipi + (freteVal>0?freteVal:0);
 
-  document.getElementById('rd-total').innerText = "R$ " + valorFinalLiquido.toFixed(2).replace('.',','); document.getElementById('rm-total').innerText = "R$ " + valorFinalLiquido.toFixed(2).replace('.',',');
-  document.getElementById('badge').innerText = `${contItens} itens`; document.getElementById('badge').style.display = contItens > 0 ? 'block' : 'none';
-  document.getElementById('mb-info').innerHTML = `<b>Total: R$ ${valorFinalLiquido.toFixed(2).replace('.',',')}</b><br>${contItens} itens selecionados`;
-
-  document.getElementById('btn-orc-d').innerText = txtBotaoOrc; document.getElementById('btn-orc-m').innerText = txtBotaoOrc;
-  document.getElementById('btn-orc-d').disabled = !liberado; document.getElementById('btn-orc-m').disabled = !liberado;
-
-  renderizarListaCarrinho('lista-d'); 
-
-  if(liberado) {
-    let selectPrazo = document.getElementById('prazo-d'); let textoPrazoFinal = selectPrazo.options[selectPrazo.selectedIndex].text;
-    if(SUB_PRAZOS[prazoPct]) { let subSelect = document.getElementById('subprazo-d'); if(subSelect && subSelect.value) { textoPrazoFinal = subSelect.value; } }
-
-    DADOS_PDF_PRONTO = {
-      logoUrl: document.querySelector('#logo-area img') ? document.querySelector('#logo-area img').src : '',
-      prazo: textoPrazoFinal, itens: listaItensPdf,
-      contas: {
-        subtotal: subtotalProdutos, pctPrazo: prazoPct, valPrazo: valorPrazo, totalIpi: totalIpi,
-        valorFrete: valorFrete, liquido: valorFinalLiquido, tabelaAtiva: tabelaAtiva + " (ICMS " + icmsBase + "%)"
-      }
-    };
-  } else {
-    DADOS_PDF_PRONTO = null;
-    document.getElementById('btn-xls-d').classList.remove('liberado'); document.getElementById('btn-xls-m').classList.remove('liberado');
-    document.getElementById('btn-xls-d').disabled = true; document.getElementById('btn-xls-m').disabled = true;
-  }
+  // BUILD DADOS (Sempre preparado, para o botão Baixar)
+  DADOS_PDF_PRONTO = {
+    tipoAcao: '',
+    logoUrl: document.querySelector('#logo-area img') ? document.querySelector('#logo-area img').src : '',
+    codigoRepre: CODIGO_REPRE, prazo: prazoTexto, itens: itensPdf,
+    clienteInfo: '', observacoes: '', // Serão injetados pelo acionarPdf
+    contas: { subtotal: subOrig, pctPrazo: prazoBase, valPrazo: valDescPrazo, totalIpi: ipi, valorFrete: freteVal>0?freteVal:0, liquido: tot }
+  };
+  
+  let upd = (prefix) => {
+    document.getElementById(prefix+'-tabela-ativa').innerText = tAtiva;
+    document.getElementById(prefix+'-bruto-prod').innerText = formatDin(subOrig);
+    document.getElementById(prefix+'-prazo-pct').innerText = prazoBase;
+    document.getElementById(prefix+'-prazo-val').innerText = '- ' + formatDin(valDescPrazo);
+    document.getElementById(prefix+'-ipi-val').innerText = '+ ' + formatDin(ipi);
+    
+    let fLabel = document.getElementById(prefix+'-frete-val');
+    if(!uf) fLabel.innerText = "Selecione o Estado";
+    else if(freteVal===-1){ fLabel.innerText = `Falta ${formatDin(configFrete.pedidoMinimo - gross)}`; fLabel.style.color='red'; }
+    else fLabel.innerText = freteVal===0 ? "GRÁTIS" : formatDin(freteVal);
+    
+    document.getElementById(prefix+'-total').innerText = formatDin(tot);
+  };
+  upd('rd'); upd('rm');
+  
+  let mb = document.getElementById('mb-info');
+  mb.innerHTML = cont===0 ? 'Selecione produtos' : `<b>${cont} itens</b><br>${formatDin(tot)}`;
+  
+  let lib = cont > 0 && uf !== "" && freteVal !== -1;
+  document.getElementById('btn-orc-d').disabled = !lib; document.getElementById('btn-orc-m').disabled = !lib;
+  
+  // O botão de baixar pode ser ativado se tiver apenas itens (draft).
+  document.getElementById('btn-baixar-d').disabled = cont === 0; document.getElementById('btn-baixar-m').disabled = cont === 0;
 }
 
-// O Carrinho agora renderiza apenas a lista-d, já que ela fica centralizada no Modal acessível pelo desktop e mobile.
-function renderizarListaCarrinho(containerId) {
-  const container = document.getElementById(containerId);
-  const arr = Object.values(SELECIONADOS);
-  if(arr.length === 0) { container.innerHTML = '<div class="vazio">Carrinho vazio. Adicione produtos na tela inicial.</div>'; return; }
-
-  let icmsBase = document.getElementById('icms-d').value;
-  let brutoPrevia = somarBrutoPrevia();
-  let tabelaCard = "M26071";
-  if(icmsBase === "7") { tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072"; } 
-  else { tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
-
-  container.innerHTML = arr.map(item => {
-    let p = item.produto; let key = p.codigo.toLowerCase().trim();
-    return `
-      <div class="sel-row">
-        <div class="sel-cod" title="${p.codigo}">Ref: ${p.codigo}</div>
-        <div class="sel-desc">${p.descricao}</div>
-        <div class="sel-qty-wrap">
-          <button class="qty-btn" onclick="mudarQtyLista('${key}', -1)">-</button>
-          <span class="qty-num">${item.qtd}</span>
-          <button class="qty-btn" onclick="mudarQtyLista('${key}', 1)">+</button>
-        </div>
-        <div class="sel-rm" onclick="removerItemLista('${key}')">✕</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function abrirSheet() { document.getElementById('sh-ov').classList.add('open'); document.getElementById('b-sheet').classList.add('open'); }
-function fecharSheet() { document.getElementById('sh-ov').classList.remove('open'); document.getElementById('b-sheet').classList.remove('open'); }
-
-function abrirFluxoFechamento(origem) {
-  if (Object.keys(SELECIONADOS).length === 0) { alert("Adicione itens ao pedido primeiro."); return; }
-  document.getElementById('modal-cliente').classList.add('open');
-}
-
-function fecharModalCliente() { document.getElementById('modal-cliente').classList.remove('open'); }
-function clicouForaCliente(e) { if(e.target.id === 'modal-cliente') fecharModalCliente(); }
+function abrirFluxoFechamento(t){ fecharSheet(); document.getElementById('modal-cliente').style.display='flex'; document.getElementById('modal-cliente').classList.add('open'); }
+function fecharModalCliente(){ document.getElementById('modal-cliente').classList.remove('open'); setTimeout(()=>document.getElementById('modal-cliente').style.display='none',300); }
+function clicouForaCliente(e){ if(e.target===document.getElementById('modal-cliente')) fecharModalCliente(); }
 
 function confirmarSalvamentoPedido() {
-  let cnpj = (document.getElementById('cli-cnpj').value || '').trim();
-  let razao = (document.getElementById('cli-razao').value || '').trim();
-  let fantasia = (document.getElementById('cli-fantasia').value || '').trim();
-  let endereco = (document.getElementById('cli-endereco').value || '').trim();
-  let telefone = (document.getElementById('cli-telefone').value || '').trim();
-  let email = (document.getElementById('cli-email').value || '').trim();
-  let uf = document.getElementById('cli-uf').value;
-
-  if(!cnpj) { alert("Por favor, preencha o CNPJ ou CPF."); return; }
-  if(!razao) { alert("Por favor, preencha a Razão Social ou Nome."); return; }
-  if(!uf) { alert("A UF do Cliente não foi selecionada."); return; }
-
-  let totalItensStr = document.getElementById('badge').innerText;
-  let tabelaAtivaStr = document.getElementById('rd-tabela-ativa').innerText;
-  let txtItens = Object.values(SELECIONADOS).map(x => `${x.produto.codigo} (${x.qtd} un)`).join(' | ');
-  let stringDadosCliente = `REPRESENTANTE: ${CODIGO_REPRE}\nRAZÃO SOCIAL: ${razao}\nFANTASIA: ${fantasia}\nCNPJ/CPF: ${cnpj}\nENDEREÇO: ${endereco}\nTELEFONE: ${telefone}\nE-MAIL: ${email}\nESTADO DESTINO: ${uf}\nTABELA APLICADA: ${tabelaAtivaStr}`;
+  let razao = document.getElementById('cli-razao').value.trim() || 'Não Informado';
+  let strCli = `CNPJ/CPF: ${document.getElementById('cli-cnpj').value}\nRazão Social: ${razao}\nFantasia: ${document.getElementById('cli-fantasia').value}\nEndereço: ${document.getElementById('cli-endereco').value}\nTelefone: ${document.getElementById('cli-telefone').value}\nE-mail: ${document.getElementById('cli-email').value}`;
   
-  let payloadPlanilha = {
-    clienteInfo: stringDadosCliente, itens: txtItens, qtd: parseInt(totalItensStr) || 1,
+  DADOS_PDF_PRONTO.clienteInfo = strCli;
+  
+  document.getElementById('btn-salvar-cli').innerText = "Salvando..."; document.getElementById('btn-salvar-cli').disabled = true;
+  
+  let payload = {
+    acao: 'pedido',
+    qtd: document.getElementById('cart-count').innerText,
     subtotalProdutos: DADOS_PDF_PRONTO.contas.subtotal, totalIpi: DADOS_PDF_PRONTO.contas.totalIpi,
-    totalDescontos: DADOS_PDF_PRONTO.contas.valPrazo, prazo: DADOS_PDF_PRONTO.prazo, total: DADOS_PDF_PRONTO.contas.liquido
+    totalDescontos: DADOS_PDF_PRONTO.contas.valPrazo, prazo: DADOS_PDF_PRONTO.prazo, total: DADOS_PDF_PRONTO.contas.liquido,
+    clienteInfo: strCli, itens: JSON.stringify(DADOS_PDF_PRONTO.itens.map(x => `${x.codigo} (${x.qtd}cx)`))
   };
 
-  const btnCli = document.getElementById('btn-salvar-cli');
-  btnCli.disabled = true; btnCli.innerText = "Salvando...";
-
-  fetch(URL_GOOGLE_SCRIPT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payloadPlanilha) })
-  .then(res => res.json())
-  .then(resData => {
-    btnCli.disabled = false; btnCli.innerText = "Salvar Pedido na Planilha";
-    if(resData.status === 'success') {
-      fecharModalCliente();
-      showToast("Pedido salvo na planilha com sucesso! Opção de envio liberada.");
-      DADOS_PDF_PRONTO.clienteInfo = stringDadosCliente; DADOS_PDF_PRONTO.razaoSegura = razao; DADOS_PDF_PRONTO.codigoRepre = CODIGO_REPRE;
-      
-      document.getElementById('btn-xls-d').classList.add('liberado'); document.getElementById('btn-xls-m').classList.add('liberado');
-      document.getElementById('btn-xls-d').disabled = false; document.getElementById('btn-xls-m').disabled = false;
-      document.getElementById('btn-xls-d').innerText = "🚀 Enviar"; document.getElementById('btn-xls-m').innerText = "🚀 Enviar";
-      document.getElementById('btn-orc-d').innerText = "Salvo ✓"; document.getElementById('btn-orc-m').innerText = "Salvo ✓";
-    } else { alert("Erro ao registar: " + resData.message); }
-  })
-  .catch(err => {
-    alert("Erro de rede ao salvar pedido.");
-    btnCli.disabled = false; btnCli.innerText = "Salvar Pedido na Planilha";
+  fetch(URL_GOOGLE_SCRIPT, { method:'POST', body:JSON.stringify(payload) })
+  .then(()=> {
+    fecharModalCliente();
+    document.getElementById('btn-salvar-cli').innerText = "Salvar Pedido na Planilha"; document.getElementById('btn-salvar-cli').disabled = false;
+    showToast("Pedido salvo na planilha!");
+    // Libera os botões de envio
+    ['btn-xls-d','btn-xls-m','btn-disolle-d','btn-disolle-m'].forEach(id => { document.getElementById(id).classList.add('liberado'); document.getElementById(id).disabled = false; });
+  }).catch(()=> {
+    document.getElementById('btn-salvar-cli').innerText = "Tentar Novamente"; document.getElementById('btn-salvar-cli').disabled = false; alert("Erro ao salvar planilha.");
   });
 }
 
-function baixarPdf() {
-  if(!DADOS_PDF_PRONTO) return;
+function acionarPdf(tipo) {
+  if (!DADOS_PDF_PRONTO || DADOS_PDF_PRONTO.itens.length === 0) { alert("Carrinho vazio."); return; }
+  
+  // Roteamento
+  DADOS_PDF_PRONTO.tipoAcao = tipo;
+  DADOS_PDF_PRONTO.observacoes = document.getElementById('cli-obs').value.trim();
+
   document.getElementById('loading-modal').style.display = 'flex'; document.getElementById('loading-modal').classList.add('open');
   
-  fetch(URL_GOOGLE_SCRIPT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ acao: 'pdf', dadosPdf: DADOS_PDF_PRONTO }) })
-  .then(res => res.json())
-  .then(resData => {
-    document.getElementById('loading-modal').style.display = 'none'; document.getElementById('loading-modal').classList.remove('open');
-
-    if(resData.status === 'success' && resData.base64) {
-      let byteChars = atob(resData.base64); let byteNumbers = new Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
-      let blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
-      
-      let dataAtual = new Date();
-      let dataStr = `${String(dataAtual.getDate()).padStart(2, '0')}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}-${dataAtual.getFullYear()}`;
-      let nomeRepreSeguro = (DADOS_PDF_PRONTO.codigoRepre || 'Repre').replace(/[^a-z0-9]/gi, '_');
-      
-      let link = document.createElement('a'); link.href = window.URL.createObjectURL(blob);
-      link.download = `${nomeRepreSeguro}_${dataStr}.pdf`; link.click();
-
-      if(resData.emailStatus && resData.emailStatus.includes("Erro")) {
-        alert("O PDF e a Planilha foram salvos, MAS o E-mail não pôde ser enviado!\n\nMotivo: " + resData.emailStatus + "\n\nVocê esqueceu de rodar a função testarPermissoes() lá no Apps Script!");
-      }
-      
+  fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify({ acao: 'pdf', dadosPdf: DADOS_PDF_PRONTO }) })
+  .then(r => r.json()).then(res => {
+    document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none';
+    if(res.status === 'success') {
+      let a = document.createElement('a'); a.href = res.base64; a.download = `Pedido_${CODIGO_REPRE}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
       document.getElementById('modal-sucesso').style.display = 'flex'; document.getElementById('modal-sucesso').classList.add('open');
-    } else { alert("Erro ao construir/enviar PDF: " + resData.message); }
-  })
-  .catch(err => {
-    document.getElementById('loading-modal').style.display = 'none'; document.getElementById('loading-modal').classList.remove('open');
-    alert("Erro de rede ao processar PDF/E-mail.");
+      if (tipo !== 'baixar') console.log("Status de E-mail: " + res.emailStatus);
+    } else { alert("Erro ao processar: " + res.message); }
+  }).catch(err => {
+    document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none'; alert("Falha na comunicação.");
   });
 }
 
-function fecharModalSucesso() {
-  document.getElementById('modal-sucesso').style.display = 'none'; document.getElementById('modal-sucesso').classList.remove('open');
-}
-function clicouForaSucesso(e) { if(e.target.id === 'modal-sucesso') fecharModalSucesso(); }
+function fecharModalSucesso() { document.getElementById('modal-sucesso').classList.remove('open'); setTimeout(()=>document.getElementById('modal-sucesso').style.display='none',300); limSel(); fecharSheet(); }
+function clicouForaSucesso(e) { if(e.target===document.getElementById('modal-sucesso')) fecharModalSucesso(); }
+function abrirSheet() { document.getElementById('b-sheet').classList.add('open'); document.getElementById('sh-ov').classList.add('open'); }
+function fecharSheet() { document.getElementById('b-sheet').classList.remove('open'); document.getElementById('sh-ov').classList.remove('open'); }
+function abrirCarrinho() { document.getElementById('modal-carrinho').style.display='flex'; document.getElementById('modal-carrinho').classList.add('open'); }
+function fecharCarrinho() { document.getElementById('modal-carrinho').classList.remove('open'); setTimeout(()=>document.getElementById('modal-carrinho').style.display='none',300); }
+function clicouForaCarrinho(e) { if(e.target===document.getElementById('modal-carrinho')) fecharCarrinho(); }
 </script>
 </body>
 </html>
