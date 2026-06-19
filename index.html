@@ -146,7 +146,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <button class="modal-close-btn" onclick="fecharModalSucesso()" style="background:#f4f4f2; color:#333;">✕</button>
     <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
     <h3 style="color:var(--verde-dk); font-size: 20px; margin-bottom: 8px;">Ação Concluída!</h3>
-    <p style="font-size:13px; color:var(--sub);">O PDF foi gerado e salvo com sucesso.</p>
+    <p style="font-size:13px; color:var(--sub);">A solicitação foi processada com sucesso.</p>
     <button class="btn prim" onclick="fecharModalSucesso()" style="margin-top: 20px;">Fechar</button>
   </div>
 </div>
@@ -239,7 +239,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       
       <div class="btn-group">
         <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>✓ Finalizar</button>
-        <button class="btn" id="btn-baixar-d" onclick="acionarPdf('baixar')" disabled>⬇️ Baixar PDF</button>
+        <button class="btn" id="btn-baixar-d" onclick="acionarPdf('baixar')" disabled style="background:#fff; color:var(--verde-dk); border-color:var(--verde);">⬇️ Baixar PDF</button>
         <button class="btn pdf-btn" id="btn-xls-d" onclick="acionarPdf('enviar')" disabled>🚀 Enviar</button>
         <button class="btn pdf-btn" id="btn-disolle-d" onclick="acionarPdf('enviar_disolle')" disabled>🚀 Enviar Di Solle</button>
       </div>
@@ -247,7 +247,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </aside>
 </div>
 
-<!-- BARRA MOBILE -->
 <div class="mob-bar" id="mob-bar">
   <div class="mb-info" id="mb-info">Selecione produtos</div>
   <button class="mb-btn" onclick="abrirSheet()">Avançar</button>
@@ -255,7 +254,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <div class="sh-overlay" id="sh-ov" onclick="fecharSheet()"></div>
 
-<!-- BOTTOM SHEET MOBILE OTIMIZADO -->
 <div class="b-sheet" id="b-sheet">
   <div class="sh-header">
     <div class="sh-handle"></div>
@@ -297,7 +295,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     
     <div class="btn-group">
       <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>✓ Finalizar</button>
-      <button class="btn" id="btn-baixar-m" onclick="acionarPdf('baixar')" disabled>⬇️ Baixar PDF</button>
+      <button class="btn" id="btn-baixar-m" onclick="acionarPdf('baixar')" disabled style="background:#fff; color:var(--verde-dk); border-color:var(--verde);">⬇️ Baixar PDF</button>
       <button class="btn pdf-btn" id="btn-xls-m" onclick="acionarPdf('enviar')" disabled>🚀 Enviar</button>
       <button class="btn pdf-btn" id="btn-disolle-m" onclick="acionarPdf('enviar_disolle')" disabled>🚀 Enviar Di Solle</button>
     </div>
@@ -352,10 +350,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyzY7o6bq6jgtuRuUZ3FrxzZ_NPJZ9rN6pocSTrDfyVz6K8vo9IsoXh0WQZIyO9kMW6oQ/exec"; 
+// !!! ATENÇÃO: COLOQUE A SUA URL AQUI !!!
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzHxSWSEHMTky3gzaQzdnrozIEkvJw_u_5c9M9QQb2Kdp9M7KVLEUDUd0j64SZlEIhaQA/exec";
 
 let PRODUTOS = [];
-let SELECIONADOS = {};
+let SELECIONADOS = {}; // Estrutura original = { 'codigonorm': { produto: {...}, qtd: X } }
 let DADOS_PDF_PRONTO = null;
 let FRETE_REGRAS = {};
 let CODIGO_REPRE = localStorage.getItem('repre_cod') || "";
@@ -388,7 +387,7 @@ const SUB_PRAZOS = {
   "7": ["35 DIAS", "14/56 DIAS", "21/49 DIAS", "28/42 DIAS", "14/35/56 DIAS", "21/35/49 DIAS", "14/28/42/56 DIAS"],
   "5": ["42 DIAS", "28/56 DIAS", "35/49 DIAS", "14/42/70 DIAS", "28/42/56 DIAS", "21/35/49/63 DIAS", "14/28/42/56/70 DIAS"],
   "2": ["56 DIAS", "28/84 DIAS", "49/63 DIAS", "35/56/77 DIAS", "42/56/70 DIAS", "35/49/63/77 DIAS", "28/42/56/70/84 DIAS", "21/35/49/63/77/91 DIAS"],
-  "0": ["63 DIAS", "35/91 DIAS", "35/63/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"]
+  "0": ["63 DIAS", "35/91 DIAS", "35/63/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"] // ADICIONADO 35/63/91 DIAS AQUI
 };
 
 function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
@@ -412,17 +411,42 @@ function sincronizarPlanilha(){
   carregarDados(true).then(()=> { document.getElementById('btn-sync').innerText = "🔄 Sincronizar Catálogo"; showToast("Catálogo atualizado!"); });
 }
 
+function somarBrutoPrevia(){
+  let bruto = 0;
+  Object.values(SELECIONADOS).forEach(item => {
+    let p = item.produto;
+    let precoUnit = p.emPromocao ? (p.precosPromo['M26071'] || 0) : (p.precos['M26071'] || 0);
+    bruto += (precoUnit * item.qtd);
+  });
+  return bruto;
+}
+
 function renderizar(arr){
   const g = document.getElementById('grid'); g.innerHTML='';
   document.getElementById('cont').innerText = `${arr.length} produtos`;
+  
+  let uf = document.getElementById('uf-d').value;
+  let icmsBase = (["RS","SC","PR","MG","RJ"].includes(uf)) ? "12" : "7";
+  let brutoPrevia = somarBrutoPrevia();
+  let tabelaCard = "M26071";
+  
+  if(icmsBase === "7") {
+    tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072";
+  } else {
+    tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122";
+  }
+
   arr.forEach(p => {
-    let tAtiva = document.getElementById('uf-d').value === 'RS' ? 'M26071' : 'M26071';
-    let pFinal = p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva];
+    let pFinal = p.emPromocao ? p.precosPromo[tabelaCard] : p.precos[tabelaCard];
     if(!pFinal) return;
-    let qty = SELECIONADOS[p.codigoNorm] || 0;
+    
+    let keyCod = p.codigo.toLowerCase().trim();
+    let qty = SELECIONADOS[keyCod] ? SELECIONADOS[keyCod].qtd : 0;
+    
     let c = document.createElement('div');
     c.className = `card ${qty>0?'sel':''} ${p.emPromocao?'promo':''}`;
     c.onclick = () => abrirModal(p);
+    
     let html = `<div class="card-img">`;
     if(qty>0) html+= `<div class="card-badge-qty">${qty}</div>`;
     if(p.emPromocao) html+= `<div class="card-badge-promo">PROMO</div>`;
@@ -437,9 +461,9 @@ function filtrar(){
   let b = document.getElementById('busca').value.toLowerCase();
   let promo = document.getElementById('fil-promo').value;
   let pMax = parseFloat(document.getElementById('fil-preco').value) || 0;
-  let tAtiva = 'M26071';
+  
   let f = PRODUTOS.filter(p => {
-    let preco = p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva];
+    let preco = p.emPromocao ? p.precosPromo['M26071'] : p.precos['M26071'];
     if(!preco) return false;
     let mat = (p.codigo||'').toLowerCase().includes(b) || (p.descricao||'').toLowerCase().includes(b) || (p.codigoEan||'').includes(b);
     if(promo==='sim' && !p.emPromocao) mat = false;
@@ -452,23 +476,31 @@ function limFiltros(){ document.getElementById('busca').value=''; document.getEl
 
 function abrirModal(p){
   PRODUTO_MODAL_ATIVO = p;
-  let tAtiva = 'M26071';
+  let uf = document.getElementById('uf-d').value;
+  let icmsBase = (["RS","SC","PR","MG","RJ"].includes(uf)) ? "12" : "7";
+  let brutoPrevia = somarBrutoPrevia();
+  let tAtiva = "M26071";
+  
+  if(icmsBase === "7") { tAtiva = brutoPrevia <= 5000 ? "M26071" : "M26072"; } 
+  else { tAtiva = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
+
   document.getElementById('modal-img').src = p.fileId ? `https://drive.google.com/thumbnail?id=${p.fileId}&sz=w600` : '';
   document.getElementById('modal-img').style.display = 'none'; document.getElementById('modal-spin').style.display = 'block';
   document.getElementById('modal-cod').innerText = p.codigo; document.getElementById('modal-desc').innerText = p.descricao;
   document.getElementById('modal-preco').innerText = formatDin(p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva]);
   document.getElementById('modal-emb').innerText = `Múltiplo: ${p.qtdEmbalagem} | NCM: ${p.ncm} | IPI: ${p.ipi}%`;
   
-  let q = SELECIONADOS[p.codigoNorm] || p.qtdEmbalagem;
+  let key = p.codigo.toLowerCase().trim();
+  let q = SELECIONADOS[key] ? SELECIONADOS[key].qtd : p.qtdEmbalagem;
   document.getElementById('modal-qty').value = q;
-  document.getElementById('btn-add-modal').innerText = SELECIONADOS[p.codigoNorm] ? "Atualizar Quantidade" : "Adicionar ao Pedido";
+  document.getElementById('btn-add-modal').innerText = SELECIONADOS[key] ? "Atualizar Quantidade" : "Adicionar ao Pedido";
   document.getElementById('modal').classList.add('open');
 }
 
 function fecharModal(){ document.getElementById('modal').classList.remove('open'); PRODUTO_MODAL_ATIVO = null; }
 function clicouFora(e){ if(e.target===document.getElementById('modal')) fecharModal(); }
 
-// VALIDAÇÃO E CORREÇÃO NATIVA AO DIGITAR
+// CORREÇÃO: Forçar múltiplo ao digitar
 function corrigirQtyModal(input){
   if(!PRODUTO_MODAL_ATIVO) return;
   let v = parseInt(input.value) || 0;
@@ -495,9 +527,13 @@ function mudarQtyModal(d){
 function confirmarAddModal(){
   if(!PRODUTO_MODAL_ATIVO) return;
   let i = document.getElementById('modal-qty');
-  corrigirQtyModal(i); // Força a correção antes de salvar
+  corrigirQtyModal(i);
   let v = parseInt(i.value);
-  SELECIONADOS[PRODUTO_MODAL_ATIVO.codigoNorm] = v;
+  let key = PRODUTO_MODAL_ATIVO.codigo.toLowerCase().trim();
+  
+  // ESTRUTURA ORIGINAL DE CHAVE REAJUSTADA PARA FUNCIONAR
+  SELECIONADOS[key] = { produto: PRODUTO_MODAL_ATIVO, qtd: v };
+  
   fecharModal(); calcularTudo(); filtrar(); showToast("Item adicionado.");
 }
 
@@ -510,6 +546,7 @@ function alterouUF(id){
   calcularTudo();
 }
 function syncRegras(idO, idD){ document.getElementById(idD).value = document.getElementById(idO).value; calcularTudo(); }
+
 function alterouPrazoBase(idO, idD){
   let val = document.getElementById(idO).value; document.getElementById(idD).value = val;
   let wD = document.getElementById('wrapper-subprazo-d'), wM = document.getElementById('wrapper-subprazo-m');
@@ -522,11 +559,8 @@ function alterouPrazoBase(idO, idD){
 }
 
 function calcularTudo(){
-  let cont = 0, gross = 0, ipi = 0, itensPdf = [], totalItens = 0;
-  let tAtiva = 'M26071';
-  
-  // DEDUÇÃO AUTOMÁTICA DE ICMS PELA UF
   let uf = document.getElementById('uf-d').value;
+  // DEDUÇÃO AUTOMÁTICA DE ICMS PELA UF
   let icmsBase = (["RS","SC","PR","MG","RJ"].includes(uf)) ? "12" : "7";
 
   let prazoBase = parseInt(document.getElementById('prazo-d').value)||0;
@@ -534,78 +568,86 @@ function calcularTudo(){
   let prazoTexto = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
   if(SUB_PRAZOS[prazoBase]) prazoTexto = document.getElementById('subprazo-d').value || prazoTexto;
 
+  let subtotalBrutoInicial = somarBrutoPrevia();
+  let tabelaAtiva = "M26071";
+  if(icmsBase === "7") { tabelaAtiva = subtotalBrutoInicial <= 5000 ? "M26071" : "M26072"; } 
+  else { tabelaAtiva = subtotalBrutoInicial <= 2500 ? "M26121" : "M26122"; }
+
+  let subtotalProdutos = 0, totalIpi = 0, contItens = 0, listaItensPdf = [];
   let hd = document.getElementById('lista-d'); hd.innerHTML='';
   
-  for(let c in SELECIONADOS){
-    let p = PRODUTOS.find(x => x.codigoNorm===c);
-    if(!p) continue;
-    let qty = SELECIONADOS[c]; cont++; totalItens += qty;
-    let prc = p.emPromocao ? p.precosPromo[tAtiva] : p.precos[tAtiva];
+  Object.keys(SELECIONADOS).forEach(c => {
+    let item = SELECIONADOS[c];
+    let p = item.produto; let qty = item.qtd;
     
-    // Matemtática IPI e Descontos
-    let baseComIcms = prc;
-    if(icmsBase === "7") baseComIcms = prc * 1.053;
-    let descAplicado = p.emPromocao ? baseComIcms : (baseComIcms * pctPrazo);
-    let totalDescItem = descAplicado * qty;
-    let valorIpiItem = totalDescItem * (p.ipi/100);
+    let precoUnit = p.emPromocao ? (p.precosPromo[tabelaAtiva] || 0) : (p.precos[tabelaAtiva] || 0);
+    let totalItemOriginal = precoUnit * qty;
+    subtotalProdutos += totalItemOriginal;
+    contItens += qty;
+
+    let valorComDescontoPrazo = precoUnit * pctPrazo;
+    let valorIpiCada = valorComDescontoPrazo * (p.ipi / 100);
+    let valorItemComIpi = valorComDescontoPrazo + valorIpiCada;
+    let valorTotalItemDescIpi = valorItemComIpi * qty;
     
-    gross += totalDescItem; ipi += valorIpiItem;
+    totalIpi += (valorIpiCada * qty);
     
-    itensPdf.push({
+    listaItensPdf.push({
       fileId: p.fileId, codigo: p.codigo, descricao: p.descricao, qtd: qty, ncm: p.ncm,
-      valorComDesconto: descAplicado, valorIpiCada: descAplicado*(p.ipi/100), ipi: p.ipi,
-      valorComIpi: descAplicado + (descAplicado*(p.ipi/100)), valorTotalItem: totalDescItem + valorIpiItem
+      valorComDesconto: valorComDescontoPrazo, valorIpiCada: valorIpiCada, ipi: p.ipi,
+      valorComIpi: valorItemComIpi, valorTotalItem: valorTotalItemDescIpi
     });
     
-    hd.innerHTML+= `<div class="sel-row"><div class="sel-cod">${p.codigo}</div><div class="sel-desc">${p.descricao}</div><div class="sel-qty-wrap">${qty} x ${formatDin(descAplicado)}</div><div class="sel-rm" onclick="rmItem('${c}')">✕</div></div>`;
-  }
+    hd.innerHTML+= `<div class="sel-row"><div class="sel-cod">${p.codigo}</div><div class="sel-desc">${p.descricao}</div><div class="sel-qty-wrap">${qty} x ${formatDin(valorComDescontoPrazo)}</div><div class="sel-rm" onclick="rmItem('${c}')">✕</div></div>`;
+  });
   
-  if(cont===0){ hd.innerHTML='<div class="vazio">Carrinho vazio</div>'; }
-  document.getElementById('badge').innerText = `${totalItens} cx`; document.getElementById('badge').style.display = totalItens>0?'inline-block':'none';
-  document.getElementById('cart-count').innerText = cont; document.getElementById('cart-count-m').innerText = cont;
+  if(contItens===0){ hd.innerHTML='<div class="vazio">Carrinho vazio</div>'; }
+  document.getElementById('badge').innerText = `${contItens} itens`; document.getElementById('badge').style.display = contItens>0?'inline-block':'none';
+  document.getElementById('cart-count').innerText = Object.keys(SELECIONADOS).length; document.getElementById('cart-count-m').innerText = Object.keys(SELECIONADOS).length;
   
-  let valDescPrazo = 0, subOrig = gross;
-  if(prazoBase > 0) { subOrig = gross / pctPrazo; valDescPrazo = subOrig - gross; }
+  let valDescPrazo = 0;
+  if(prazoBase > 0) { valDescPrazo = subtotalProdutos - (subtotalProdutos * pctPrazo); }
   
-  let freteVal = 0, configFrete = FRETE_REGRAS[uf] || null;
-  if(configFrete && gross < configFrete.pedidoMinimo) freteVal = -1;
-  else if(configFrete && gross < configFrete.gratis) freteVal = configFrete.intervalo;
-  
-  let tot = gross + ipi + (freteVal>0?freteVal:0);
+  let subtotalLiquidoParcial = (subtotalProdutos - valDescPrazo) + totalIpi;
 
-  // BUILD DADOS (Sempre preparado, para o botão Baixar)
+  let freteVal = 0, configFrete = FRETE_REGRAS[uf] || null;
+  if(configFrete && subtotalBrutoInicial < configFrete.pedidoMinimo) freteVal = -1;
+  else if(configFrete && subtotalBrutoInicial < configFrete.gratis) freteVal = configFrete.intervalo;
+  
+  let totalLiquido = subtotalLiquidoParcial + (freteVal>0?freteVal:0);
+
   DADOS_PDF_PRONTO = {
     tipoAcao: '',
     logoUrl: document.querySelector('#logo-area img') ? document.querySelector('#logo-area img').src : '',
-    codigoRepre: CODIGO_REPRE, prazo: prazoTexto, itens: itensPdf,
+    codigoRepre: CODIGO_REPRE, prazo: prazoTexto, itens: listaItensPdf,
     clienteInfo: '', observacoes: '', // Serão injetados pelo acionarPdf
-    contas: { subtotal: subOrig, pctPrazo: prazoBase, valPrazo: valDescPrazo, totalIpi: ipi, valorFrete: freteVal>0?freteVal:0, liquido: tot }
+    contas: { subtotal: subtotalProdutos, pctPrazo: prazoBase, valPrazo: valDescPrazo, totalIpi: totalIpi, valorFrete: freteVal>0?freteVal:0, liquido: totalLiquido }
   };
   
   let upd = (prefix) => {
-    document.getElementById(prefix+'-tabela-ativa').innerText = tAtiva;
-    document.getElementById(prefix+'-bruto-prod').innerText = formatDin(subOrig);
+    document.getElementById(prefix+'-tabela-ativa').innerText = tabelaAtiva;
+    document.getElementById(prefix+'-bruto-prod').innerText = formatDin(subtotalProdutos);
     document.getElementById(prefix+'-prazo-pct').innerText = prazoBase;
     document.getElementById(prefix+'-prazo-val').innerText = '- ' + formatDin(valDescPrazo);
-    document.getElementById(prefix+'-ipi-val').innerText = '+ ' + formatDin(ipi);
+    document.getElementById(prefix+'-ipi-val').innerText = '+ ' + formatDin(totalIpi);
     
     let fLabel = document.getElementById(prefix+'-frete-val');
     if(!uf) fLabel.innerText = "Selecione o Estado";
-    else if(freteVal===-1){ fLabel.innerText = `Falta ${formatDin(configFrete.pedidoMinimo - gross)}`; fLabel.style.color='red'; }
+    else if(freteVal===-1){ fLabel.innerText = `Falta ${formatDin(configFrete.pedidoMinimo - subtotalBrutoInicial)}`; fLabel.style.color='red'; }
     else fLabel.innerText = freteVal===0 ? "GRÁTIS" : formatDin(freteVal);
     
-    document.getElementById(prefix+'-total').innerText = formatDin(tot);
+    document.getElementById(prefix+'-total').innerText = formatDin(totalLiquido);
   };
   upd('rd'); upd('rm');
   
   let mb = document.getElementById('mb-info');
-  mb.innerHTML = cont===0 ? 'Selecione produtos' : `<b>${cont} itens</b><br>${formatDin(tot)}`;
+  mb.innerHTML = contItens===0 ? 'Selecione produtos' : `<b>${contItens} cx</b><br>${formatDin(totalLiquido)}`;
   
-  let lib = cont > 0 && uf !== "" && freteVal !== -1;
+  let lib = contItens > 0 && uf !== "" && freteVal !== -1;
   document.getElementById('btn-orc-d').disabled = !lib; document.getElementById('btn-orc-m').disabled = !lib;
   
-  // O botão de baixar pode ser ativado se tiver apenas itens (draft).
-  document.getElementById('btn-baixar-d').disabled = cont === 0; document.getElementById('btn-baixar-m').disabled = cont === 0;
+  // Botão Baixar sempre fica liberado SE tiver itens (independente de frete ou de ter clicado em finalizar)
+  document.getElementById('btn-baixar-d').disabled = contItens === 0; document.getElementById('btn-baixar-m').disabled = contItens === 0;
 }
 
 function abrirFluxoFechamento(t){ fecharSheet(); document.getElementById('modal-cliente').style.display='flex'; document.getElementById('modal-cliente').classList.add('open'); }
@@ -613,10 +655,15 @@ function fecharModalCliente(){ document.getElementById('modal-cliente').classLis
 function clicouForaCliente(e){ if(e.target===document.getElementById('modal-cliente')) fecharModalCliente(); }
 
 function confirmarSalvamentoPedido() {
-  let razao = document.getElementById('cli-razao').value.trim() || 'Não Informado';
-  let strCli = `CNPJ/CPF: ${document.getElementById('cli-cnpj').value}\nRazão Social: ${razao}\nFantasia: ${document.getElementById('cli-fantasia').value}\nEndereço: ${document.getElementById('cli-endereco').value}\nTelefone: ${document.getElementById('cli-telefone').value}\nE-mail: ${document.getElementById('cli-email').value}`;
+  let cnpj = document.getElementById('cli-cnpj').value;
+  let razao = document.getElementById('cli-razao').value;
+  if (!cnpj || !razao) { alert("Preencha CNPJ e Razão Social."); return; }
+
+  let obs = document.getElementById('cli-obs').value.trim();
+  let strCli = `CNPJ/CPF: ${cnpj}\nRazão Social: ${razao}\nFantasia: ${document.getElementById('cli-fantasia').value}\nEndereço: ${document.getElementById('cli-endereco').value}\nTelefone: ${document.getElementById('cli-telefone').value}\nE-mail: ${document.getElementById('cli-email').value}`;
   
   DADOS_PDF_PRONTO.clienteInfo = strCli;
+  DADOS_PDF_PRONTO.observacoes = obs;
   
   document.getElementById('btn-salvar-cli').innerText = "Salvando..."; document.getElementById('btn-salvar-cli').disabled = true;
   
@@ -625,15 +672,16 @@ function confirmarSalvamentoPedido() {
     qtd: document.getElementById('cart-count').innerText,
     subtotalProdutos: DADOS_PDF_PRONTO.contas.subtotal, totalIpi: DADOS_PDF_PRONTO.contas.totalIpi,
     totalDescontos: DADOS_PDF_PRONTO.contas.valPrazo, prazo: DADOS_PDF_PRONTO.prazo, total: DADOS_PDF_PRONTO.contas.liquido,
-    clienteInfo: strCli, itens: JSON.stringify(DADOS_PDF_PRONTO.itens.map(x => `${x.codigo} (${x.qtd}cx)`))
+    clienteInfo: strCli + (obs ? "\nObs: " + obs : ""), 
+    itens: JSON.stringify(DADOS_PDF_PRONTO.itens.map(x => `${x.codigo} (${x.qtd}cx)`))
   };
 
   fetch(URL_GOOGLE_SCRIPT, { method:'POST', body:JSON.stringify(payload) })
   .then(()=> {
     fecharModalCliente();
     document.getElementById('btn-salvar-cli').innerText = "Salvar Pedido na Planilha"; document.getElementById('btn-salvar-cli').disabled = false;
-    showToast("Pedido salvo na planilha!");
-    // Libera os botões de envio
+    showToast("Pedido salvo! Você já pode enviar.");
+    // Libera os botões de envio somente após Finalizar!
     ['btn-xls-d','btn-xls-m','btn-disolle-d','btn-disolle-m'].forEach(id => { document.getElementById(id).classList.add('liberado'); document.getElementById(id).disabled = false; });
   }).catch(()=> {
     document.getElementById('btn-salvar-cli').innerText = "Tentar Novamente"; document.getElementById('btn-salvar-cli').disabled = false; alert("Erro ao salvar planilha.");
@@ -643,9 +691,10 @@ function confirmarSalvamentoPedido() {
 function acionarPdf(tipo) {
   if (!DADOS_PDF_PRONTO || DADOS_PDF_PRONTO.itens.length === 0) { alert("Carrinho vazio."); return; }
   
-  // Roteamento
   DADOS_PDF_PRONTO.tipoAcao = tipo;
-  DADOS_PDF_PRONTO.observacoes = document.getElementById('cli-obs').value.trim();
+  
+  // Garantir que as informações do cliente estejam preenchidas se for salvar direto
+  if (!DADOS_PDF_PRONTO.observacoes) DADOS_PDF_PRONTO.observacoes = document.getElementById('cli-obs').value.trim();
 
   document.getElementById('loading-modal').style.display = 'flex'; document.getElementById('loading-modal').classList.add('open');
   
