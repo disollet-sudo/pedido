@@ -350,7 +350,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // !!! ATENÇÃO: SUBSTUTA PELA URL REAL GERADA NA IMPLANTAÇÃO !!!
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwxhuYSWD8BWJhrkOldye0_2MJyR1ko2_wfN3ZqKLcHDi3KPn6Vz73JNAcPHeNAUxUUXQ/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzSITEo1U7nGVFFtXLNfRV1Cvdzz0lACD8pCh7yBo3WLVuSbJ403r6YXjWc59KdOUBg4A/exec";
 
 let PRODUTOS = [];
 let SELECIONADOS = {}; 
@@ -710,7 +710,18 @@ function acionarPdf(tipo) {
   });
 }
 
-function fecharModalSucesso() { document.getElementById('modal-sucesso').classList.remove('open'); setTimeout(()=>document.getElementById('modal-sucesso').style.display='none',300); limSel(); fecharSheet(); }
+// MODIFICADA: Limpa o carrinho apenas se a ação concluída for o envio final para a Di Solle
+function fecharModalSucesso() { 
+  document.getElementById('modal-sucesso').classList.remove('open'); 
+  setTimeout(()=>document.getElementById('modal-sucesso').style.display='none',300); 
+  
+  if (DADOS_PDF_PRONTO && DADOS_PDF_PRONTO.tipoAcao === 'enviar_disolle') {
+    limSel(); 
+  }
+  
+  fecharSheet(); 
+}
+
 function clicouForaSucesso(e) { if(e.target===document.getElementById('modal-sucesso')) fecharModalSucesso(); }
 function abrirSheet() { document.getElementById('b-sheet').classList.add('open'); document.getElementById('sh-ov').classList.add('open'); }
 function fecharSheet() { document.getElementById('b-sheet').classList.remove('open'); document.getElementById('sh-ov').classList.remove('open'); }
