@@ -244,6 +244,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   </aside>
 </div>
 
+<!-- BARRA MOBILE -->
 <div class="mob-bar" id="mob-bar">
   <div class="mb-info" id="mb-info">Selecione produtos</div>
   <button class="mb-btn" onclick="abrirSheet()">Avançar</button>
@@ -251,6 +252,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <div class="sh-overlay" id="sh-ov" onclick="fecharSheet()"></div>
 
+<!-- BOTTOM SHEET MOBILE -->
 <div class="b-sheet" id="b-sheet">
   <div class="sh-header">
     <div class="sh-handle"></div>
@@ -347,7 +349,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <script>
 // !!! ATENÇÃO: SUBSTUTA PELA URL REAL GERADA NA IMPLANTAÇÃO !!!
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxmyuVRlyZQmK3U7aQFxjFxzjZlzap2iGiofcK6xbnwhzLyY1ZXLISIEwSbPAqEf5a7/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbweA9MJybmUPu9c66apC3dpHqBFn4ZaHRTmJJ1YVJ5v6hUKg8t1lccgqp4RSf8qdK9zmg/exec";
 
 let PRODUTOS = [];
 let SELECIONADOS = {}; 
@@ -598,7 +600,6 @@ function calcularTudo(){
   
   let totalLiquido = subtotalLiquidoParcial + (freteVal>0?freteVal:0);
 
-  // INSERIDO O ESTADO AQUI NO DADOS_PDF_PRONTO
   DADOS_PDF_PRONTO = {
     tipoAcao: '',
     logoUrl: document.querySelector('#logo-area img') ? document.querySelector('#logo-area img').src : '',
@@ -667,7 +668,9 @@ function confirmarSalvamentoPedido() {
     document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none';
     
     if(res.status === 'success') {
-      let a = document.createElement('a'); a.href = res.base64; a.download = `Pedido_${CODIGO_REPRE}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      // UTILIZANDO O NOME GERADO PELO SERVIDOR AQUI
+      let nomeFinal = res.nomeArquivo || `${CODIGO_REPRE} - Pedido.pdf`;
+      let a = document.createElement('a'); a.href = res.base64; a.download = nomeFinal; document.body.appendChild(a); a.click(); document.body.removeChild(a);
       
       ['btn-disolle-d','btn-disolle-m'].forEach(id => { document.getElementById(id).classList.add('liberado'); document.getElementById(id).disabled = false; });
       
@@ -694,7 +697,9 @@ function acionarPdf(tipo) {
   .then(r => r.json()).then(res => {
     document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none';
     if(res.status === 'success') {
-      let a = document.createElement('a'); a.href = res.base64; a.download = `Pedido_${CODIGO_REPRE}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      // UTILIZANDO O NOME GERADO PELO SERVIDOR AQUI
+      let nomeFinal = res.nomeArquivo || `${CODIGO_REPRE} - Pedido.pdf`;
+      let a = document.createElement('a'); a.href = res.base64; a.download = nomeFinal; document.body.appendChild(a); a.click(); document.body.removeChild(a);
       document.getElementById('modal-sucesso').style.display = 'flex'; document.getElementById('modal-sucesso').classList.add('open');
     } else { alert("Erro ao processar operação: " + res.message); }
   }).catch(err => {
