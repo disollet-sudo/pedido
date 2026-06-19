@@ -42,7 +42,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .card-img img.loaded{opacity:1}
 .no-img-icon{font-size:30px;color:#ddd}
 .card-body{padding:10px 12px 12px}
-.card-body .tabela-atual-visivel {font-size:11px; font-weight:bold; color:#777; margin-bottom:2px;}
 .card-cod{font-size:11px;font-weight:700;color:var(--verde-dk);margin-bottom:3px}
 .card-desc{font-size:12px;color:var(--texto);font-weight:500;line-height:1.35;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card-bottom{display:flex;justify-content:space-between;align-items:center}
@@ -65,7 +64,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 .sel-cod{font-size:11px;font-weight:700;color:var(--verde-dk);flex-shrink:0;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sel-desc{flex:1;font-size:11px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sel-qty-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.qty-btn{width:22px;height:22px;border:1px solid var(--borda);border-radius:5px;background:var(--cinza);cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .qty-num{width:32px;text-align:center;font-size:12px;font-weight:700}
 .sel-rm{cursor:pointer;color:#ccc;font-size:18px;flex-shrink:0}
 .sel-rm:hover{color:#e24b4a}
@@ -137,7 +135,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   <div class="modal-box" style="padding: 30px; max-width: 320px; height: auto; justify-content: center; align-items: center; text-align: center; background: #fff;">
     <div class="modal-spin" style="display:block; margin-bottom:16px;"></div>
     <div style="font-weight:bold; color:var(--verde-dk); font-size: 16px;">Processando Solicitação...</div>
-    <div style="font-size:12px; color:var(--sub); margin-top:8px;">Aguarde, gerando arquivos. Não feche a página.</div>
+    <div style="font-size:12px; color:var(--sub); margin-top:8px;">Aguarde, executando rotinas. Não feche a página.</div>
   </div>
 </div>
 
@@ -240,13 +238,13 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="btn-group">
         <button class="btn prim" id="btn-orc-d" onclick="abrirFluxoFechamento('d')" disabled>✓ Finalizar</button>
         <button class="btn" id="btn-baixar-d" onclick="acionarPdf('baixar')" disabled style="background:#fff; color:var(--verde-dk); border-color:var(--verde);">⬇️ Baixar PDF</button>
-        <button class="btn pdf-btn" id="btn-xls-d" onclick="acionarPdf('enviar')" disabled>🚀 Enviar</button>
         <button class="btn pdf-btn" id="btn-disolle-d" onclick="acionarPdf('enviar_disolle')" disabled>🚀 Enviar Di Solle</button>
       </div>
     </div>
   </aside>
 </div>
 
+<!-- BARRA MOBILE -->
 <div class="mob-bar" id="mob-bar">
   <div class="mb-info" id="mb-info">Selecione produtos</div>
   <button class="mb-btn" onclick="abrirSheet()">Avançar</button>
@@ -254,6 +252,7 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 
 <div class="sh-overlay" id="sh-ov" onclick="fecharSheet()"></div>
 
+<!-- BOTTOM SHEET MOBILE -->
 <div class="b-sheet" id="b-sheet">
   <div class="sh-header">
     <div class="sh-handle"></div>
@@ -296,7 +295,6 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
     <div class="btn-group">
       <button class="btn prim" id="btn-orc-m" onclick="abrirFluxoFechamento('m')" disabled>✓ Finalizar</button>
       <button class="btn" id="btn-baixar-m" onclick="acionarPdf('baixar')" disabled style="background:#fff; color:var(--verde-dk); border-color:var(--verde);">⬇️ Baixar PDF</button>
-      <button class="btn pdf-btn" id="btn-xls-m" onclick="acionarPdf('enviar')" disabled>🚀 Enviar</button>
       <button class="btn pdf-btn" id="btn-disolle-m" onclick="acionarPdf('enviar_disolle')" disabled>🚀 Enviar Di Solle</button>
     </div>
     <button class="btn" onclick="fecharSheet()" style="margin-top: 10px; margin-bottom:0; width: 100%;">Fechar Aba</button>
@@ -341,7 +339,8 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
       <div class="field"><label>Observações</label><textarea id="cli-obs" rows="3" placeholder="Informações adicionais do pedido..."></textarea></div>
     </div>
     <div style="margin-top: 10px;">
-      <button class="btn prim" id="btn-salvar-cli" onclick="confirmarSalvamentoPedido()" style="margin-bottom: 8px;">Salvar Pedido na Planilha</button>
+      <!-- ALTERADO: TEXTO PARA "ENVIAR" E ACIONAMENTO DO NOVO COMBO DE TAREFAS -->
+      <button class="btn prim" id="btn-salvar-cli" onclick="confirmarSalvamentoPedido()" style="margin-bottom: 8px;">Enviar</button>
       <button class="btn" onclick="fecharModalCliente()">Cancelar</button>
     </div>
   </div>
@@ -350,11 +349,11 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
 <div class="toast" id="toast"></div>
 
 <script>
-// !!! ATENÇÃO: COLOQUE A SUA URL AQUI !!!
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzHxSWSEHMTky3gzaQzdnrozIEkvJw_u_5c9M9QQb2Kdp9M7KVLEUDUd0j64SZlEIhaQA/exec";
+// !!! ATENÇÃO: SUBSTUTA PELA URL REAL GERADA NA IMPLANTAÇÃO !!!
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbys3x27hgrZHwk6_7xNzromSbUkOAbPI2oizsSwLQ6MT0Us4Kodu4CsRuzEWKXrWC3sAQ/exec";
 
 let PRODUTOS = [];
-let SELECIONADOS = {}; // Estrutura original = { 'codigonorm': { produto: {...}, qtd: X } }
+let SELECIONADOS = {}; 
 let DADOS_PDF_PRONTO = null;
 let FRETE_REGRAS = {};
 let CODIGO_REPRE = localStorage.getItem('repre_cod') || "";
@@ -387,7 +386,7 @@ const SUB_PRAZOS = {
   "7": ["35 DIAS", "14/56 DIAS", "21/49 DIAS", "28/42 DIAS", "14/35/56 DIAS", "21/35/49 DIAS", "14/28/42/56 DIAS"],
   "5": ["42 DIAS", "28/56 DIAS", "35/49 DIAS", "14/42/70 DIAS", "28/42/56 DIAS", "21/35/49/63 DIAS", "14/28/42/56/70 DIAS"],
   "2": ["56 DIAS", "28/84 DIAS", "49/63 DIAS", "35/56/77 DIAS", "42/56/70 DIAS", "35/49/63/77 DIAS", "28/42/56/70/84 DIAS", "21/35/49/63/77/91 DIAS"],
-  "0": ["63 DIAS", "35/91 DIAS", "35/63/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"] // ADICIONADO 35/63/91 DIAS AQUI
+  "0": ["63 DIAS", "35/91 DIAS", "35/63/91 DIAS", "56/70 DIAS", "42/63/84 DIAS", "21/49/77/105 DIAS", "42/56/70/84 DIAS", "35/49/63/77/91 DIAS", "28/42/56/70/84/98 DIAS"]
 };
 
 function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
@@ -430,11 +429,8 @@ function renderizar(arr){
   let brutoPrevia = somarBrutoPrevia();
   let tabelaCard = "M26071";
   
-  if(icmsBase === "7") {
-    tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072";
-  } else {
-    tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122";
-  }
+  if(icmsBase === "7") { tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072"; } 
+  else { tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
 
   arr.forEach(p => {
     let pFinal = p.emPromocao ? p.precosPromo[tabelaCard] : p.precos[tabelaCard];
@@ -500,16 +496,13 @@ function abrirModal(p){
 function fecharModal(){ document.getElementById('modal').classList.remove('open'); PRODUTO_MODAL_ATIVO = null; }
 function clicouFora(e){ if(e.target===document.getElementById('modal')) fecharModal(); }
 
-// CORREÇÃO: Forçar múltiplo ao digitar
 function corrigirQtyModal(input){
   if(!PRODUTO_MODAL_ATIVO) return;
   let v = parseInt(input.value) || 0;
   let m = PRODUTO_MODAL_ATIVO.qtdEmbalagem || 1;
-  if(v < m) {
-    input.value = m;
-  } else if(v % m !== 0) {
-    let old = v;
-    input.value = Math.ceil(v / m) * m;
+  if(v < m) { input.value = m; } 
+  else if(v % m !== 0) {
+    let old = v; input.value = Math.ceil(v / m) * m;
     showToast(`Corrigido de ${old} para ${input.value} (múltiplo de ${m})`);
   }
 }
@@ -519,21 +512,15 @@ function mudarQtyModal(d){
   let i = document.getElementById('modal-qty');
   let v = parseInt(i.value) || 0;
   let m = PRODUTO_MODAL_ATIVO.qtdEmbalagem;
-  v += (d * m);
-  if(v < m) v = m;
-  i.value = v;
+  v += (d * m); if(v < m) v = m; i.value = v;
 }
 
 function confirmarAddModal(){
   if(!PRODUTO_MODAL_ATIVO) return;
-  let i = document.getElementById('modal-qty');
-  corrigirQtyModal(i);
+  let i = document.getElementById('modal-qty'); corrigirQtyModal(i);
   let v = parseInt(i.value);
   let key = PRODUTO_MODAL_ATIVO.codigo.toLowerCase().trim();
-  
-  // ESTRUTURA ORIGINAL DE CHAVE REAJUSTADA PARA FUNCIONAR
   SELECIONADOS[key] = { produto: PRODUTO_MODAL_ATIVO, qtd: v };
-  
   fecharModal(); calcularTudo(); filtrar(); showToast("Item adicionado.");
 }
 
@@ -560,7 +547,6 @@ function alterouPrazoBase(idO, idD){
 
 function calcularTudo(){
   let uf = document.getElementById('uf-d').value;
-  // DEDUÇÃO AUTOMÁTICA DE ICMS PELA UF
   let icmsBase = (["RS","SC","PR","MG","RJ"].includes(uf)) ? "12" : "7";
 
   let prazoBase = parseInt(document.getElementById('prazo-d').value)||0;
@@ -598,7 +584,7 @@ function calcularTudo(){
       valorComIpi: valorItemComIpi, valorTotalItem: valorTotalItemDescIpi
     });
     
-    hd.innerHTML+= `<div class="sel-row"><div class="sel-cod">${p.codigo}</div><div class="sel-desc">${p.descricao}</div><div class="sel-qty-wrap">${qty} x ${formatDin(valorComDescontoPrazo)}</div><div class="sel-rm" onclick="rmItem('${c}')">✕</div></div>`;
+    hd.innerHTML+= `<div class="sel-row"><div class="sel-cod">${p.codigo}</div><div class="sel-desc">${p.descricao}</div><div class="sel-qty-wrap">${qty} cx</div><div class="sel-rm" onclick="rmItem('${c}')">✕</div></div>`;
   });
   
   if(contItens===0){ hd.innerHTML='<div class="vazio">Carrinho vazio</div>'; }
@@ -607,7 +593,6 @@ function calcularTudo(){
   
   let valDescPrazo = 0;
   if(prazoBase > 0) { valDescPrazo = subtotalProdutos - (subtotalProdutos * pctPrazo); }
-  
   let subtotalLiquidoParcial = (subtotalProdutos - valDescPrazo) + totalIpi;
 
   let freteVal = 0, configFrete = FRETE_REGRAS[uf] || null;
@@ -619,8 +604,7 @@ function calcularTudo(){
   DADOS_PDF_PRONTO = {
     tipoAcao: '',
     logoUrl: document.querySelector('#logo-area img') ? document.querySelector('#logo-area img').src : '',
-    codigoRepre: CODIGO_REPRE, prazo: prazoTexto, itens: listaItensPdf,
-    clienteInfo: '', observacoes: '', // Serão injetados pelo acionarPdf
+    codigoRepre: CODIGO_REPRE, prazo: prazoTexto, itens: listaItensPdf, clienteInfo: '', observacoes: '',
     contas: { subtotal: subtotalProdutos, pctPrazo: prazoBase, valPrazo: valDescPrazo, totalIpi: totalIpi, valorFrete: freteVal>0?freteVal:0, liquido: totalLiquido }
   };
   
@@ -634,7 +618,7 @@ function calcularTudo(){
     let fLabel = document.getElementById(prefix+'-frete-val');
     if(!uf) fLabel.innerText = "Selecione o Estado";
     else if(freteVal===-1){ fLabel.innerText = `Falta ${formatDin(configFrete.pedidoMinimo - subtotalBrutoInicial)}`; fLabel.style.color='red'; }
-    else fLabel.innerText = freteVal===0 ? "GRÁTIS" : formatDin(freteVal);
+    else { fLabel.innerText = freteVal===0 ? "GRÁTIS" : formatDin(freteVal); fLabel.style.color=''; }
     
     document.getElementById(prefix+'-total').innerText = formatDin(totalLiquido);
   };
@@ -645,8 +629,6 @@ function calcularTudo(){
   
   let lib = contItens > 0 && uf !== "" && freteVal !== -1;
   document.getElementById('btn-orc-d').disabled = !lib; document.getElementById('btn-orc-m').disabled = !lib;
-  
-  // Botão Baixar sempre fica liberado SE tiver itens (independente de frete ou de ter clicado em finalizar)
   document.getElementById('btn-baixar-d').disabled = contItens === 0; document.getElementById('btn-baixar-m').disabled = contItens === 0;
 }
 
@@ -654,20 +636,23 @@ function abrirFluxoFechamento(t){ fecharSheet(); document.getElementById('modal-
 function fecharModalCliente(){ document.getElementById('modal-cliente').classList.remove('open'); setTimeout(()=>document.getElementById('modal-cliente').style.display='none',300); }
 function clicouForaCliente(e){ if(e.target===document.getElementById('modal-cliente')) fecharModalCliente(); }
 
+// NOVO FLUXO: Enviar dados para planilha, rodar o Drive (Pasta 1), disparar E-mail e baixar no dispositivo no mesmo clique!
 function confirmarSalvamentoPedido() {
   let cnpj = document.getElementById('cli-cnpj').value;
   let razao = document.getElementById('cli-razao').value;
-  if (!cnpj || !razao) { alert("Preencha CNPJ e Razão Social."); return; }
+  if (!cnpj || !razao) { alert("Preencha o CNPJ e a Razão Social para prosseguir."); return; }
 
   let obs = document.getElementById('cli-obs').value.trim();
   let strCli = `CNPJ/CPF: ${cnpj}\nRazão Social: ${razao}\nFantasia: ${document.getElementById('cli-fantasia').value}\nEndereço: ${document.getElementById('cli-endereco').value}\nTelefone: ${document.getElementById('cli-telefone').value}\nE-mail: ${document.getElementById('cli-email').value}`;
   
   DADOS_PDF_PRONTO.clienteInfo = strCli;
   DADOS_PDF_PRONTO.observacoes = obs;
+  DADOS_PDF_PRONTO.tipoAcao = 'enviar'; // Força a ação de processamento padrão (Pasta 1 + E-mail)
+
+  fecharModalCliente();
+  document.getElementById('loading-modal').style.display = 'flex'; document.getElementById('loading-modal').classList.add('open');
   
-  document.getElementById('btn-salvar-cli').innerText = "Salvando..."; document.getElementById('btn-salvar-cli').disabled = true;
-  
-  let payload = {
+  let payloadPlanilha = {
     acao: 'pedido',
     qtd: document.getElementById('cart-count').innerText,
     subtotalProdutos: DADOS_PDF_PRONTO.contas.subtotal, totalIpi: DADOS_PDF_PRONTO.contas.totalIpi,
@@ -676,25 +661,40 @@ function confirmarSalvamentoPedido() {
     itens: JSON.stringify(DADOS_PDF_PRONTO.itens.map(x => `${x.codigo} (${x.qtd}cx)`))
   };
 
-  fetch(URL_GOOGLE_SCRIPT, { method:'POST', body:JSON.stringify(payload) })
-  .then(()=> {
-    fecharModalCliente();
-    document.getElementById('btn-salvar-cli').innerText = "Salvar Pedido na Planilha"; document.getElementById('btn-salvar-cli').disabled = false;
-    showToast("Pedido salvo! Você já pode enviar.");
-    // Libera os botões de envio somente após Finalizar!
-    ['btn-xls-d','btn-xls-m','btn-disolle-d','btn-disolle-m'].forEach(id => { document.getElementById(id).classList.add('liberado'); document.getElementById(id).disabled = false; });
-  }).catch(()=> {
-    document.getElementById('btn-salvar-cli').innerText = "Tentar Novamente"; document.getElementById('btn-salvar-cli').disabled = false; alert("Erro ao salvar planilha.");
+  // Etapa 1: Salvar dados textuais na planilha de registros
+  fetch(URL_GOOGLE_SCRIPT, { method:'POST', body:JSON.stringify(payloadPlanilha) })
+  .then(() => {
+    // Etapa 2: Gerar o PDF e processar no Servidor (Drive Pasta 1 + Validação de e-mail)
+    return fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify({ acao: 'pdf', dadosPdf: DADOS_PDF_PRONTO }) });
+  })
+  .then(r => r.json())
+  .then(res => {
+    document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none';
+    
+    if(res.status === 'success') {
+      // Etapa 3: Baixar no dispositivo do cliente automaticamente
+      let a = document.createElement('a'); a.href = res.base64; a.download = `Pedido_${CODIGO_REPRE}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      
+      // Habilitar botões para envio opcional ao canal da Di Solle
+      ['btn-disolle-d','btn-disolle-m'].forEach(id => { document.getElementById(id).classList.add('liberado'); document.getElementById(id).disabled = false; });
+      
+      document.getElementById('modal-sucesso').style.display = 'flex'; document.getElementById('modal-sucesso').classList.add('open');
+    } else { alert("Erro ao processar PDF: " + res.message); }
+  })
+  .catch(err => {
+    document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none'; 
+    alert("Falha na comunicação geral da transação.");
   });
 }
 
+// Controla as requisições diretas de Baixar ou Enviar Di Solle
 function acionarPdf(tipo) {
   if (!DADOS_PDF_PRONTO || DADOS_PDF_PRONTO.itens.length === 0) { alert("Carrinho vazio."); return; }
   
   DADOS_PDF_PRONTO.tipoAcao = tipo;
-  
-  // Garantir que as informações do cliente estejam preenchidas se for salvar direto
-  if (!DADOS_PDF_PRONTO.observacoes) DADOS_PDF_PRONTO.observacoes = document.getElementById('cli-obs').value.trim();
+  if(tipo === 'baixar' && !DADOS_PDF_PRONTO.clienteInfo){
+    DADOS_PDF_PRONTO.clienteInfo = "Download Rápido - Sem dados cadastrais preenchidos";
+  }
 
   document.getElementById('loading-modal').style.display = 'flex'; document.getElementById('loading-modal').classList.add('open');
   
@@ -704,10 +704,9 @@ function acionarPdf(tipo) {
     if(res.status === 'success') {
       let a = document.createElement('a'); a.href = res.base64; a.download = `Pedido_${CODIGO_REPRE}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
       document.getElementById('modal-sucesso').style.display = 'flex'; document.getElementById('modal-sucesso').classList.add('open');
-      if (tipo !== 'baixar') console.log("Status de E-mail: " + res.emailStatus);
-    } else { alert("Erro ao processar: " + res.message); }
+    } else { alert("Erro ao processar operação: " + res.message); }
   }).catch(err => {
-    document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none'; alert("Falha na comunicação.");
+    document.getElementById('loading-modal').classList.remove('open'); document.getElementById('loading-modal').style.display = 'none'; alert("Falha de rede.");
   });
 }
 
