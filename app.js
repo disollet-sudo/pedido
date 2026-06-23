@@ -121,7 +121,7 @@ function filtrar() {
 
   // Calcula a tabela ativa da mesma forma que o modal e renderizar()
   let uf = document.getElementById('uf-d').value;
-  let icmsBase = (["RS", "SC", "PR", "MG", "RJ"].includes(uf)) ? "12" : "7";
+  let icmsBase = (["RS", "SC", "PR","SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
   let brutoPrevia = somarBrutoPrevia();
   let tabelaFiltro = "M26071";
   if (icmsBase === "7") { tabelaFiltro = brutoPrevia <= 5000 ? "M26071" : "M26072"; }
