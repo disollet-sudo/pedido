@@ -150,7 +150,7 @@ function limFiltros() {
 function somarBrutoPrevia() {
   // Determina a tabela correta com base no estado já selecionado
   let uf = document.getElementById('uf-d') ? document.getElementById('uf-d').value : '';
-  let icmsBase = (["RS", "SC", "PR", "MG", "RJ"].includes(uf)) ? "12" : "7";
+  let icmsBase = (["RS", "SC", "PR","SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
   // Primeira passagem: soma com M26071 para saber o volume e definir tabela
   let brutoInicial = 0;
   Object.values(SELECIONADOS).forEach(item => {
@@ -178,7 +178,7 @@ function renderizar(arr) {
   document.getElementById('cont').innerText = `${arr.length} produtos`;
 
   let uf = document.getElementById('uf-d').value;
-  let icmsBase = (["RS", "SC", "PR", "MG", "RJ"].includes(uf)) ? "12" : "7";
+  let icmsBase = (["RS", "SC", "PR","SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
   let brutoPrevia = somarBrutoPrevia();
   let tabelaCard = "M26071";
 
@@ -213,7 +213,7 @@ function renderizar(arr) {
 function abrirModal(p) {
   PRODUTO_MODAL_ATIVO = p;
   let uf = document.getElementById('uf-d').value;
-  let icmsBase = (["RS", "SC", "PR", "MG", "RJ"].includes(uf)) ? "12" : "7";
+  let icmsBase = (["RS", "SC", "PR","SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
   let brutoPrevia = somarBrutoPrevia();
   let tAtiva = "M26071";
 
