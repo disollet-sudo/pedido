@@ -122,10 +122,14 @@ function filtrar() {
   // Calcula a tabela ativa da mesma forma que o modal e renderizar()
   let uf = document.getElementById('uf-d').value;
   let icmsBase = (["RS", "SC", "PR","SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
-  let brutoPrevia = somarBrutoPrevia();
-  let tabelaFiltro = "M26071";
-  if (icmsBase === "7") { tabelaFiltro = brutoPrevia <= 5000 ? "M26071" : "M26072"; }
-  else { tabelaFiltro = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
+  let prazoBase2 = parseInt(document.getElementById('prazo-d').value) || 0;
+  let pctPrazo2 = (100 - prazoBase2) / 100;
+  let tabelaBase2 = icmsBase === "7" ? "M26071" : "M26121";
+  let limiteTabela2 = icmsBase === "7" ? 5000 : 2500;
+  let liquidoPrevia2 = calcularTotalLiquidoComTabela(tabelaBase2, pctPrazo2, uf);
+  let tabelaFiltro = (liquidoPrevia2 <= limiteTabela2)
+    ? tabelaBase2
+    : (icmsBase === "7" ? "M26072" : "M26122");
 
   let f = PRODUTOS.filter(p => {
     let preco = p.emPromocao ? p.precosPromo[tabelaFiltro] : p.precos[tabelaFiltro];
@@ -169,11 +173,14 @@ function renderizar(arr) {
 
   let uf = document.getElementById('uf-d').value;
   let icmsBase = (["RS", "SC", "PR","SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
-  let brutoPrevia = somarBrutoPrevia();
-  let tabelaCard = "M26071";
-
-  if (icmsBase === "7") { tabelaCard = brutoPrevia <= 5000 ? "M26071" : "M26072"; }
-  else { tabelaCard = brutoPrevia <= 2500 ? "M26121" : "M26122"; }
+  let prazoBaseR = parseInt(document.getElementById('prazo-d').value) || 0;
+  let pctPrazoR = (100 - prazoBaseR) / 100;
+  let tabelaBaseR = icmsBase === "7" ? "M26071" : "M26121";
+  let limiteTabelaR = icmsBase === "7" ? 5000 : 2500;
+  let liquidoPreviaR = calcularTotalLiquidoComTabela(tabelaBaseR, pctPrazoR, uf);
+  let tabelaCard = (liquidoPreviaR <= limiteTabelaR)
+    ? tabelaBaseR
+    : (icmsBase === "7" ? "M26072" : "M26122");
 
   arr.forEach(p => {
     let pFinal = p.emPromocao ? p.precosPromo[tabelaCard] : p.precos[tabelaCard];
@@ -308,6 +315,24 @@ function alterouPrazoBase(idO, idD) {
   calcularTudo();
 }
 
+function calcularTotalLiquidoComTabela(tabela, pctPrazo, uf) {
+  let subtotal = 0, totalIpi = 0;
+  Object.values(SELECIONADOS).forEach(item => {
+    let p = item.produto, qty = item.qtd;
+    let precoUnit = p.emPromocao ? (p.precosPromo[tabela] || 0) : (p.precos[tabela] || 0);
+    subtotal += precoUnit * qty;
+    let valorComDesc = precoUnit * pctPrazo;
+    totalIpi += valorComDesc * (p.ipi / 100) * qty;
+  });
+  let valDesc = subtotal - (subtotal * pctPrazo);
+  let liquido = (subtotal - valDesc) + totalIpi;
+  let configFrete = FRETE_REGRAS[uf] || null;
+  if (configFrete && subtotal >= configFrete.pedidoMinimo && subtotal < configFrete.gratis) {
+    liquido += configFrete.intervalo;
+  }
+  return liquido;
+}
+
 function calcularTudo() {
   let uf = document.getElementById('uf-d').value;
   let icmsBase = (["RS", "SC", "PR", "SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
@@ -316,10 +341,15 @@ function calcularTudo() {
   let prazoTexto = document.getElementById('prazo-d').options[document.getElementById('prazo-d').selectedIndex].text;
   if (SUB_PRAZOS[prazoBase]) prazoTexto = document.getElementById('subprazo-d').value || prazoTexto;
 
+  // 1ª passagem: calcula o total líquido com a tabela BASE para decidir a tabela definitiva
+  let tabelaBase = icmsBase === "7" ? "M26071" : "M26121";
+  let limiteTabela = icmsBase === "7" ? 5000 : 2500;
+  let liquidoPrevia = calcularTotalLiquidoComTabela(tabelaBase, pctPrazo, uf);
+  let tabelaAtiva = (liquidoPrevia <= limiteTabela)
+    ? tabelaBase
+    : (icmsBase === "7" ? "M26072" : "M26122");
+
   let subtotalBrutoInicial = somarBrutoPrevia();
-  let tabelaAtiva = "M26071";
-  if (icmsBase === "7") { tabelaAtiva = subtotalBrutoInicial <= 5000 ? "M26071" : "M26072"; }
-  else { tabelaAtiva = subtotalBrutoInicial <= 2500 ? "M26121" : "M26122"; }
 
   let subtotalProdutos = 0, totalIpi = 0, contItens = 0, listaItensPdf = [];
   let hd = document.getElementById('lista-d');
