@@ -148,26 +148,15 @@ function limFiltros() {
 }
 
 function somarBrutoPrevia() {
-  // Determina a tabela correta com base no estado já selecionado
+  // Soma sempre pela tabela BASE (M26071 ou M26121) para decidir o threshold.
+  // A decisão de qual tabela aplicar de fato é feita pelos callers (calcularTudo, filtrar, renderizar).
   let uf = document.getElementById('uf-d') ? document.getElementById('uf-d').value : '';
   let icmsBase = (["RS", "SC", "PR", "SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
-  // Usa a tabela base do grupo correto para calcular o volume e decidir o threshold
   let tabelaBase = icmsBase === "7" ? "M26071" : "M26121";
-  let brutoInicial = 0;
-  Object.values(SELECIONADOS).forEach(item => {
-    let p = item.produto;
-    let precoUnit = p.emPromocao ? (p.precosPromo[tabelaBase] || 0) : (p.precos[tabelaBase] || 0);
-    brutoInicial += (precoUnit * item.qtd);
-  });
-  // Determina tabela definitiva pelo volume usando a tabela base correta
-  let tabela;
-  if (icmsBase === "7") { tabela = brutoInicial <= 5000 ? "M26071" : "M26072"; }
-  else { tabela = brutoInicial <= 2500 ? "M26121" : "M26122"; }
-  // Segunda passagem: soma com a tabela definitiva
   let bruto = 0;
   Object.values(SELECIONADOS).forEach(item => {
     let p = item.produto;
-    let precoUnit = p.emPromocao ? (p.precosPromo[tabela] || 0) : (p.precos[tabela] || 0);
+    let precoUnit = p.emPromocao ? (p.precosPromo[tabelaBase] || 0) : (p.precos[tabelaBase] || 0);
     bruto += (precoUnit * item.qtd);
   });
   return bruto;
