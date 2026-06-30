@@ -224,4 +224,17 @@ header{background:#000;border-bottom:1px solid #222;padding:12px 20px;position:s
   .cart-qty-input{width:48px;height:38px}
   .qty-big-btn{width:42px;height:42px;font-size:22px}
   .qty-big-input{height:42px}
+
+  /* Impede o zoom de toque-duplo do iOS Safari ao tocar rápido nos botões de quantidade/cards */
+  .cart-qty-btn,.qty-big-btn,.cart-qty-input,.qty-big-input,.qty-num,.card,.btn,.btn-lim,.btn-sync{
+    touch-action:manipulation;
+  }
+
+  /* Corrige a faixa branca lateral: impede que o botão "Sincronizar Catálogo" (e outros itens)
+     empurrem a largura da página para além da tela */
+  html,body{overflow-x:hidden}
+  .filtros-inner{max-width:100%}
+  .top-actions{flex-wrap:wrap;width:100%;gap:8px}
+  .btn-sync{white-space:normal;text-align:center;flex:1 1 100%}
+  #icons-actions,#cont{flex:0 0 auto}
 }
