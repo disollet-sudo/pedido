@@ -64,7 +64,7 @@ function doPost(e) {
 
     if (dados.acao === 'pdf') {
       var result = gerarPdfPedido(dados.dadosPdf);
-      return ContentService.createTextOutput(JSON.stringify({ status: 'success', base64: result.base64, emailStatus: result.emailStatus, nomeArquivo: result.nomeArquivo })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success', base64: result.base64, emailStatus: result.emailStatus, nomeArquivo: result.nomeArquivo, driveStatus: result.driveStatus })).setMimeType(ContentService.MimeType.JSON);
     }
 
     registrarPedido(dados);
@@ -79,6 +79,35 @@ function normalizarReferencia(val) {
   var s = String(val).trim();
   if (s.endsWith('.0')) s = s.slice(0, -2);
   return s.toLowerCase();
+}
+
+// Remove acentos e caixa, útil para comparar cabeçalhos/textos de forma tolerante
+function normalizarTextoSemAcento(val) {
+  if (val === undefined || val === null) return '';
+  return String(val)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase().trim();
+}
+
+// Procura, dentre os cabeçalhos de uma linha, a coluna cujo texto contenha algum dos termos informados.
+// Prioriza correspondência EXATA do cabeçalho (evita, por ex., confundir "Produto" com "Codigo_ean"
+// só porque ambos contêm "codigo"); só cai para correspondência parcial se não achar exata.
+function encontrarColuna(headers, termos) {
+  var headersNorm = headers.map(function (h) { return normalizarTextoSemAcento(h).toLowerCase().trim(); });
+
+  // 1ª passada: cabeçalho igual (exato) a algum dos termos
+  for (var t = 0; t < termos.length; t++) {
+    var idxExato = headersNorm.indexOf(termos[t]);
+    if (idxExato !== -1) return idxExato;
+  }
+
+  // 2ª passada: cabeçalho contém o termo (correspondência parcial, usada como última tentativa)
+  for (var i = 0; i < headersNorm.length; i++) {
+    for (var t2 = 0; t2 < termos.length; t2++) {
+      if (headersNorm[i].indexOf(termos[t2]) !== -1) return i;
+    }
+  }
+  return -1;
 }
 
 function obterBase64DriveFile(fileId) {
@@ -157,16 +186,20 @@ function getProdutos(forceUpdate) {
   // --- Tenta recuperar Produtos do Cache ---
   if (!forceUpdate) {
     try {
-      var cacheInfo = cache.get('cat_info');
+      var cacheInfo = cache.get('cat_info_v2');
       if (cacheInfo) {
         var info = JSON.parse(cacheInfo), strCache = '', valid = true;
         for (var i = 0; i < info.chunks; i++) {
-          var chunk = cache.get('cat_chk_' + i);
+          var chunk = cache.get('cat_chk_v2_' + i);
           if (!chunk) { valid = false; break; }
           strCache += chunk;
         }
         if (valid) {
           var resCache = JSON.parse(strCache);
+          // Se o cache foi gravado antes da tabela MILLENIUM existir, descarta e reconstrói
+          if (!('tabelaMillenium' in resCache)) valid = false;
+        }
+        if (valid) {
           resCache.clientes = clientes; 
           return resCache;
         }
@@ -256,19 +289,132 @@ function getProdutos(forceUpdate) {
     return 0;
   });
 
-  var resultadoParaCache = { produtos: produtos, logoUrl : logoId ? 'https://drive.google.com/thumbnail?id=' + logoId + '&sz=w400' : '', estados : estados, freteRegras: freteRegras };
+  // --- TABELA ESPECIAL KNE825 ---
+  var tabelaEspecial = {};
+  try {
+    var abaEspecial = ss.getSheetByName('KNE825');
+    if (abaEspecial) {
+      var dadosEspecial = abaEspecial.getDataRange().getValues();
+      // Cabeçalho: Produto | Descricao | Preço Unitário
+      for (var e = 1; e < dadosEspecial.length; e++) {
+        var codEsp = normalizarReferencia(dadosEspecial[e][0]);
+        var precoEsp = parseFloat(String(dadosEspecial[e][2]).replace(',', '.')) || 0;
+        if (codEsp && precoEsp > 0) {
+          tabelaEspecial[codEsp] = precoEsp;
+        }
+      }
+    }
+  } catch(eKne) { console.log('Erro KNE825: ' + eKne.message); }
+
+  // --- TABELA ESPECIAL MILLENIUM (ICMS 7 > R$5.000 / ICMS 12 > R$3.000, prazo Antecipado 42 ou 63 dias) ---
+  var tabelaMillenium = {}; // { codNorm: { "M26072": {"42":.., "63":.., "antecipado":..}, "M26122": {...} } }
+  try {
+    var abaMillenium = ss.getSheetByName('MILLENIUM');
+    if (abaMillenium) {
+      var dadosMillenium = abaMillenium.getDataRange().getValues();
+      if (dadosMillenium.length > 1) {
+        var headersMillenium = dadosMillenium[0];
+
+        // Localiza as colunas pelo nome do cabeçalho (tolerante a maiúsculas/acentos/posição)
+        var colTbPrecoMil = encontrarColuna(headersMillenium, ['tb_preco', 'tb preco']);
+        var colProdutoMil = encontrarColuna(headersMillenium, ['produto']);
+        var colPrecoMil   = encontrarColuna(headersMillenium, ['pr_menor', 'pr menor', 'menor']);
+        var colPagtoMil   = encontrarColuna(headersMillenium, ['pagamento']);
+
+        // Fallbacks caso o cabeçalho não seja encontrado: A = Tb_preco (0), B = Produto (1), O = PR_MENOR (14), Q = Pagamento (16)
+        if (colTbPrecoMil === -1) colTbPrecoMil = 0;
+        if (colProdutoMil === -1) colProdutoMil = 1;
+        if (colPrecoMil === -1)   colPrecoMil = 14;
+        if (colPagtoMil === -1)   colPagtoMil = 16;
+
+        for (var m = 1; m < dadosMillenium.length; m++) {
+          var rowMil = dadosMillenium[m];
+          var codMil = normalizarReferencia(rowMil[colProdutoMil]);
+          if (!codMil) continue;
+
+          var tbPrecoMil = String(rowMil[colTbPrecoMil] || '').trim();
+          if (!tbPrecoMil) continue;
+
+          var textoPagto = normalizarTextoSemAcento(rowMil[colPagtoMil]);
+          var chavePrazo = '';
+          if (textoPagto.indexOf('42') !== -1) chavePrazo = '42';
+          else if (textoPagto.indexOf('63') !== -1) chavePrazo = '63';
+          else if (textoPagto.indexOf('ANTECIP') !== -1) chavePrazo = 'antecipado';
+          if (!chavePrazo) continue; // só nos interessam as linhas de Antecipado (42/63 dias ou Antecipado puro)
+
+          var precoMil = parseFloat(String(rowMil[colPrecoMil]).replace(',', '.')) || 0;
+          if (precoMil <= 0) continue;
+
+          if (!tabelaMillenium[codMil]) tabelaMillenium[codMil] = {};
+          if (!tabelaMillenium[codMil][tbPrecoMil]) tabelaMillenium[codMil][tbPrecoMil] = {};
+          tabelaMillenium[codMil][tbPrecoMil][chavePrazo] = precoMil;
+        }
+      }
+    }
+  } catch (eMil) { console.log('Erro MILLENIUM: ' + eMil.message); }
+  console.log('MILLENIUM: ' + Object.keys(tabelaMillenium).length + ' produtos carregados.');
+
+  var resultadoParaCache = { produtos: produtos, logoUrl : logoId ? 'https://drive.google.com/thumbnail?id=' + logoId + '&sz=w400' : '', estados : estados, freteRegras: freteRegras, tabelaKNE825: tabelaEspecial, tabelaMillenium: tabelaMillenium };
   
   try {
     var jsonStr = JSON.stringify(resultadoParaCache);
     var chunkSize = 90000, chunks = Math.ceil(jsonStr.length / chunkSize);
     for (var c = 0; c < chunks; c++) {
-      cache.put('cat_chk_' + c, jsonStr.substring(c * chunkSize, (c + 1) * chunkSize), 14400);
+      cache.put('cat_chk_v2_' + c, jsonStr.substring(c * chunkSize, (c + 1) * chunkSize), 14400);
     }
-    cache.put('cat_info', JSON.stringify({ chunks: chunks }), 14400);
+    cache.put('cat_info_v2', JSON.stringify({ chunks: chunks }), 14400);
   } catch (e) {}
 
   resultadoParaCache.clientes = clientes; 
   return resultadoParaCache;
+}
+
+// --- FUNÇÃO DE DIAGNÓSTICO (rode manualmente pelo editor do Apps Script) ---
+// Edite o valor de CODIGO_TESTE abaixo com o código do produto (o mesmo que aparece
+// embaixo da foto no catálogo) e clique em "Executar". Depois veja em "Execuções"
+// (ou Ver > Registros) o resultado detalhado.
+function debugMillenium() {
+  var CODIGO_TESTE = '1401010004000'; // <<< troque aqui pelo código do produto a testar
+
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+
+  // 1) Mostra como esse código aparece na aba "Tabela" (todas as linhas/tiers dele)
+  var sheet = ss.getSheetByName('Tabela') || ss.getSheets()[0];
+  var dataTab = sheet.getDataRange().getValues();
+  console.log('--- Linhas em "Tabela" cujo código bate (aproximado) com ' + CODIGO_TESTE + ' ---');
+  var alvoNorm = normalizarReferencia(CODIGO_TESTE);
+  for (var i = 1; i < dataTab.length; i++) {
+    var codLinha = normalizarReferencia(dataTab[i][1]);
+    if (codLinha === alvoNorm || codLinha.replace(/^0+/, '') === alvoNorm.replace(/^0+/, '')) {
+      console.log('Tb_preco=' + dataTab[i][0] + ' | Produto="' + dataTab[i][1] + '" | Preco=' + dataTab[i][3]);
+    }
+  }
+
+  // 2) Mostra como esse código aparece na aba "MILLENIUM"
+  var abaMillenium = ss.getSheetByName('MILLENIUM');
+  if (!abaMillenium) { console.log('Aba MILLENIUM não encontrada!'); return; }
+  var dataMil = abaMillenium.getDataRange().getValues();
+  var headersMil = dataMil[0];
+  var colTbPrecoMil = encontrarColuna(headersMil, ['tb_preco', 'tb preco']);
+  var colProdutoMil = encontrarColuna(headersMil, ['produto']);
+  var colPrecoMil   = encontrarColuna(headersMil, ['pr_menor', 'pr menor', 'menor']);
+  var colPagtoMil   = encontrarColuna(headersMil, ['pagamento']);
+  if (colTbPrecoMil === -1) colTbPrecoMil = 0;
+  if (colProdutoMil === -1) colProdutoMil = 1;
+  if (colPrecoMil === -1)   colPrecoMil = 14;
+  if (colPagtoMil === -1)   colPagtoMil = 16;
+  console.log('Colunas detectadas na aba MILLENIUM -> Tb_preco: ' + colTbPrecoMil + ' | Produto: ' + colProdutoMil + ' | Pr_Menor: ' + colPrecoMil + ' | Pagamento: ' + colPagtoMil);
+
+  console.log('--- Linhas em "MILLENIUM" cujo código bate (aproximado) com ' + CODIGO_TESTE + ' ---');
+  var encontrouAlgo = false;
+  for (var m = 1; m < dataMil.length; m++) {
+    var codMilLinha = normalizarReferencia(dataMil[m][colProdutoMil]);
+    if (codMilLinha === alvoNorm || codMilLinha.replace(/^0+/, '') === alvoNorm.replace(/^0+/, '')) {
+      encontrouAlgo = true;
+      console.log('Tb_preco="' + dataMil[m][colTbPrecoMil] + '" | Produto="' + dataMil[m][colProdutoMil] + '" | Pagamento="' + dataMil[m][colPagtoMil] + '" | Pr_Menor=' + dataMil[m][colPrecoMil]);
+    }
+  }
+  if (!encontrouAlgo) console.log('NENHUMA linha da aba MILLENIUM bateu com esse código — confira se o código está exatamente igual (sem dígito faltando/sobrando).');
 }
 
 function registrarPedido(dados) {
@@ -432,19 +578,25 @@ function gerarPdfPedido(dados) {
 
   var emailStatus = "Não aplicável";
   var enviarEmail = false;
-  var folderDestinoId = '';
+  var pastasDestino = [];
+  var driveStatus = []; // registra sucesso/erro de cada pasta, para o app poder avisar o usuário
 
+  // Ao finalizar o pedido: envia e-mail para a Di Solle E já salva o PDF
+  // nas pastas do Drive (cópia de e-mail + pasta oficial de pedidos), tudo em uma única ação.
   if (dados.tipoAcao === 'enviar') {
-    folderDestinoId = '1g_3tAV4rY765KuTh5XuhSt4mpfYVBjPW';
+    pastasDestino = ['1g_3tAV4rY765KuTh5XuhSt4mpfYVBjPW', '1Jdxb2j_dOWTJtgABUNVOcM6kYLVkmPTH'];
     enviarEmail = true;
-  } else if (dados.tipoAcao === 'enviar_disolle') {
-    folderDestinoId = '1Jdxb2j_dOWTJtgABUNVOcM6kYLVkmPTH';
-    enviarEmail = false;
   }
 
-  if (folderDestinoId !== '') {
-    try { DriveApp.getFolderById(folderDestinoId).createFile(pdfBlob); } catch(e) {}
-  }
+  pastasDestino.forEach(function (folderId) {
+    try {
+      DriveApp.getFolderById(folderId).createFile(pdfBlob);
+      driveStatus.push({ folderId: folderId, ok: true });
+    } catch (e) {
+      driveStatus.push({ folderId: folderId, ok: false, erro: e.message });
+      Logger.log('Falha ao salvar PDF na pasta ' + folderId + ': ' + e.message);
+    }
+  });
 
   if (enviarEmail) {
     try {
@@ -460,5 +612,5 @@ function gerarPdfPedido(dados) {
     } catch (e) { emailStatus = "Erro ao enviar e-mail: " + e.message; }
   }
 
-  return { base64: base64, emailStatus: emailStatus, nomeArquivo: nomeArquivoPdf };
+  return { base64: base64, emailStatus: emailStatus, nomeArquivo: nomeArquivoPdf, driveStatus: driveStatus };
 }
