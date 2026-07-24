@@ -3,7 +3,7 @@
    Para adicionar funcionalidades, mexa aqui.
    ============================================= */
 
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbytvjKtdDFMa5S6j1z4tQ5CiEq33i7uk3chWs2Y6tcPR-HSQ0wZ3UgjdcIk4DkZzGHbnA/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbwruSrru-2iY14DFId9t3dkUlJKLTta0O45Y2ELO_hOTQSKEv_0rBlk78lSgV10kKa6-g/exec";
 
 // --- ESTADO GLOBAL ---
 let PRODUTOS = [];
