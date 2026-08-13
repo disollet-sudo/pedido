@@ -8,7 +8,7 @@
    Este arquivo precisa ser o PRIMEIRO <script> carregado no index.html.
    ============================================= */
 
-const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbz6qpZZE_6i0k-Caz3QZBC7JeHrOXWB5r6spNnxA1Yc3qwCLim0kk0Nn0o_vK8E7fDwFA/exec";
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyFLWB1jfcuN3hPPUBanmbpo5JqMCN_HhUu49h2uYk6KP1IEGxTMK0G4w1XEro0fRnFfw/exec";
 
 // --- ESTADO GLOBAL PRINCIPAL ---
 let PRODUTOS = [];
@@ -21,6 +21,7 @@ let PRODUTO_MODAL_ATIVO = null;
 let BLOQUEIA_SALVAMENTO_CNPJ = false;
 let MODO_MODAL_CLIENTE = 'pedido'; // 'pedido' ou 'orcamento' — controla o comportamento do modal de dados do cliente
 let ORCAMENTO_ATIVO_ID = null;     // id do orçamento salvo que está sendo editado no carrinho atual (null = nenhum)
+let ENVIANDO_PEDIDO = false; // true enquanto um pedido/orçamento está sendo enviado ao servidor
 let TABELA_ATIVA_ANTERIOR = null;  // guarda a última tabela de preço aplicada — usado para só
                                    // re-renderizar o grid de produtos quando ela realmente mudar
                                    // (evita recriar todos os cards/fotos a cada clique no carrinho)
