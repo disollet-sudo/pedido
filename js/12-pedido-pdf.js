@@ -2,10 +2,50 @@
    Di Solle — 12. PDF E ENVIO DE PEDIDOS
    Modal de dados do cliente (compartilhado entre "Efetuar Pedido" e
    "Orçamento"), envio para o Google Apps Script e download do PDF.
-   Depende de: 01-estado-global.js, 05-utils-busca.js,
+   Depende de: 01-estado-global.js (ENVIANDO_PEDIDO), 05-utils-busca.js,
                14-orcamentos.js (salvarOrcamentoAtualLocal, removerOrcamentoLocal, mostrarModalSucesso),
                15-navegacao.js (fecharSheet)
    ============================================= */
+
+// --------- Trava de duplo clique / duplo envio ---------
+// Evita que o usuário clique várias vezes em "Efetuar Pedido" (achando que
+// falhou) e acabe gerando pedidos e e-mails duplicados no servidor.
+function travarBotoesEnvio(travar) {
+  ['btn-orc-d', 'btn-orc-m', 'btn-baixar-d', 'btn-baixar-m'].forEach(function (id) {
+    var btn = document.getElementById(id);
+    if (btn) btn.disabled = travar;
+  });
+  var btnSalvarCli = document.getElementById('btn-salvar-cli');
+  if (btnSalvarCli) btnSalvarCli.disabled = travar;
+}
+
+function baixarArquivoResultado(res, nomeFallback) {
+  // Preferência 1: link direto do Drive (mais leve, mais rápido, sem
+  // depender de um base64 gigante voltando na resposta HTTP).
+  if (res.fileUrl) {
+    window.open(res.fileUrl, '_blank');
+    return;
+  }
+  // Preferência 2 (fallback): base64 embutido na resposta.
+  if (res.base64) {
+    let nomeFinal = res.nomeArquivo || nomeFallback;
+    let href = res.base64.startsWith('data:') ? res.base64 : 'data:application/pdf;base64,' + res.base64;
+    let a = document.createElement('a');
+    a.href = href;
+    a.download = nomeFinal;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
+  }
+  // Se nenhum dos dois veio, ainda assim o pedido pode ter sido
+  // registrado/salvo no Drive — avisa em vez de falhar silenciosamente.
+  if (typeof showToast === 'function') {
+    showToast('Pedido processado, mas não foi possível localizar o arquivo PDF para download automático.');
+  } else {
+    alert('Pedido processado, mas não foi possível localizar o arquivo PDF para download automático.');
+  }
+}
 
 function abrirFluxoFechamento(t) {
   fecharSheet();
@@ -45,6 +85,7 @@ function configurarModalClienteModo(modo) {
 }
 
 function confirmarModalClienteRouter() {
+  if (ENVIANDO_PEDIDO) return; // já tem um envio em andamento, ignora clique repetido
   if (MODO_MODAL_CLIENTE === 'orcamento') confirmarComoOrcamento();
   else confirmarSalvamentoPedido();
 }
@@ -59,6 +100,8 @@ function clicouForaCliente(e) {
 }
 
 function confirmarSalvamentoPedido() {
+  if (ENVIANDO_PEDIDO) return;
+
   let cnpj = document.getElementById('cli-cnpj').value;
   let razao = document.getElementById('cli-razao').value;
   if (!cnpj || !razao) { alert("Preencha o CNPJ e a Razão Social para prosseguir."); return; }
@@ -83,6 +126,8 @@ function confirmarSalvamentoPedido() {
     obs
   };
 
+  ENVIANDO_PEDIDO = true;
+  travarBotoesEnvio(true);
   fecharModalCliente();
   document.getElementById('loading-modal').style.display = 'flex';
   document.getElementById('loading-modal').classList.add('open');
@@ -110,16 +155,9 @@ function confirmarSalvamentoPedido() {
     .then(res => {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
-      
+
       if (res.status === 'success') {
-        let nomeFinal = res.nomeArquivo || `${CODIGO_REPRE} - Pedido.pdf`;
-        let href = res.base64.startsWith('data:') ? res.base64 : 'data:application/pdf;base64,' + res.base64;
-        let a = document.createElement('a'); 
-        a.href = href; 
-        a.download = nomeFinal;
-        document.body.appendChild(a); 
-        a.click(); 
-        document.body.removeChild(a);
+        baixarArquivoResultado(res, `${CODIGO_REPRE} - Pedido.pdf`);
 
         if (ORCAMENTO_ATIVO_ID) {
           removerOrcamentoLocal(ORCAMENTO_ATIVO_ID);
@@ -129,20 +167,26 @@ function confirmarSalvamentoPedido() {
         mostrarModalSucesso('pedido');
         if (res.driveStatus && res.driveStatus.some(d => !d.ok)) {
           let erros = res.driveStatus.filter(d => !d.ok).map(d => d.erro).join('; ');
-          if (typeof showToast === 'function') showToast("⚠️ PDF baixado, mas falhou ao salvar no Drive: " + erros);
+          if (typeof showToast === 'function') showToast("⚠️ PDF processado, mas falhou ao salvar no Drive: " + erros);
         }
       } else { 
-        alert("Erro ao processar Pedido/PDF: " + res.message); 
+        alert("Erro ao processar Pedido/PDF: " + (res.message || 'erro desconhecido no servidor. Verifique os Logs de Execução do Apps Script.')); 
       }
     })
     .catch(err => {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
-      alert("Falha de rede ou tempo de resposta excedido ao processar o pedido.");
+      alert("Falha de rede ou tempo de resposta excedido ao processar o pedido. " + (err && err.message ? err.message : ''));
+    })
+    .finally(() => {
+      ENVIANDO_PEDIDO = false;
+      travarBotoesEnvio(false);
     });
 }
 
 function confirmarComoOrcamento() {
+  if (ENVIANDO_PEDIDO) return;
+
   let cnpj = document.getElementById('cli-cnpj').value.trim();
   let razao = document.getElementById('cli-razao').value.trim();
   let obs = document.getElementById('cli-obs').value.trim();
@@ -169,6 +213,8 @@ function confirmarComoOrcamento() {
     obs
   };
 
+  ENVIANDO_PEDIDO = true;
+  travarBotoesEnvio(true);
   fecharModalCliente();
   document.getElementById('loading-modal').style.display = 'flex';
   document.getElementById('loading-modal').classList.add('open');
@@ -183,27 +229,26 @@ function confirmarComoOrcamento() {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
       if (res.status === 'success') {
-        let nomeFinal = res.nomeArquivo || `${CODIGO_REPRE} - Orcamento.pdf`;
-        let href = res.base64.startsWith('data:') ? res.base64 : 'data:application/pdf;base64,' + res.base64;
-        let a = document.createElement('a'); 
-        a.href = href; 
-        a.download = nomeFinal;
-        document.body.appendChild(a); 
-        a.click(); 
-        document.body.removeChild(a);
-
+        baixarArquivoResultado(res, `${CODIGO_REPRE} - Orcamento.pdf`);
         salvarOrcamentoAtualLocal();
         mostrarModalSucesso('orcamento');
-      } else { alert("Erro ao processar PDF: " + res.message); }
+      } else {
+        alert("Erro ao processar PDF: " + (res.message || 'erro desconhecido no servidor. Verifique os Logs de Execução do Apps Script.'));
+      }
     })
-    .catch(() => {
+    .catch(err => {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
-      alert("Falha na comunicação geral da transação.");
+      alert("Falha na comunicação geral da transação. " + (err && err.message ? err.message : ''));
+    })
+    .finally(() => {
+      ENVIANDO_PEDIDO = false;
+      travarBotoesEnvio(false);
     });
 }
 
 function acionarPdf(tipo) {
+  if (ENVIANDO_PEDIDO) return;
   if (!DADOS_PDF_PRONTO || !DADOS_PDF_PRONTO.itens || DADOS_PDF_PRONTO.itens.length === 0) { 
     alert("Carrinho vazio."); 
     return; 
@@ -212,6 +257,9 @@ function acionarPdf(tipo) {
   if (tipo === 'baixar' && !DADOS_PDF_PRONTO.clienteInfo) {
     DADOS_PDF_PRONTO.clienteInfo = "Download Rápido - Sem dados cadastrais preenchidos";
   }
+
+  ENVIANDO_PEDIDO = true;
+  travarBotoesEnvio(true);
   document.getElementById('loading-modal').style.display = 'flex';
   document.getElementById('loading-modal').classList.add('open');
   
@@ -225,25 +273,24 @@ function acionarPdf(tipo) {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
       if (res.status === 'success') {
-        let nomeFinal = res.nomeArquivo || `${CODIGO_REPRE} - Pedido.pdf`;
-        let href = res.base64.startsWith('data:') ? res.base64 : 'data:application/pdf;base64,' + res.base64;
-        let a = document.createElement('a'); 
-        a.href = href; 
-        a.download = nomeFinal;
-        document.body.appendChild(a); 
-        a.click(); 
-        document.body.removeChild(a);
-        
+        baixarArquivoResultado(res, `${CODIGO_REPRE} - Pedido.pdf`);
+
         let modSuc = document.getElementById('modal-sucesso');
         if (modSuc) {
           modSuc.style.display = 'flex';
           modSuc.classList.add('open');
         }
-      } else { alert("Erro ao processar operação: " + res.message); }
+      } else {
+        alert("Erro ao processar operação: " + (res.message || 'erro desconhecido no servidor. Verifique os Logs de Execução do Apps Script.'));
+      }
     })
-    .catch(() => {
+    .catch(err => {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
-      alert("Falha de rede.");
+      alert("Falha de rede. " + (err && err.message ? err.message : ''));
+    })
+    .finally(() => {
+      ENVIANDO_PEDIDO = false;
+      travarBotoesEnvio(false);
     });
 }
