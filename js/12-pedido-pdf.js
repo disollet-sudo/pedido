@@ -141,6 +141,10 @@ function confirmarSalvamentoPedido() {
     totalDescontos: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.valPrazo : 0,
     prazo: DADOS_PDF_PRONTO.prazo,
     total: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.liquido : 0,
+    // Código da transportadora (aba "Frete", coluna E) — vai junto pro
+    // Code.gs gravar na aba "Pedidos" e também aparece no PDF, pra ser
+    // usado no preenchimento do Cigam.
+    transportadora: DADOS_PDF_PRONTO.transportadora || '',
     clienteInfo: strCli + (obs ? "\nObs: " + obs : ""),
     itensResumo: JSON.stringify(DADOS_PDF_PRONTO.itens.map(x => `${x.codigo} (${x.qtd}cx)`)),
     dadosPdf: DADOS_PDF_PRONTO
