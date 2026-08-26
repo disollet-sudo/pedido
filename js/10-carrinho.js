@@ -4,7 +4,8 @@
    UF/prazo e o calcularTudo() — a função central que recalcula preços,
    descontos, IPI, frete e monta o objeto DADOS_PDF_PRONTO.
    Depende de: 01-estado-global.js, 05-utils-busca.js,
-               06-precos-kne825-millenium.js (getPrecoFinal, getInfoPrecoItem),
+               06-precos-kne825-millenium.js (getPrecoFinal, getInfoPrecoItem,
+               getInfoMillenium, getMinimoMilleniumItem),
                08-catalogo-filtros.js (filtrar, somarBrutoPrevia),
                03-persistencia-local.js
    ============================================= */
@@ -266,6 +267,37 @@ function calcularTotalLiquidoComTabela(tabela, pctPrazo, uf) {
   return liquido;
 }
 
+// =============================================
+// PEDIDO MÍNIMO ATIVO
+// Regra: se houver item da tabela MILLENIUM no carrinho (pro ICMS/prazo
+// atual), vale APENAS o "Pedido mínimo" (coluna B da aba MILLENIUM) desse(s)
+// item(ns) — ignora o mínimo geral por UF (aba Frete). Havendo mais de um
+// item Millenium com mínimos diferentes, usa o maior deles. Sem item
+// Millenium no carrinho, vale o mínimo geral da UF (aba Frete).
+// =============================================
+function obterPedidoMinimoAtivo(icmsBase, prazoBase, configFrete) {
+  let temItemMillenium = false;
+  let minimosMillenium = [];
+
+  Object.values(SELECIONADOS).forEach(item => {
+    let ehMillenium = (typeof getInfoMillenium === 'function')
+      ? getInfoMillenium(item.produto, icmsBase, prazoBase, 0, true) !== null
+      : false;
+    if (ehMillenium) {
+      temItemMillenium = true;
+      let minMill = (typeof getMinimoMilleniumItem === 'function')
+        ? getMinimoMilleniumItem(item.produto, icmsBase)
+        : null;
+      if (minMill !== null && minMill > 0) minimosMillenium.push(minMill);
+    }
+  });
+
+  if (temItemMillenium) {
+    return minimosMillenium.length > 0 ? Math.max(...minimosMillenium) : 0;
+  }
+  return configFrete ? configFrete.pedidoMinimo : 0;
+}
+
 function calcularTudo() {
   let uf = document.getElementById('uf-d').value;
   let icmsBase = (["RS", "SC", "PR", "SP", "MG", "RJ"].includes(uf)) ? "12" : "7";
@@ -331,8 +363,12 @@ function calcularTudo() {
   let valDescPrazo = subtotalProdutos - totalComDescontoAcumulado;
   let subtotalLiquidoParcial = totalComDescontoAcumulado + totalIpi;
 
-  let freteVal = 0, configFrete = FRETE_REGRAS[uf] || null;
-  if (configFrete && subtotalBrutoInicial < configFrete.pedidoMinimo) freteVal = -1;
+  let configFrete = FRETE_REGRAS[uf] || null;
+  let pedidoMinimoAtivo = obterPedidoMinimoAtivo(icmsBase, prazoBase, configFrete);
+  let abaixoDoMinimo = pedidoMinimoAtivo > 0 && subtotalBrutoInicial < pedidoMinimoAtivo;
+
+  let freteVal = 0;
+  if (abaixoDoMinimo) freteVal = -1;
   else if (configFrete && subtotalBrutoInicial < configFrete.gratis) freteVal = configFrete.intervalo;
 
   let totalLiquido = subtotalLiquidoParcial + (freteVal > 0 ? freteVal : 0);
@@ -374,11 +410,22 @@ function calcularTudo() {
     document.getElementById(prefix + '-ipi-val').innerText = '+ ' + formatDin(totalIpi);
     let fLabel = document.getElementById(prefix + '-frete-val');
     if (!uf) fLabel.innerText = "Selecione o Estado";
-    else if (freteVal === -1) { fLabel.innerText = `Falta ${formatDin(configFrete.pedidoMinimo - subtotalBrutoInicial)}`; fLabel.style.color = 'red'; }
+    else if (freteVal === -1) { fLabel.innerText = `Falta ${formatDin(pedidoMinimoAtivo - subtotalBrutoInicial)}`; fLabel.style.color = 'red'; }
     else { fLabel.innerText = freteVal === 0 ? "GRÁTIS" : formatDin(freteVal); fLabel.style.color = ''; }
     document.getElementById(prefix + '-total').innerText = formatDin(totalLiquido);
   };
   upd('rd'); upd('rm');
+
+  // Aviso de "abaixo do pedido mínimo" também no card fixo do rodapé mobile
+  // (a barra que fica sempre visível antes de abrir a aba/sheet).
+  let mb = document.getElementById('mb-info');
+  if (contItens === 0) {
+    mb.innerHTML = 'Selecione produtos';
+  } else if (freteVal === -1) {
+    mb.innerHTML = `<b>${contItens} cx</b><br><span style="color:#c0392b;font-weight:700;">⚠️ Falta ${formatDin(pedidoMinimoAtivo - subtotalBrutoInicial)} p/ pedido mínimo</span>`;
+  } else {
+    mb.innerHTML = `<b>${contItens} cx</b><br>${formatDin(totalLiquido)}`;
+  }
 
   let chaveRenderizacao = tabelaAtiva + '|' + prazoBase;
   if (chaveRenderizacao !== TABELA_ATIVA_ANTERIOR) {
@@ -386,9 +433,9 @@ function calcularTudo() {
     filtrar();
   }
 
-  let mb = document.getElementById('mb-info');
-  mb.innerHTML = contItens === 0 ? 'Selecione produtos' : `<b>${contItens} cx</b><br>${formatDin(totalLiquido)}`;
-
+  // "Efetuar Pedido" fica bloqueado quando o carrinho está abaixo do pedido
+  // mínimo ativo (freteVal === -1) — nesse caso só o botão "Orçamento" fica
+  // disponível (ele só depende de ter item no carrinho).
   let lib = contItens > 0 && uf !== "" && freteVal !== -1;
   document.getElementById('btn-orc-d').disabled = !lib;
   document.getElementById('btn-orc-m').disabled = !lib;
