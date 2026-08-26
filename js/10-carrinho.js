@@ -364,6 +364,9 @@ function calcularTudo() {
   let subtotalLiquidoParcial = totalComDescontoAcumulado + totalIpi;
 
   let configFrete = FRETE_REGRAS[uf] || null;
+  // Código da transportadora (coluna E da aba "Frete") — vem junto de
+  // FRETE_REGRAS[uf] e precisa ser preenchido no Cigam junto com o pedido.
+  let transportadoraCod = configFrete ? (configFrete.transportadora || '') : '';
   let pedidoMinimoAtivo = obterPedidoMinimoAtivo(icmsBase, prazoBase, configFrete);
   let abaixoDoMinimo = pedidoMinimoAtivo > 0 && subtotalBrutoInicial < pedidoMinimoAtivo;
 
@@ -377,7 +380,7 @@ function calcularTudo() {
   DADOS_PDF_PRONTO = {
     tipoAcao: '',
     logoUrl: document.querySelector('#logo-area img') ? document.querySelector('#logo-area img').src : '',
-    codigoRepre: CODIGO_REPRE, prazo: prazoTexto, estado: uf, itens: listaItensPdf,
+    codigoRepre: CODIGO_REPRE, prazo: prazoTexto, estado: uf, transportadora: transportadoraCod, itens: listaItensPdf,
     clienteInfo: '', observacoes: '',
     contas: {
       subtotal: subtotalProdutos,
@@ -412,6 +415,8 @@ function calcularTudo() {
     if (!uf) fLabel.innerText = "Selecione o Estado";
     else if (freteVal === -1) { fLabel.innerText = `Falta ${formatDin(pedidoMinimoAtivo - subtotalBrutoInicial)}`; fLabel.style.color = 'red'; }
     else { fLabel.innerText = freteVal === 0 ? "GRÁTIS" : formatDin(freteVal); fLabel.style.color = ''; }
+    let tLabel = document.getElementById(prefix + '-transportadora');
+    if (tLabel) tLabel.innerText = transportadoraCod || '-';
     document.getElementById(prefix + '-total').innerText = formatDin(totalLiquido);
   };
   upd('rd'); upd('rm');
