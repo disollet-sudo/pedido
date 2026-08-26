@@ -10,6 +10,11 @@
 // o que destruía o ponto decimal de números puros (3.276 virava 3276).
 // Agora: número puro é usado direto; só strings passam pela limpeza
 // de formato brasileiro (ponto de milhar + vírgula decimal).
+//
+// AJUSTE (bug do Pedido Mínimo): strings SEM vírgula mas com ponto de
+// milhar puro (ex: "3.000", "12.500.000") antes eram lidas como decimal
+// (3.000 virava 3.0). Agora, se o ponto separa grupos de exatamente 3
+// dígitos e não há vírgula, é tratado como milhar e removido.
 function parseValorNum(val) {
   if (val === undefined || val === null || val === '') return 0;
 
@@ -21,11 +26,15 @@ function parseValorNum(val) {
   let s = String(val).replace('R$', '').replace('%', '').trim();
   if (!s) return 0;
 
-  // Só remove pontos como separador de milhar se houver vírgula decimal
-  // (formato BR: "1.234,56"). Sem vírgula, o ponto (se existir) já é o
-  // separador decimal normal (ex: "3.6") e não deve ser removido.
   if (s.indexOf(',') !== -1) {
+    // Formato BR com decimal: "1.234,56" -> remove pontos de milhar, vírgula vira ponto.
     s = s.replace(/\./g, '').replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+    // Só tem ponto(s), todos separando grupos de EXATAMENTE 3 dígitos
+    // (ex: "3.000", "12.500", "1.234.567") -> são separadores de milhar,
+    // não decimal. Um número tipo "3.6" não bate nesse padrão e continua
+    // sendo lido como decimal normalmente.
+    s = s.replace(/\./g, '');
   }
 
   let n = parseFloat(s);
@@ -124,6 +133,43 @@ function getInfoMillenium(produto, icmsBase, prazoBase, brutoCarrinho, ignorarMi
   }
 
   return null;
+}
+
+// Retorna o "Pedido mínimo" (coluna B da aba MILLENIUM) do item, para o ICMS
+// da UF atual. Usado pelo carrinho (10-carrinho.js -> obterPedidoMinimoAtivo)
+// para saber qual valor mínimo travar o botão "Efetuar Pedido" quando o
+// carrinho tem item Millenium. Se o código tiver mais de um registro pro
+// mesmo ICMS, usa o maior mínimo entre eles. Retorna null se o item não
+// está na tabela Millenium (ou não tem mínimo definido para esse ICMS).
+function getMinimoMilleniumItem(produto, icmsBase) {
+  if (!TABELA_MILLENIUM || !produto || !produto.codigo) return null;
+
+  let codNorm = produto.codigo.toLowerCase().trim();
+  let registros = TABELA_MILLENIUM[codNorm];
+
+  if (!registros) {
+    let semZero = codNorm.replace(/^0+/, '');
+    for (let k of Object.keys(TABELA_MILLENIUM)) {
+      if (k.replace(/^0+/, '') === semZero) {
+        registros = TABELA_MILLENIUM[k];
+        break;
+      }
+    }
+  }
+
+  if (!registros) return null;
+
+  let lista = Array.isArray(registros) ? registros : [registros];
+  let minimos = [];
+
+  lista.forEach(item => {
+    let icmItem = String(item.icm || '').trim();
+    if (icmItem && icmItem !== String(icmsBase)) return;
+    let m = parseValorNum(item.minimo);
+    if (m > 0) minimos.push(m);
+  });
+
+  return minimos.length > 0 ? Math.max(...minimos) : null;
 }
 
 // Retorna o preço "bruto" de um item para fins de soma do carrinho (checar Pedido Mínimo/frete).
