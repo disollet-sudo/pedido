@@ -432,11 +432,26 @@ function calcularTudo() {
     mb.innerHTML = `<b>${contItens} cx</b><br>${formatDin(totalLiquido)}`;
   }
 
-  let chaveRenderizacao = tabelaAtiva + '|' + prazoBase;
-  if (chaveRenderizacao !== TABELA_ATIVA_ANTERIOR) {
-    TABELA_ATIVA_ANTERIOR = chaveRenderizacao;
-    filtrar();
-  }
+  // ---------------------------------------------------------------------
+  // CORREÇÃO (bug: card da tela principal não sincronizava com o carrinho)
+  // Antes, filtrar() (que redesenha a grade principal — preço do card,
+  // badge de quantidade "sel") só era chamada quando a CHAVE tabelaAtiva+
+  // prazoBase mudava. Só que a maioria dos eventos de adicionar/remover
+  // item do carrinho NÃO muda tabelaAtiva nem prazoBase — então a grade
+  // ficava com estado antigo: preço Millenium não atualizava quando o
+  // total cruzava o "Pedido mínimo" (ex: R$1,69 -> R$1,45 ao passar de
+  // R$5.000), e o badge de quantidade/realce do card não refletia
+  // add/remove.
+  //
+  // filtrar() (08-catalogo-filtros.js) já é debounced (150ms via
+  // setTimeout) e renderizar() é idempotente — sempre reconstrói a grade
+  // do zero lendo SELECIONADOS e getPrecoFinal() na hora. Por isso é
+  // seguro chamar filtrar() sempre que calcularTudo() rodar, sem
+  // condicional: não há custo perceptível (debounce absorve chamadas em
+  // rajada) e garante que a grade principal sempre reflete o estado atual
+  // do carrinho, não só quando a tabela de preço muda.
+  TABELA_ATIVA_ANTERIOR = tabelaAtiva + '|' + prazoBase;
+  filtrar();
 
   // "Efetuar Pedido" fica bloqueado quando o carrinho está abaixo do pedido
   // mínimo ativo (freteVal === -1) — nesse caso só o botão "Orçamento" fica
