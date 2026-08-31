@@ -173,14 +173,30 @@ function getMinimoMilleniumItem(produto, icmsBase) {
 }
 
 // Retorna o preço "bruto" de um item para fins de soma do carrinho (checar Pedido Mínimo/frete).
-// Se o item está na aba Millenium, usa o preço Millenium do prazo atual (ignorando o próprio
-// mínimo, pra não virar loop). Se não está na Millenium, usa a tabela normal como antes.
+//
+// CORRIGIDO (bug do loop circular do Pedido Mínimo): antes, esta função usava
+// o preço JÁ PROMOCIONAL do Millenium (via getInfoMillenium(..., ignorarMinimo=true))
+// para somar o bruto do carrinho. Só que esse bruto é exatamente o valor usado
+// depois para checar se o carrinho ATINGE o Pedido Mínimo que libera esse mesmo
+// desconto — ou seja, quanto maior o desconto Millenium, menor o bruto calculado,
+// dificultando (ou até impossibilitando) bater o próprio mínimo que libera o
+// desconto. Exemplo real: 3.000 un a R$1,45 (preço promo) = R$4.350 (não bate o
+// mínimo de R$5.000) -> cai pro preço cheio R$1,69 -> 3.000 x 1,69 = R$5.070
+// (bateria o mínimo, mas tarde demais, o preço já foi decidido como o cheio).
+//
+// Agora o bruto para checagem do Pedido Mínimo sempre usa o preço da tabela
+// NORMAL (cheio) — a mesma base que subtotalBrutoInicial/frete já usam — e só
+// cai para o preço Millenium como fallback, para itens que existem SOMENTE na
+// aba MILLENIUM (sem nenhuma linha correspondente na aba Tabela).
 function getPrecoBrutoItem(produto, icmsBase, prazoBase, tabelaBase) {
-  let mill = getInfoMillenium(produto, icmsBase, prazoBase, 0, true);
-  if (mill) return mill.preco;
-  return produto.emPromocao
+  let precoNormal = produto.emPromocao
     ? (produto.precosPromo && produto.precosPromo[tabelaBase] ? produto.precosPromo[tabelaBase] : 0)
     : (produto.precos && produto.precos[tabelaBase] ? produto.precos[tabelaBase] : 0);
+  if (precoNormal > 0) return precoNormal;
+
+  // Fallback: item não tem preço na tabela normal (só existe na MILLENIUM).
+  let mill = getInfoMillenium(produto, icmsBase, prazoBase, 0, true);
+  return mill ? mill.preco : 0;
 }
 
 // Retorna as informações detalhadas de preço do item
