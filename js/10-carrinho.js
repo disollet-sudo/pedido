@@ -328,6 +328,7 @@ function calcularTudo() {
       descricao: p.descricao,
       qtd: qty,
       ncm: p.ncm || '',
+      codigoEan: p.codigoEan || '',
       valorComDesconto: valorComDescontoPrazo,
       valorIpiCada: valorIpiCada,
       ipi: p.ipi || 0,
