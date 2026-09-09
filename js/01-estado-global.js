@@ -75,3 +75,9 @@ const LINHAS_PRODUTO = [
   { nome: 'Inova',     prefixo: '38' }
 ];
 let FILTRO_LINHA_ATIVO = null; // prefixo de 2 dígitos ativo, ou null
+
+// --- INTEGRAÇÃO COM PAINEL METAS & REPIC (botão "Mix") ---
+const URL_REPIC_META = "https://script.google.com/macros/s/AKfycby3eaBjmToS2cFZttspe-6LeG___EN0NKHXIbi1fwTXZiALvKVQAwdZGkx4ZKn6F7_ErA/exec";
+let PACOTE_REPIC_META = null;
+let PACOTE_REPIC_META_TS = null;
+const REPIC_PADRAO_CLIENTE_NOVO_MIX = 120; // mesma regra do painel
