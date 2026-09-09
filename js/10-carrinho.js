@@ -5,7 +5,7 @@
    descontos, IPI, frete e monta o objeto DADOS_PDF_PRONTO.
    Depende de: 01-estado-global.js, 05-utils-busca.js,
                06-precos-kne825-millenium.js (getPrecoFinal, getInfoPrecoItem,
-               getInfoMillenium, getMinimoMilleniumItem),
+               getInfoMillenium),
                08-catalogo-filtros.js (filtrar, somarBrutoPrevia),
                03-persistencia-local.js
    ============================================= */
@@ -269,32 +269,19 @@ function calcularTotalLiquidoComTabela(tabela, pctPrazo, uf) {
 
 // =============================================
 // PEDIDO MÍNIMO ATIVO
-// Regra: se houver item da tabela MILLENIUM no carrinho (pro ICMS/prazo
-// atual), vale APENAS o "Pedido mínimo" (coluna B da aba MILLENIUM) desse(s)
-// item(ns) — ignora o mínimo geral por UF (aba Frete). Havendo mais de um
-// item Millenium com mínimos diferentes, usa o maior deles. Sem item
-// Millenium no carrinho, vale o mínimo geral da UF (aba Frete).
+// CORRIGIDO: o pedido mínimo que trava o botão "Efetuar Pedido" é SEMPRE
+// o mínimo geral por ICMS/UF (aba "Frete" -> configFrete.pedidoMinimo),
+// mesmo quando há item da tabela MILLENIUM no carrinho.
+//
+// A coluna "Pedido mínimo" (coluna B) da aba MILLENIUM NÃO trava mais o
+// botão — ela continua servindo apenas como um dos critérios internos de
+// getInfoMillenium() (06-precos-kne825-millenium.js) pra decidir se aplica
+// o preço especial daquela tabela ou não. São duas regras independentes:
+//   - Pedido mínimo pra liberar o botão de pedido -> sempre ICMS/UF (aqui).
+//   - Pedido mínimo pra "destravar" o preço Millenium de um item -> dentro
+//     de getInfoMillenium(), usando item.minimo (coluna B da MILLENIUM).
 // =============================================
 function obterPedidoMinimoAtivo(icmsBase, prazoBase, configFrete) {
-  let temItemMillenium = false;
-  let minimosMillenium = [];
-
-  Object.values(SELECIONADOS).forEach(item => {
-    let ehMillenium = (typeof getInfoMillenium === 'function')
-      ? getInfoMillenium(item.produto, icmsBase, prazoBase, 0, true) !== null
-      : false;
-    if (ehMillenium) {
-      temItemMillenium = true;
-      let minMill = (typeof getMinimoMilleniumItem === 'function')
-        ? getMinimoMilleniumItem(item.produto, icmsBase)
-        : null;
-      if (minMill !== null && minMill > 0) minimosMillenium.push(minMill);
-    }
-  });
-
-  if (temItemMillenium) {
-    return minimosMillenium.length > 0 ? Math.max(...minimosMillenium) : 0;
-  }
   return configFrete ? configFrete.pedidoMinimo : 0;
 }
 
