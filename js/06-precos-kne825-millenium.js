@@ -63,6 +63,19 @@ function getPrecoEspecialKNE825(produto) {
 // =============================================
 // TABELA ESPECIAL MILLENIUM (Regra por Colunas Diretas)
 // =============================================
+// LÓGICA (confirmada): um item da aba MILLENIUM só usa o preço especial
+// dessa tabela se, ao mesmo tempo:
+//   1) o total bruto do carrinho (brutoCarrinho) bater o "Pedido mínimo"
+//      da coluna B daquele item (item.minimo) — abaixo disso, o item cai
+//      pro preço da tabela normal;
+//   2) existir valor preenchido na coluna correspondente ao PRAZO
+//      selecionado (Antecipado/28/35/42/56/63 dias) — sem valor naquela
+//      coluna, também cai pro preço normal.
+// Esse "Pedido mínimo" da coluna B NÃO é o pedido mínimo geral que trava
+// o botão "Efetuar Pedido" (isso é outra regra, sempre por ICMS/UF — ver
+// obterPedidoMinimoAtivo em 10-carrinho.js). Aqui ele só decide qual
+// PREÇO usar.
+//
 // ignorarMinimo: quando true, pula a checagem do "Pedido mínimo" (coluna B).
 // Usado por getPrecoBrutoItem() pra saber o preço Millenium do item SEM
 // depender do próprio bruto do carrinho (evita loop circular).
@@ -106,7 +119,9 @@ function getInfoMillenium(produto, icmsBase, prazoBase, brutoCarrinho, ignorarMi
       continue;
     }
 
-    // 2. Validação de Pedido Mínimo (Coluna B) — pulada quando ignorarMinimo=true
+    // 2. Validação de Pedido Mínimo (Coluna B) — pulada quando ignorarMinimo=true.
+    // Item só qualifica pro preço Millenium se o bruto do carrinho já bater
+    // esse mínimo específico da coluna B.
     if (!ignorarMinimo) {
       let minimo = parseValorNum(item.minimo);
       if (minimo > 0 && brutoCarrinho < minimo) {
@@ -133,43 +148,6 @@ function getInfoMillenium(produto, icmsBase, prazoBase, brutoCarrinho, ignorarMi
   }
 
   return null;
-}
-
-// Retorna o "Pedido mínimo" (coluna B da aba MILLENIUM) do item, para o ICMS
-// da UF atual. Usado pelo carrinho (10-carrinho.js -> obterPedidoMinimoAtivo)
-// para saber qual valor mínimo travar o botão "Efetuar Pedido" quando o
-// carrinho tem item Millenium. Se o código tiver mais de um registro pro
-// mesmo ICMS, usa o maior mínimo entre eles. Retorna null se o item não
-// está na tabela Millenium (ou não tem mínimo definido para esse ICMS).
-function getMinimoMilleniumItem(produto, icmsBase) {
-  if (!TABELA_MILLENIUM || !produto || !produto.codigo) return null;
-
-  let codNorm = produto.codigo.toLowerCase().trim();
-  let registros = TABELA_MILLENIUM[codNorm];
-
-  if (!registros) {
-    let semZero = codNorm.replace(/^0+/, '');
-    for (let k of Object.keys(TABELA_MILLENIUM)) {
-      if (k.replace(/^0+/, '') === semZero) {
-        registros = TABELA_MILLENIUM[k];
-        break;
-      }
-    }
-  }
-
-  if (!registros) return null;
-
-  let lista = Array.isArray(registros) ? registros : [registros];
-  let minimos = [];
-
-  lista.forEach(item => {
-    let icmItem = String(item.icm || '').trim();
-    if (icmItem && icmItem !== String(icmsBase)) return;
-    let m = parseValorNum(item.minimo);
-    if (m > 0) minimos.push(m);
-  });
-
-  return minimos.length > 0 ? Math.max(...minimos) : null;
 }
 
 // Retorna o preço "bruto" de um item para fins de soma do carrinho (checar Pedido Mínimo/frete).
