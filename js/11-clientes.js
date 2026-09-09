@@ -36,7 +36,9 @@ function buscarClienteAoDigitar(cnpj) {
     salvarClienteLocal();
     showToast("✅ Dados do cliente preenchidos automaticamente.");
     ativarClienteKNE825(cnpj);
+    atualizarBotaoMix();
   } else {
+    atualizarBotaoMix();
     if (confirm("❌ Cliente não localizado! Deseja abrir a tela de cadastro para este CNPJ agora?")) {
       fecharModalCliente();
       setTimeout(() => {
@@ -175,6 +177,7 @@ function mostrarFichaCompletaCliente(c) {
       if (input) input.value = c[f] || '';
     });
     salvarClienteLocal();
+    atualizarBotaoMix();
 
     if(c.estado) {
       let estadoUpper = c.estado.toUpperCase().trim();
