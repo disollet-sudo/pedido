@@ -19,6 +19,18 @@ function travarBotoesEnvio(travar) {
   if (btnSalvarCli) btnSalvarCli.disabled = travar;
 }
 
+// --------- ID único do pedido (dedupe no servidor) ---------
+// Gerado 1x por carrinho/DADOS_PDF_PRONTO e reaproveitado em qualquer
+// reenvio (retry de rede, clique de novo após erro, etc.), pra que o
+// Code.gs consiga reconhecer que já processou esse mesmo pedido e não
+// grave/gera o PDF duas vezes.
+function garantirPedidoId() {
+  if (!DADOS_PDF_PRONTO.pedidoId) {
+    DADOS_PDF_PRONTO.pedidoId = 'PED-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  }
+  return DADOS_PDF_PRONTO.pedidoId;
+}
+
 function baixarArquivoResultado(res, nomeFallback) {
   // Preferência 1: link direto do Drive (mais leve, mais rápido, sem
   // depender de um base64 gigante voltando na resposta HTTP).
@@ -126,6 +138,8 @@ function confirmarSalvamentoPedido() {
     obs
   };
 
+  let pedidoId = garantirPedidoId();
+
   ENVIANDO_PEDIDO = true;
   travarBotoesEnvio(true);
   fecharModalCliente();
@@ -135,6 +149,7 @@ function confirmarSalvamentoPedido() {
   // Payload unificado (Salva na Planilha + Gera PDF em 1 única chamada de rede)
   let payloadUnificado = {
     acao: 'pedido_e_pdf',
+    pedidoId: pedidoId,
     qtd: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.totalCx : 0,
     subtotalProdutos: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.subtotal : 0,
     totalIpi: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.totalIpi : 0,
@@ -217,6 +232,8 @@ function confirmarComoOrcamento() {
     obs
   };
 
+  let pedidoId = garantirPedidoId();
+
   ENVIANDO_PEDIDO = true;
   travarBotoesEnvio(true);
   fecharModalCliente();
@@ -226,7 +243,7 @@ function confirmarComoOrcamento() {
   fetch(URL_GOOGLE_SCRIPT, { 
     method: 'POST', 
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ acao: 'pdf', dadosPdf: DADOS_PDF_PRONTO }) 
+    body: JSON.stringify({ acao: 'pdf', pedidoId: pedidoId, dadosPdf: DADOS_PDF_PRONTO }) 
   })
     .then(r => r.json())
     .then(res => {
@@ -262,6 +279,8 @@ function acionarPdf(tipo) {
     DADOS_PDF_PRONTO.clienteInfo = "Download Rápido - Sem dados cadastrais preenchidos";
   }
 
+  let pedidoId = garantirPedidoId();
+
   ENVIANDO_PEDIDO = true;
   travarBotoesEnvio(true);
   document.getElementById('loading-modal').style.display = 'flex';
@@ -270,7 +289,7 @@ function acionarPdf(tipo) {
   fetch(URL_GOOGLE_SCRIPT, { 
     method: 'POST', 
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ acao: 'pdf', dadosPdf: DADOS_PDF_PRONTO }) 
+    body: JSON.stringify({ acao: 'pdf', pedidoId: pedidoId, dadosPdf: DADOS_PDF_PRONTO }) 
   })
     .then(r => r.json())
     .then(res => {
