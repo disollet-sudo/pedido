@@ -14,7 +14,7 @@ function verificarNovoClienteExistente(cnpj) {
   let c = CLIENTES.find(x => x.cnpj.replace(/\D/g, '') === cLimpo);
   if (c) {
     alert("⚠️ ALERTA IMPEDITIVO: Este CNPJ já existe cadastrado na planilha! Não é permitido criar duplicados.");
-    ['razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep'].forEach(f => {
+    ['razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep','email'].forEach(f => {
       document.getElementById('nc-' + f).value = c[f] || '';
     });
     BLOQUEIA_SALVAMENTO_CNPJ = true;
@@ -30,7 +30,7 @@ function buscarClienteAoDigitar(cnpj) {
   let cLimpo = cnpj.replace(/\D/g, '').trim();
   let c = CLIENTES.find(x => x.cnpj.replace(/\D/g, '') === cLimpo);
   if (c) {
-    ['razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep'].forEach(f => {
+    ['razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep','email'].forEach(f => {
       document.getElementById('cli-' + f).value = c[f] || '';
     });
     salvarClienteLocal();
@@ -66,10 +66,13 @@ function salvarNovoCliente() {
     bairro: document.getElementById('nc-bairro').value,
     municipio: document.getElementById('nc-municipio').value,
     numero: document.getElementById('nc-numero').value,
-    cep: document.getElementById('nc-cep').value
+    cep: document.getElementById('nc-cep').value,
+    email: document.getElementById('nc-email').value.trim()
   };
 
   if (!c.cnpj || !c.razao) { alert("Preencha obrigatoriamente CNPJ e Razão Social."); return; }
+  if (!c.email) { alert("Preencha obrigatoriamente o E-mail."); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) { alert("E-mail inválido."); return; }
 
   document.getElementById('loading-modal').style.display = 'flex';
   document.getElementById('loading-modal').classList.add('open');
@@ -85,7 +88,7 @@ function salvarNovoCliente() {
         if (Object.keys(SELECIONADOS).length > 0) {
           document.getElementById('modal-cliente').style.display = 'flex';
           document.getElementById('modal-cliente').classList.add('open');
-          ['cnpj','razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep'].forEach(f => {
+          ['cnpj','razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep','email'].forEach(f => {
             document.getElementById('cli-' + f).value = c[f] || '';
           });
           salvarClienteLocal();
@@ -166,6 +169,7 @@ function mostrarFichaCompletaCliente(c) {
     <div style="margin-bottom:6px;"><b>MUNICÍPIO:</b> ${c.municipio || '-'}</div>
     <div style="margin-bottom:6px;"><b>NÚMERO:</b> ${c.numero || '-'}</div>
     <div style="margin-bottom:6px;"><b>CEP:</b> ${c.cep || '-'}</div>
+    <div style="margin-bottom:6px;"><b>E-MAIL:</b> ${c.email || '-'}</div>
   `;
 
   let btnUsar = document.getElementById('btn-selecionar-cliente-busca');
