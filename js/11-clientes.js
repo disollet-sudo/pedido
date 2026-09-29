@@ -8,6 +8,8 @@
                10-carrinho.js (calcularTudo)
    ============================================= */
 
+let salvandoNovoCliente = false; // trava contra cliques repetidos em "Salvar Cliente"
+
 function verificarNovoClienteExistente(cnpj) {
   if (!cnpj) return;
   let cLimpo = cnpj.replace(/\D/g, '').trim();
@@ -74,17 +76,33 @@ function salvarNovoCliente() {
   if (!c.email) { alert("Preencha obrigatoriamente o E-mail."); return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) { alert("E-mail inválido."); return; }
 
-  document.getElementById('loading-modal').style.display = 'flex';
-  document.getElementById('loading-modal').classList.add('open');
+  if (salvandoNovoCliente) return; // evita cliques repetidos
+  salvandoNovoCliente = true;
+  let btnSalvar = document.getElementById('btn-salvar-nc');
+  btnSalvar.disabled = true;
+  btnSalvar.innerText = 'Salvando...';
+
+  let loadingEl = document.getElementById('loading-modal');
+  loadingEl.style.zIndex = '99999'; // fica por cima do modal de cadastro
+  loadingEl.style.display = 'flex';
+  loadingEl.classList.add('open');
+
+  const terminarSalvamento = () => {
+    loadingEl.classList.remove('open');
+    loadingEl.style.display = 'none';
+    loadingEl.style.zIndex = '';
+    btnSalvar.disabled = false;
+    btnSalvar.innerText = 'Salvar Cliente';
+    salvandoNovoCliente = false;
+  };
 
   fetch(URL_GOOGLE_SCRIPT, { method: 'POST', body: JSON.stringify({ acao: 'salvar_cliente', cliente: c }) })
     .then(r => r.json()).then(res => {
-      document.getElementById('loading-modal').classList.remove('open');
-      document.getElementById('loading-modal').style.display = 'none';
+      terminarSalvamento();
       if (res.status === 'success') {
         CLIENTES.push(c);
-        showToast("✅ Cliente salvo com sucesso!");
         fecharModalNovoCliente();
+        showToast("✅ Cliente salvo com sucesso!");
         if (Object.keys(SELECIONADOS).length > 0) {
           document.getElementById('modal-cliente').style.display = 'flex';
           document.getElementById('modal-cliente').classList.add('open');
@@ -95,8 +113,7 @@ function salvarNovoCliente() {
         }
       } else { alert(res.message); }
     }).catch(() => {
-      document.getElementById('loading-modal').classList.remove('open');
-      document.getElementById('loading-modal').style.display = 'none';
+      terminarSalvamento();
       alert("Erro de conexão.");
     });
 }
