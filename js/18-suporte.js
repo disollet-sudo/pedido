@@ -8,7 +8,6 @@
 
   // ===== CONFIGURAR =====
   var DB_URL = 'https://SEU-PROJETO-default-rtdb.firebaseio.com';
-  var TELA_INICIAL = ''; // opcional: seletor CSS da tela inicial (ex.: '#tela-home'). Vazio = botão sempre visível
   // ======================
 
   var RRWEB = 'https://cdn.jsdelivr.net/npm/rrweb@1.1.3/dist/rrweb.min.js';
@@ -30,7 +29,7 @@
     '.dsp-acoes{display:flex;gap:8px;justify-content:flex-end}',
     '.dsp-acoes button{padding:9px 14px;border-radius:8px;border:1px solid #b8c0cc;background:#fff;color:#1b2430;font:inherit;font-weight:600;cursor:pointer}',
     '.dsp-acoes .dsp-ok{background:#0f766e;border-color:#0f766e;color:#fff}',
-    '.dsp-pill{position:fixed;left:14px;bottom:14px;z-index:2147483000;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:999px;background:#0f766e;color:#fff;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25)}',
+    '.dsp-pill{position:fixed;left:14px;bottom:84px;z-index:2147483000;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:999px;background:#0f766e;color:#fff;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25)}',
     '.dsp-pill button{border:0;border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.18);color:#fff;font:inherit;font-weight:600;cursor:pointer}',
     '.dsp-pill button[data-a=fim]{background:#fff;color:#0f766e}',
     '.dsp-ptr{position:fixed;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid #e11d74;background:rgba(225,29,116,.18);z-index:2147483002;pointer-events:none;display:none}',
@@ -62,15 +61,18 @@
   // ---------- interface ----------
   function montar() {
     var st = el('style'); st.textContent = CSS; document.head.appendChild(st);
-    ui.btn = el('button', 'dsp-ui dsp-btn', '<i>?</i>Suporte'); ui.btn.type = 'button'; ui.btn.onclick = pedir;
-    ui.ptr = el('div', 'dsp-ui dsp-ptr');
-    document.body.appendChild(ui.btn); document.body.appendChild(ui.ptr);
-    if (TELA_INICIAL) {
-      setInterval(function () {
-        var t = document.querySelector(TELA_INICIAL);
-        ui.btn.style.display = (!S.sid && t && t.offsetParent !== null) ? '' : 'none';
-      }, 800);
+    var host = document.getElementById('icons-actions'); // barra de botões da tela inicial
+    if (host) {
+      ui.btn = el('button', 'btn-icon-label', '🛠️ Suporte');
+      ui.btn.title = 'Pedir ajuda: o suporte passa a ver a tela deste app';
+      host.appendChild(ui.btn);
+    } else { // reserva: botão flutuante, caso a barra não exista
+      ui.btn = el('button', 'dsp-ui dsp-btn', '<i>?</i>Suporte');
+      document.body.appendChild(ui.btn);
     }
+    ui.btn.type = 'button'; ui.btn.onclick = pedir;
+    ui.ptr = el('div', 'dsp-ui dsp-ptr');
+    document.body.appendChild(ui.ptr);
     var sid = null; try { sid = sessionStorage.getItem('dsp_sid'); } catch (e) {}
     if (sid) iniciar(sessionStorage.getItem('dsp_nome') || '', sessionStorage.getItem('dsp_perm') === '1', sid);
   }
@@ -120,7 +122,7 @@
       }).catch(function () {});
       S.stop = rrweb.record({
         emit: emitir,
-        checkoutEveryNms: 120000,
+        checkoutEveryNms: 300000,
         maskInputOptions: { password: true },
         sampling: { mousemove: false, scroll: 150, input: 'last' }
       });
@@ -144,7 +146,7 @@
     ss('dsp_sid', null); ss('dsp_nome', null); ss('dsp_perm', null);
     if (ui.pill) { ui.pill.remove(); ui.pill = null; }
     ui.ptr.style.display = 'none';
-    if (!TELA_INICIAL) ui.btn.style.display = '';
+    ui.btn.style.display = '';
   }
 
   function batida() {
@@ -237,7 +239,19 @@
 
   function digitar(k) {
     var e = document.activeElement;
-    if (!e || !/^(INPUT|TEXTAREA)$/.test(e.tagName) || typeof k !== 'string' || !k) return;
+    if (!e || typeof k !== 'string' || !k) return;
+    if (e.tagName === 'SELECT') { // lista: escolhe a opção que começa com o texto digitado (ex.: "RS", "28")
+      var agora = Date.now();
+      S.tb = ((S.tbT && agora - S.tbT < 1500) ? S.tb : '') + k; S.tbT = agora;
+      var q = S.tb.toLowerCase();
+      for (var i = 0; i < e.options.length; i++) {
+        if (e.options[i].text.toLowerCase().indexOf(q) === 0 || e.options[i].value.toLowerCase() === q) {
+          e.selectedIndex = i; e.dispatchEvent(new Event('change', { bubbles: true })); break;
+        }
+      }
+      return;
+    }
+    if (!/^(INPUT|TEXTAREA)$/.test(e.tagName)) return;
     var v = e.value, nv = k === 'Backspace' ? v.slice(0, -1) : v + k;
     var proto = e.tagName === 'INPUT' ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
     Object.getOwnPropertyDescriptor(proto, 'value').set.call(e, nv);
