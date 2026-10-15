@@ -7,7 +7,7 @@
   'use strict';
 
   // ===== CONFIGURAR =====
-  var DB_URL = 'https://SEU-PROJETO-default-rtdb.firebaseio.com';
+  var DB_URL = 'https://disolle-suporte-default-rtdb.firebaseio.com';
   // ======================
 
   var RRWEB = 'https://cdn.jsdelivr.net/npm/rrweb@1.1.3/dist/rrweb.min.js';
