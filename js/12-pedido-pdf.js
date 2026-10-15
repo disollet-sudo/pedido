@@ -24,6 +24,9 @@ function travarBotoesEnvio(travar) {
 // reenvio (retry de rede, clique de novo após erro, etc.), pra que o
 // Code.gs consiga reconhecer que já processou esse mesmo pedido e não
 // grave/gera o PDF duas vezes.
+// Orçamento e download rápido usam o mesmo id + um sufixo ("-orc", "-pdf"):
+// assim um orçamento feito antes NÃO faz o servidor ignorar o pedido
+// real do mesmo carrinho (antes, os dois dividiam o mesmo id).
 function garantirPedidoId() {
   if (!DADOS_PDF_PRONTO.pedidoId) {
     DADOS_PDF_PRONTO.pedidoId = 'PED-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
@@ -31,7 +34,81 @@ function garantirPedidoId() {
   return DADOS_PDF_PRONTO.pedidoId;
 }
 
-function baixarArquivoResultado(res, nomeFallback) {
+// --------- Janela "Salvar como" do Chrome (só computador) ---------
+// Funciona no Chrome e Edge do computador. No celular e em outros
+// navegadores a função não existe, e o download segue como sempre.
+// Precisa ser chamada DENTRO do clique do usuário (depois do envio o
+// navegador já não deixa abrir), então o arquivo é escolhido antes e
+// gravado quando o PDF fica pronto.
+function nomeSugeridoPdf(prefixo) {
+  var d = new Date();
+  var dd = String(d.getDate()).padStart(2, '0');
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var elRazao = document.getElementById('cli-razao');
+  var razao = ((elRazao && elRazao.value) || '').replace(/[\/\\:*?"<>|]/g, '').trim() || 'SemCliente';
+  return (prefixo || '') + CODIGO_REPRE + '_' + dd + mm + d.getFullYear() + '_' + razao + '.pdf';
+}
+
+function pedirLocalSalvar(nome) {
+  if (typeof window.showSaveFilePicker !== 'function') return Promise.resolve(null);
+  try {
+    return window.showSaveFilePicker({
+      suggestedName: nome,
+      types: [{ description: 'PDF', accept: { 'application/pdf': ['.pdf'] } }]
+    }).catch(function () { return null; }); // fechou a janela ou não permitido: segue com o download normal
+  } catch (e) {
+    return Promise.resolve(null);
+  }
+}
+
+function idDoDrive(url) {
+  var m = /[?&]id=([^&]+)/.exec(url || '');
+  return m ? m[1] : '';
+}
+
+// Pega os bytes do PDF (do que veio na resposta, ou do próprio Drive numa
+// chamada separada e leve) e grava no arquivo escolhido. Devolve true/false.
+function gravarNoLocalEscolhido(res, handle) {
+  var id = idDoDrive(res.fileUrl);
+  var obter;
+  if (res.base64) {
+    obter = Promise.resolve(res.base64);
+  } else if (id) {
+    obter = fetch(URL_GOOGLE_SCRIPT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ acao: 'baixar_pdf', fileId: id })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j.status !== 'success' || !j.base64) throw new Error(j.message || 'sem arquivo');
+      return j.base64;
+    });
+  } else {
+    return Promise.resolve(false);
+  }
+
+  return obter.then(function (b64) {
+    var bin = atob(String(b64).split(',').pop());
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return handle.createWritable().then(function (w) {
+      return w.write(new Blob([bytes], { type: 'application/pdf' })).then(function () { return w.close(); });
+    });
+  }).then(function () { return true; }).catch(function () { return false; });
+}
+
+function baixarArquivoResultado(res, nomeFallback, handle) {
+  // Computador (Chrome/Edge): grava no local que a pessoa escolheu na janela "Salvar como".
+  // Se algo falhar, cai no download normal logo abaixo.
+  if (handle) {
+    gravarNoLocalEscolhido(res, handle).then(function (ok) {
+      if (ok) {
+        if (typeof showToast === 'function') showToast('✅ PDF salvo no local escolhido.');
+      } else {
+        baixarArquivoResultado(res, nomeFallback);
+      }
+    });
+    return;
+  }
   // Preferência 1: link direto do Drive (mais leve, mais rápido, sem
   // depender de um base64 gigante voltando na resposta HTTP).
   if (res.fileUrl) {
@@ -142,56 +219,60 @@ function confirmarSalvamentoPedido() {
 
   ENVIANDO_PEDIDO = true;
   travarBotoesEnvio(true);
-  fecharModalCliente();
-  document.getElementById('loading-modal').style.display = 'flex';
-  document.getElementById('loading-modal').classList.add('open');
 
-  // Payload unificado (Salva na Planilha + Gera PDF em 1 única chamada de rede)
-  let payloadUnificado = {
-    acao: 'pedido_e_pdf',
-    pedidoId: pedidoId,
-    qtd: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.totalCx : 0,
-    subtotalProdutos: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.subtotal : 0,
-    totalIpi: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.totalIpi : 0,
-    totalDescontos: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.valPrazo : 0,
-    prazo: DADOS_PDF_PRONTO.prazo,
-    total: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.liquido : 0,
-    // Código da transportadora (aba "Frete", coluna E) — vai junto pro
-    // Code.gs gravar na aba "Pedidos" e também aparece no PDF, pra ser
-    // usado no preenchimento do Cigam.
-    transportadora: DADOS_PDF_PRONTO.transportadora || '',
-    clienteInfo: strCli + (obs ? "\nObs: " + obs : ""),
-    itensResumo: JSON.stringify(DADOS_PDF_PRONTO.itens.map(x => `${x.codigo} (${x.qtd}cx)`)),
-    dadosPdf: DADOS_PDF_PRONTO
-  };
+  // A janela "Salvar como" abre agora, no clique (depois do envio o Chrome não deixa mais).
+  pedirLocalSalvar(nomeSugeridoPdf('')).then(function (handle) {
+    fecharModalCliente();
+    document.getElementById('loading-modal').style.display = 'flex';
+    document.getElementById('loading-modal').classList.add('open');
 
-  fetch(URL_GOOGLE_SCRIPT, { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payloadUnificado) 
-  })
-    .then(r => r.json())
-    .then(res => {
-      document.getElementById('loading-modal').classList.remove('open');
-      document.getElementById('loading-modal').style.display = 'none';
+    // Payload unificado (Salva na Planilha + Gera PDF em 1 única chamada de rede)
+    let payloadUnificado = {
+      acao: 'pedido_e_pdf',
+      pedidoId: pedidoId,
+      qtd: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.totalCx : 0,
+      subtotalProdutos: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.subtotal : 0,
+      totalIpi: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.totalIpi : 0,
+      totalDescontos: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.valPrazo : 0,
+      prazo: DADOS_PDF_PRONTO.prazo,
+      total: DADOS_PDF_PRONTO.contas ? DADOS_PDF_PRONTO.contas.liquido : 0,
+      // Código da transportadora (aba "Frete", coluna E) — vai junto pro
+      // Code.gs gravar na aba "Pedidos" e também aparece no PDF, pra ser
+      // usado no preenchimento do Cigam.
+      transportadora: DADOS_PDF_PRONTO.transportadora || '',
+      clienteInfo: strCli + (obs ? "\nObs: " + obs : ""),
+      itensResumo: JSON.stringify(DADOS_PDF_PRONTO.itens.map(x => `${x.codigo} (${x.qtd}cx)`)),
+      dadosPdf: DADOS_PDF_PRONTO
+    };
 
-      if (res.status === 'success') {
-        baixarArquivoResultado(res, `${CODIGO_REPRE} - Pedido.pdf`);
-
-        if (ORCAMENTO_ATIVO_ID) {
-          removerOrcamentoLocal(ORCAMENTO_ATIVO_ID);
-          ORCAMENTO_ATIVO_ID = null;
-        }
-
-        mostrarModalSucesso('pedido');
-        if (res.driveStatus && res.driveStatus.some(d => !d.ok)) {
-          let erros = res.driveStatus.filter(d => !d.ok).map(d => d.erro).join('; ');
-          if (typeof showToast === 'function') showToast("⚠️ PDF processado, mas falhou ao salvar no Drive: " + erros);
-        }
-      } else { 
-        alert("Erro ao processar Pedido/PDF: " + (res.message || 'erro desconhecido no servidor. Verifique os Logs de Execução do Apps Script.')); 
-      }
+    return fetch(URL_GOOGLE_SCRIPT, { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payloadUnificado) 
     })
+      .then(r => r.json())
+      .then(res => {
+        document.getElementById('loading-modal').classList.remove('open');
+        document.getElementById('loading-modal').style.display = 'none';
+
+        if (res.status === 'success') {
+          baixarArquivoResultado(res, `${CODIGO_REPRE} - Pedido.pdf`, handle);
+
+          if (ORCAMENTO_ATIVO_ID) {
+            removerOrcamentoLocal(ORCAMENTO_ATIVO_ID);
+            ORCAMENTO_ATIVO_ID = null;
+          }
+
+          mostrarModalSucesso('pedido');
+          if (res.driveStatus && res.driveStatus.some(d => !d.ok)) {
+            let erros = res.driveStatus.filter(d => !d.ok).map(d => d.erro).join('; ');
+            if (typeof showToast === 'function') showToast("⚠️ PDF processado, mas falhou ao salvar no Drive: " + erros);
+          }
+        } else { 
+          alert("Erro ao processar Pedido/PDF: " + (res.message || 'erro desconhecido no servidor. Verifique os Logs de Execução do Apps Script.')); 
+        }
+      });
+  })
     .catch(err => {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
@@ -232,31 +313,35 @@ function confirmarComoOrcamento() {
     obs
   };
 
-  let pedidoId = garantirPedidoId();
+  let pedidoId = garantirPedidoId() + '-orc'; // sufixo: o orçamento não "gasta" o id do pedido real
 
   ENVIANDO_PEDIDO = true;
   travarBotoesEnvio(true);
-  fecharModalCliente();
-  document.getElementById('loading-modal').style.display = 'flex';
-  document.getElementById('loading-modal').classList.add('open');
 
-  fetch(URL_GOOGLE_SCRIPT, { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ acao: 'pdf', pedidoId: pedidoId, dadosPdf: DADOS_PDF_PRONTO }) 
-  })
-    .then(r => r.json())
-    .then(res => {
-      document.getElementById('loading-modal').classList.remove('open');
-      document.getElementById('loading-modal').style.display = 'none';
-      if (res.status === 'success') {
-        baixarArquivoResultado(res, `${CODIGO_REPRE} - Orcamento.pdf`);
-        salvarOrcamentoAtualLocal();
-        mostrarModalSucesso('orcamento');
-      } else {
-        alert("Erro ao processar PDF: " + (res.message || 'erro desconhecido no servidor. Verifique os Logs de Execução do Apps Script.'));
-      }
+  // A janela "Salvar como" abre agora, no clique (depois do envio o Chrome não deixa mais).
+  pedirLocalSalvar(nomeSugeridoPdf('ORC_')).then(function (handle) {
+    fecharModalCliente();
+    document.getElementById('loading-modal').style.display = 'flex';
+    document.getElementById('loading-modal').classList.add('open');
+
+    return fetch(URL_GOOGLE_SCRIPT, { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ acao: 'pdf', pedidoId: pedidoId, dadosPdf: DADOS_PDF_PRONTO }) 
     })
+      .then(r => r.json())
+      .then(res => {
+        document.getElementById('loading-modal').classList.remove('open');
+        document.getElementById('loading-modal').style.display = 'none';
+        if (res.status === 'success') {
+          baixarArquivoResultado(res, `${CODIGO_REPRE} - Orcamento.pdf`, handle);
+          salvarOrcamentoAtualLocal();
+          mostrarModalSucesso('orcamento');
+        } else {
+          alert("Erro ao processar PDF: " + (res.message || 'erro desconhecido no servidor. Verifique os Logs de Execução do Apps Script.'));
+        }
+      });
+  })
     .catch(err => {
       document.getElementById('loading-modal').classList.remove('open');
       document.getElementById('loading-modal').style.display = 'none';
@@ -279,7 +364,7 @@ function acionarPdf(tipo) {
     DADOS_PDF_PRONTO.clienteInfo = "Download Rápido - Sem dados cadastrais preenchidos";
   }
 
-  let pedidoId = garantirPedidoId();
+  let pedidoId = garantirPedidoId() + '-pdf';
 
   ENVIANDO_PEDIDO = true;
   travarBotoesEnvio(true);
