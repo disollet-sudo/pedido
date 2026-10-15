@@ -10,10 +10,32 @@
 
 let salvandoNovoCliente = false; // trava contra cliques repetidos em "Salvar Cliente"
 
+// ---------------------------------------------------------------
+// Comparação de CNPJ/CPF — funciona com ou sem pontuação.
+// Ignora pontos, barra, traço e espaços; aceita letras (CNPJ novo é
+// alfanumérico) e recompõe zeros à esquerda que a planilha costuma
+// perder quando guarda o CNPJ como número (ex.: 04123456000177 vira
+// 4123456000177). CNPJ fica com 14 caracteres e CPF com 11.
+// ---------------------------------------------------------------
+function normDoc(s) {
+  return String(s == null ? '' : s).toUpperCase().replace(/[^0-9A-Z]/g, '');
+}
+
+function chaveDoc(s) {
+  let k = normDoc(s);
+  if (k.length >= 12 && k.length < 14) return k.padStart(14, '0');
+  if (k.length === 10) return k.padStart(11, '0');
+  return k;
+}
+
+function mesmoDoc(a, b) {
+  let ka = chaveDoc(a);
+  return !!ka && ka === chaveDoc(b);
+}
+
 function verificarNovoClienteExistente(cnpj) {
   if (!cnpj) return;
-  let cLimpo = cnpj.replace(/\D/g, '').trim();
-  let c = CLIENTES.find(x => x.cnpj.replace(/\D/g, '') === cLimpo);
+  let c = CLIENTES.find(x => mesmoDoc(x.cnpj, cnpj));
   if (c) {
     alert("⚠️ ALERTA IMPEDITIVO: Este CNPJ já existe cadastrado na planilha! Não é permitido criar duplicados.");
     ['razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep','email'].forEach(f => {
@@ -29,15 +51,16 @@ function verificarNovoClienteExistente(cnpj) {
 
 function buscarClienteAoDigitar(cnpj) {
   if (!cnpj) return;
-  let cLimpo = cnpj.replace(/\D/g, '').trim();
-  let c = CLIENTES.find(x => x.cnpj.replace(/\D/g, '') === cLimpo);
+  let c = CLIENTES.find(x => mesmoDoc(x.cnpj, cnpj));
   if (c) {
-    ['razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep','email'].forEach(f => {
+    // Também grava o CNPJ no formato da base: assim o restante do app (Mix, KNE825, PDF)
+    // recebe sempre o mesmo formato, não importa como foi digitado.
+    ['cnpj','razao','fantasia','telefone','endereco','estado','bairro','municipio','numero','cep','email'].forEach(f => {
       document.getElementById('cli-' + f).value = c[f] || '';
     });
     salvarClienteLocal();
     showToast("✅ Dados do cliente preenchidos automaticamente.");
-    ativarClienteKNE825(cnpj);
+    ativarClienteKNE825(c.cnpj || cnpj);
     atualizarBotaoMix();
   } else {
     atualizarBotaoMix();
@@ -53,7 +76,7 @@ function buscarClienteAoDigitar(cnpj) {
 
 function salvarNovoCliente() {
   let cCnpj = document.getElementById('nc-cnpj').value;
-  if (BLOQUEIA_SALVAMENTO_CNPJ || CLIENTES.find(x => x.cnpj.replace(/\D/g, '') === cCnpj.replace(/\D/g, ''))) {
+  if (BLOQUEIA_SALVAMENTO_CNPJ || CLIENTES.find(x => mesmoDoc(x.cnpj, cCnpj))) {
     alert("❌ Operação abortada! CNPJ duplicado na base de dados.");
     return;
   }
@@ -159,24 +182,30 @@ function filtrarClientesBusca() {
   const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const soDigitos = s => String(s || '').replace(/\D/g, '');
   const fmtDoc = s => {
-    let d = soDigitos(s);
-    if (d.length === 14) return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
-    if (d.length === 11) return d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+    let k = chaveDoc(s);
+    if (k.length === 14) return k.replace(/^([0-9A-Z]{2})([0-9A-Z]{3})([0-9A-Z]{3})([0-9A-Z]{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    if (k.length === 11 && /^\d+$/.test(k)) return k.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
     return String(s || '');
   };
 
   let termoNorm = normalizarTexto(v);
   let termoDigitos = soDigitos(v);
+  let termoDoc = normDoc(v);
   let buscaNumerica = termoDigitos.length >= 3 && !/[a-zA-Z]/.test(v);
+  // CNPJ alfanumérico completo (12 letras/números + 2 dígitos), com ou sem pontuação
+  let buscaAlfa = !/\s/.test(v) && /^[0-9A-Za-z.\-\/]+$/.test(v) &&
+                  /^[0-9A-Z]{12}\d{2}$/.test(termoDoc) && /[A-Z]/.test(termoDoc);
   let tokens = termoNorm.split(/\s+/).filter(Boolean);
 
   // 1) Busca exata: TODAS as palavras precisam aparecer (parte do nome, fantasia, razão, cidade, UF, bairro, e-mail)
-  //    Números batem com CNPJ/CPF ou telefone (com ou sem pontuação).
+  //    Números batem com CNPJ/CPF ou telefone (com ou sem pontuação, e mesmo se a planilha perdeu o zero à esquerda).
   let filtrados = CLIENTES.filter(c => {
     let cnpjDig = soDigitos(c.cnpj);
+    let cnpjChave = chaveDoc(c.cnpj);
     if (buscaNumerica) {
-      return cnpjDig.includes(termoDigitos) || soDigitos(c.telefone).includes(termoDigitos);
+      return cnpjDig.includes(termoDigitos) || cnpjChave.includes(termoDigitos) || soDigitos(c.telefone).includes(termoDigitos);
     }
+    if (buscaAlfa) return cnpjChave === termoDoc;
     let txt = normalizarTexto([c.fantasia, c.razao, c.municipio, c.estado, c.bairro, c.email].join(' '));
     return tokens.every(t => {
       if (txt.includes(t)) return true;
@@ -187,7 +216,7 @@ function filtrarClientesBusca() {
 
   // 2) Se nada foi encontrado, tenta aproximado (tolera erro de digitação) só em nome/fantasia/cidade
   let aproximado = false;
-  if (filtrados.length === 0 && !buscaNumerica) {
+  if (filtrados.length === 0 && !buscaNumerica && !buscaAlfa) {
     filtrados = CLIENTES.filter(c => buscaInteligente([c.fantasia, c.razao, c.municipio], v));
     aproximado = true;
   }
