@@ -122,11 +122,11 @@
       }).catch(function () {});
       S.stop = rrweb.record({
         emit: emitir,
-        checkoutEveryNms: 300000,
+        checkoutEveryNms: 600000,
         maskInputOptions: { password: true },
         sampling: { mousemove: false, scroll: 150, input: 'last' }
       });
-      S.tm.push(setInterval(enviar, 800), setInterval(batida, 10000));
+      S.tm.push(setInterval(enviar, 300), setInterval(batida, 10000));
       pill(); escutar();
     }).catch(function () {
       alert('Não foi possível iniciar o suporte. Verifique a internet e tente de novo.');
@@ -160,13 +160,26 @@
     S.buf.push(ev);
   }
 
+  // Comprime o lote (gzip nativo do navegador): o catálogo grande fica ~10x menor e chega bem mais rápido
+  function comprimir(txt) {
+    if (!window.CompressionStream) return Promise.resolve({ e: txt });
+    var cs = new CompressionStream('gzip'), w = cs.writable.getWriter();
+    w.write(new TextEncoder().encode(txt)); w.close();
+    return new Response(cs.readable).arrayBuffer().then(function (buf) {
+      var b = new Uint8Array(buf), s = '', n = 0x8000;
+      for (var i = 0; i < b.length; i += n) s += String.fromCharCode.apply(null, b.subarray(i, i + n));
+      return { e: btoa(s), z: 1 };
+    });
+  }
+
   function enviar() {
     if (S.env || !S.buf.length || !S.sid) return;
     S.env = true;
     var lote = S.buf; S.buf = [];
     var apagar = S.novo; S.novo = false;
     var passo = apagar ? http('DELETE', 'ev/' + S.sid) : Promise.resolve();
-    passo.then(function () { return http('POST', 'ev/' + S.sid, { e: JSON.stringify(lote) }); })
+    passo.then(function () { return comprimir(JSON.stringify(lote)); })
+      .then(function (p) { return http('POST', 'ev/' + S.sid, p); })
       .catch(function () { if (apagar) S.novo = true; if (!S.novo) S.buf = lote.concat(S.buf); })
       .then(function () { S.env = false; });
   }
@@ -208,10 +221,20 @@
 
   function acao(a) {
     if (a.tipo === 'anel') return anel(a.x, a.y);
+    if (a.tipo === 'resync') return resync(false);
     if (!S.perm) return; // as ações abaixo só rodam com a permissão do usuário
     if (a.tipo === 'clique') return clicar(a.x, a.y);
     if (a.tipo === 'rolar') return rolar(a.x, a.y, a.dx || 0, a.dy || 0);
     if (a.tipo === 'tecla') return digitar(a.k);
+  }
+
+  // Manda uma foto nova e completa da tela (corrige qualquer diferença entre o app e o painel)
+  var ultimoRs = 0;
+  function resync(auto) {
+    var t = Date.now();
+    if (!S.sid || t - ultimoRs < (auto ? 4000 : 1500)) return;
+    ultimoRs = t;
+    try { rrweb.record.takeFullSnapshot(true); } catch (e) {}
   }
 
   function elEm(x, y) { var e = document.elementFromPoint(x, y); return e && !e.closest('.dsp-ui') ? e : null; }
@@ -221,6 +244,7 @@
     anel(x, y);
     try { if (e.focus) e.focus(); } catch (er) {}
     e.click();
+    setTimeout(function () { resync(true); }, 900); // garante que pop-ups abertos pelo clique apareçam no painel
   }
 
   function rolavel(e) {
