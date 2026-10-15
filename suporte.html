@@ -26,7 +26,8 @@
   #itens li.vivo{border-left-color:var(--ok)}
   #itens small{display:block;color:var(--muted)}
   .barra{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
-  .barra .grupo{display:flex;gap:0;margin-left:auto}
+  .barra .grupo{display:flex;gap:0}
+  #rs{margin-left:auto}
   .barra .grupo button:first-child{border-radius:8px 0 0 8px}
   .barra .grupo button:last-child{border-radius:0 8px 8px 0;border-left:0}
   #status{color:var(--muted)}
@@ -61,6 +62,7 @@
       <button id="voltar">Voltar</button>
       <strong id="quem"></strong>
       <span id="status"></span>
+      <button id="rs" title="Pede ao app uma foto nova da tela">Atualizar tela</button>
       <div class="grupo">
         <button id="m-apontar" class="on">Apontar</button>
         <button id="m-controlar">Controlar</button>
@@ -140,21 +142,25 @@ setInterval(renderLista, 5000);
 // ---------- ver a tela ----------
 function abrir(id) {
   fechar();
-  cur = { sid: id, scale: 1, vw: 0, vh: 0, ts: 0, acc: { dx: 0, dy: 0, x: 0, y: 0 } };
+  cur = { sid: id, scale: 1, vw: 0, vh: 0, ts: 0, fila: Promise.resolve(), acc: { dx: 0, dy: 0, x: 0, y: 0 } };
   $('lista').hidden = true; $('tela').hidden = false; $('espera').hidden = false;
   setModo('apontar');
-  rp = new rrweb.Replayer([], { root: $('stage'), liveMode: true, mouseTail: false, showWarning: false });
+  rp = new rrweb.Replayer([], { root: $('stage'), liveMode: true, mouseTail: false, showWarning: true });
   rp.on('resize', function (d) { cur.vw = d.width; cur.vh = d.height; $('espera').hidden = true; ajustar(); });
   rp.startLive(Date.now());
 
   refEv = db.ref('suporte/ev/' + id);
   refEv.on('child_added', function (s) {
-    var v = s.val(); if (!v || !v.e || !rp) return;
-    JSON.parse(v.e).forEach(function (ev) {
-      cur.ts = Math.max(Date.now(), cur.ts + 1); // relógio do aparelho do usuário pode estar diferente: usa o daqui
-      ev.timestamp = cur.ts;
-      rp.addEvent(ev);
-    });
+    var v = s.val(); if (!v || !v.e || !cur) return;
+    var f = cur; // a fila mantém a ordem dos lotes mesmo com a descompressão assíncrona
+    f.fila = f.fila.then(function () { return descomprimir(v); }).then(function (txt) {
+      if (cur !== f || !rp) return;
+      JSON.parse(txt).forEach(function (ev) {
+        f.ts = Math.max(Date.now(), f.ts + 1); // relógio do aparelho do usuário pode estar diferente: usa o daqui
+        ev.timestamp = f.ts;
+        rp.addEvent(ev);
+      });
+    }).catch(function () {});
   });
 
   refMeta = db.ref('suporte/meta/' + id);
@@ -167,6 +173,15 @@ function abrir(id) {
     if (!ok && modo === 'controlar') setModo('apontar');
     $('status').textContent = ok ? 'Controle liberado pelo usuário' : 'Só apontar: o usuário não liberou o controle';
   });
+}
+
+function descomprimir(v) {
+  if (!v.z) return Promise.resolve(v.e);
+  var bin = atob(v.e), b = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
+  var ds = new DecompressionStream('gzip'), w = ds.writable.getWriter();
+  w.write(b); w.close();
+  return new Response(ds.readable).text();
 }
 
 function fechar() {
@@ -232,7 +247,7 @@ ov.addEventListener('pointermove', function (e) {
     dn.lx = e.clientX; dn.ly = e.clientY;
   }
   var t = Date.now();
-  if (t - tPtr > 70) { tPtr = t; var q = pos(e); ptr(q.x, q.y); }
+  if (t - tPtr > 50) { tPtr = t; var q = pos(e); ptr(q.x, q.y); }
 });
 ov.addEventListener('pointerup', function (e) {
   if (!cur || !dn) return;
@@ -261,6 +276,7 @@ $('env').onclick = function () {
   $('txt').value = '';
 };
 $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('env').click(); });
+$('rs').onclick = function () { cmd('resync', {}); };
 $('apg').onclick = function () { cmd('tecla', { k: 'Backspace' }); };
 </script>
 </body>
